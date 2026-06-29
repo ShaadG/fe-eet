@@ -1,0 +1,18 @@
+# Interview prep files — keep local only
+Electrical_Engineer/interview_ee1_star.html
+Electrical_Electronic_Technician/interview_prep_test_equipment.html
+
+# NCEES copyrighted PDFs — do not distribute
+FE_exam/fe-handbook.pdf
+FE_exam/FE_ECTPracticeExam.pdf
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+
+# OS files
+.DS_Store
+Thumbs.db
+*.swp
+*.md

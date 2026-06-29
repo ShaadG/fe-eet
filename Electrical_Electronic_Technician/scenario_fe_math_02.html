@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FE Practice Exam Math & Stats → EET Bench | Scenario FE-MATH-02</title>
+  <style>
+    /* ── Altium Designer dark theme ─────────────────────────── */
+    :root {
+      --bg-main:    #1e1e2e;
+      --bg-panel:   #2b2b3b;
+      --bg-card:    #252535;
+      --accent:     #00d4ff;
+      --accent2:    #ff9944;
+      --green:      #00ff88;
+      --yellow:     #ffd700;
+      --red:        #ff4444;
+      --text:       #d0d0e8;
+      --text-muted: #888899;
+      --border:     #3a3a55;
+      --s-color:    #4488ff;
+      --t-color:    #44cc66;
+      --a-color:    #cc88ff;
+      --r-color:    #ffd700;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: var(--bg-main); color: var(--text); font-family: 'Segoe UI', monospace; font-size: 14px; }
+
+    /* ── Altium header bar ───────────────────────────────────── */
+    .altium-header {
+      background: linear-gradient(90deg, #0a0a1a 0%, #1a1a3a 50%, #0f0f1f 100%);
+      border-bottom: 2px solid var(--accent);
+      padding: 6px 16px;
+      display: flex; align-items: center; justify-content: space-between;
+      font-size: 11px; color: #888;
+    }
+    .altium-header .logo { color: var(--accent); font-weight: bold; font-size: 13px; letter-spacing: 2px; }
+    .altium-header .badges { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+    .badge {
+      background: #0a1a2a; border: 1px solid var(--accent);
+      color: var(--accent); padding: 2px 8px; border-radius: 3px; font-size: 10px;
+    }
+    .badge.orange { border-color: var(--accent2); color: var(--accent2); }
+    .badge.green  { border-color: var(--green);   color: var(--green); }
+    .badge.yellow { border-color: var(--yellow);  color: var(--yellow); }
+
+    /* ── Layer tab bar (Altium-style) ────────────────────────── */
+    .layer-bar {
+      background: #111120; border-bottom: 1px solid #333;
+      padding: 0 16px; display: flex; gap: 4px; overflow-x: auto;
+    }
+    .layer-tab {
+      padding: 6px 14px; cursor: pointer; font-size: 11px;
+      border-top: 3px solid transparent; color: #666;
+      white-space: nowrap; user-select: none;
+      transition: color 0.2s, border-color 0.2s;
+    }
+    .layer-tab.active { color: #fff; border-top-color: var(--accent); }
+    .layer-tab:hover  { color: #aaa; }
+
+    /* ── Layout ──────────────────────────────────────────────── */
+    .layout { display: flex; min-height: calc(100vh - 80px); }
+
+    .sidebar {
+      width: 210px; min-width: 180px; background: #111120;
+      border-right: 1px solid var(--border); padding: 12px 0;
+      font-size: 12px; flex-shrink: 0;
+    }
+    .sidebar h4 {
+      color: var(--accent); font-size: 10px; letter-spacing: 1px;
+      padding: 8px 14px 4px; text-transform: uppercase;
+    }
+    .sidebar a {
+      display: block; padding: 5px 14px; color: var(--text-muted);
+      text-decoration: none; border-left: 3px solid transparent;
+      transition: all 0.15s;
+    }
+    .sidebar a:hover, .sidebar a.active {
+      color: var(--accent); border-left-color: var(--accent); background: #1a1a2e;
+    }
+    .sidebar .divider { border-top: 1px solid var(--border); margin: 8px 0; }
+
+    .main-content { flex: 1; padding: 20px 28px; overflow-x: hidden; }
+
+    /* ── Tab panels ─────────────────────────────────────────── */
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+
+    /* ── Cards / sections ────────────────────────────────────── */
+    .section-title {
+      font-size: 18px; font-weight: bold; color: var(--accent);
+      margin-bottom: 4px; border-bottom: 1px solid var(--border);
+      padding-bottom: 6px;
+    }
+    .sub-title { font-size: 13px; color: var(--accent2); margin-bottom: 14px; }
+
+    .card {
+      background: var(--bg-panel); border: 1px solid var(--border);
+      border-radius: 6px; padding: 18px; margin-bottom: 20px;
+    }
+    .card h3 { color: var(--accent); font-size: 14px; margin-bottom: 10px; }
+
+    /* ── Formula boxes ───────────────────────────────────────── */
+    .formula-box {
+      background: #0d1a2a; border-left: 4px solid var(--accent);
+      padding: 12px 16px; margin: 12px 0; border-radius: 0 4px 4px 0;
+      font-family: monospace; font-size: 13px; color: var(--green);
+    }
+    .formula-box .label { color: var(--text-muted); font-size: 11px; margin-bottom: 6px; }
+    .formula-box .answer { color: var(--yellow); font-weight: bold; }
+
+    /* ── Plot images ─────────────────────────────────────────── */
+    .plot-container {
+      background: #111; border: 1px solid var(--border);
+      border-radius: 4px; overflow: hidden; margin: 14px 0;
+      text-align: center;
+    }
+    .plot-container img { width: 100%; max-width: 900px; display: block; margin: 0 auto; }
+    .plot-caption {
+      font-size: 11px; color: var(--text-muted); padding: 6px 12px;
+      background: #0a0a1a; border-top: 1px solid var(--border);
+      text-align: left;
+    }
+
+    /* ── Key numbers grid ────────────────────────────────────── */
+    .key-numbers {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+      gap: 10px; margin: 12px 0;
+    }
+    .kn-card {
+      background: #0d1020; border: 1px solid var(--border);
+      border-radius: 4px; padding: 10px 12px;
+    }
+    .kn-label { font-size: 10px; color: var(--text-muted); text-transform: uppercase; margin-bottom: 4px; }
+    .kn-value { font-size: 18px; font-weight: bold; color: var(--yellow); }
+    .kn-unit  { font-size: 11px; color: var(--text-muted); }
+
+    /* ── CAD Notes ───────────────────────────────────────────── */
+    .cad-notes {
+      background: #120d1e; border: 1px solid #5533aa;
+      border-radius: 6px; padding: 16px 20px; margin: 20px 0;
+    }
+    .cad-notes h3 { color: #aa88ff; font-size: 13px; margin-bottom: 10px; letter-spacing: 1px; }
+    .cad-notes ul { list-style: none; padding: 0; }
+    .cad-notes ul li { padding: 4px 0; padding-left: 16px; position: relative; color: var(--text); font-size: 13px; }
+    .cad-notes ul li::before { content: "◆"; position: absolute; left: 0; color: #7755cc; font-size: 9px; top: 6px; }
+
+    /* ── Talking points ──────────────────────────────────────── */
+    .talking-pts {
+      background: #0d1a10; border-left: 4px solid var(--green);
+      padding: 12px 16px; border-radius: 0 4px 4px 0; margin: 12px 0;
+    }
+    .talking-pts h4 { color: var(--green); font-size: 12px; margin-bottom: 8px; text-transform: uppercase; }
+    .talking-pts li { font-size: 13px; line-height: 1.7; margin-left: 16px; color: var(--text); }
+
+    /* ── Info strips ─────────────────────────────────────────── */
+    .info-strip {
+      display: flex; align-items: center; gap: 12px;
+      background: #0a1020; border: 1px solid var(--border);
+      border-radius: 4px; padding: 10px 14px; margin: 10px 0; font-size: 12px;
+    }
+    .info-strip .icon { font-size: 18px; }
+    .info-strip .detail { color: var(--text-muted); }
+    .info-strip .val    { color: var(--accent); font-weight: bold; }
+
+    /* ── Problem tag ─────────────────────────────────────────── */
+    .problem-tag {
+      display: inline-block; background: #002040; border: 1px solid var(--accent);
+      color: var(--accent); padding: 3px 10px; border-radius: 3px;
+      font-size: 11px; font-weight: bold; margin-bottom: 10px;
+    }
+
+    /* ── Answer highlight ────────────────────────────────────── */
+    .answer-highlight {
+      display: inline-block; background: #1a3a00; border: 1px solid var(--green);
+      color: var(--green); padding: 4px 12px; border-radius: 4px;
+      font-weight: bold; font-size: 13px; margin: 6px 0;
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── Altium Header ──────────────────────────────────────── -->
+<div class="altium-header">
+  <div class="logo">ALTIUM DESIGNER  /  OrCAD  /  Eagle</div>
+  <div class="badges">
+    <span class="badge">FE-MATH-02</span>
+    <span class="badge orange">EET Bench Scenario</span>
+    <span class="badge green">Practice Exam Q1, Q12, Q13, Q14</span>
+    <span class="badge yellow">Altium Designer / OrCAD / Eagle view</span>
+    <span class="badge">FE EET Project</span>
+  </div>
+</div>
+
+<!-- ── Layer Tab Bar ─────────────────────────────────────── -->
+<div class="layer-bar">
+  <div class="layer-tab active" onclick="switchTab('overview', this)">Overview</div>
+  <div class="layer-tab" onclick="switchTab('q1-trig', this)">Q1 — Trigonometry</div>
+  <div class="layer-tab" onclick="switchTab('q13-normal', this)">Q13 — Normal Distribution</div>
+  <div class="layer-tab" onclick="switchTab('q14-binomial', this)">Q14 — Binomial Probability</div>
+  <div class="layer-tab" onclick="switchTab('q12-median', this)">Q12 — Mean vs Median</div>
+  <div class="layer-tab" onclick="switchTab('cad-notes', this)">CAD Notes</div>
+</div>
+
+<!-- ── Main layout ───────────────────────────────────────── -->
+<div class="layout">
+
+  <!-- Sidebar -->
+  <nav class="sidebar">
+    <h4>FE-MATH-02 Files</h4>
+    <a href="simulate_fe_math_02.py" class="active">simulate_fe_math_02.py</a>
+    <a href="scenario_fe_math_02.html">scenario_fe_math_02.html</a>
+    <div class="divider"></div>
+    <h4>Math Set 01</h4>
+    <a href="simulate_math_applied_01.py">simulate_math_applied_01.py</a>
+    <a href="scenario_math_applied_01.html">scenario_math_applied_01.html</a>
+    <div class="divider"></div>
+    <h4>EET Scenarios</h4>
+    <a href="instrument_automation.py">instrument_automation.py</a>
+    <a href="signal_analysis_deep.py">signal_analysis_deep.py</a>
+    <a href="analysis_eet.html">analysis_eet.html</a>
+    <div class="divider"></div>
+    <h4>EE I Interview</h4>
+    <a href="../Electrical_Engineer/interview_ee1_star.html">interview_ee1_star.html</a>
+    <div class="divider"></div>
+    <h4>FE Exam</h4>
+    <a href="../FE_exam/FE_ECTPracticeExam.pdf">FE_ECTPracticeExam.pdf</a>
+    <a href="../FE_exam/fe-handbook.pdf">fe-handbook.pdf</a>
+  </nav>
+
+  <!-- Main content -->
+  <main class="main-content">
+
+    <!-- ════════════════════════════════════════════
+         TAB: OVERVIEW
+    ════════════════════════════════════════════ -->
+    <div id="tab-overview" class="tab-panel active">
+      <div class="section-title">FE Practice Exam Math &amp; Statistics → EET Bench Scenarios</div>
+      <div class="sub-title">Scenario FE-MATH-02 | Electrical Electronic Technician | PCB Manufacturing Context</div>
+
+      <div class="card">
+        <h3>What This Scenario Covers</h3>
+        <p style="line-height:1.7; margin-bottom:12px;">
+          This scenario maps four specific problems from the <strong>NCEES FE Electrical and Computer Practice Exam</strong>
+          directly to EET bench work at a PCB manufacturing and test facility. Each problem demonstrates a job qualification
+          math skill: <em>trigonometry, plane geometry, probability, and statistical inference</em>.
+        </p>
+        <p style="line-height:1.7;">
+          Each section includes: the original FE problem statement, the worked solution, a STAR-method interview response
+          connecting it to bench work, and a Python-generated plot showing the EET application.
+        </p>
+      </div>
+
+      <div class="key-numbers">
+        <div class="kn-card">
+          <div class="kn-label">Q1 Answer</div>
+          <div class="kn-value">4.5</div>
+          <div class="kn-unit">cm — Law of Sines</div>
+        </div>
+        <div class="kn-card">
+          <div class="kn-label">Q12 Median</div>
+          <div class="kn-value">11.5</div>
+          <div class="kn-unit">dataset [11..14]</div>
+        </div>
+        <div class="kn-card">
+          <div class="kn-label">Q13 P(X &gt; 15.5)</div>
+          <div class="kn-value">0.0013</div>
+          <div class="kn-unit">z = 3.0 → tail</div>
+        </div>
+        <div class="kn-card">
+          <div class="kn-label">Q14 P(X=4)</div>
+          <div class="kn-value">0.205</div>
+          <div class="kn-unit">Binomial n=10 p=0.5</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>FE Exam Specification Coverage</h3>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; font-size:13px; line-height:1.8;">
+          <div>
+            <strong style="color:var(--accent)">1. Mathematics (11–17 questions)</strong><br>
+            A. Algebra and trigonometry ← Q1 (Law of Sines)<br>
+            D. Analytic geometry ← Q4 (triangle vertices)<br>
+            G. Linear algebra ← Q11 (matrix inverse)
+          </div>
+          <div>
+            <strong style="color:var(--accent)">2. Probability &amp; Statistics (4–6 questions)</strong><br>
+            A. Measures of central tendency ← Q12 (Median)<br>
+            B. Probability distributions ← Q13 (Normal), Q14 (Binomial)<br>
+            C. Expected value ← Q15 (project ranking)
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>Python Analysis Files</h3>
+        <div class="formula-box">
+          <div class="label">Run from Electrical_Electronic_Technician/</div>
+          python3 simulate_fe_math_02.py<br><br>
+          Output → analysis_output/<br>
+          &nbsp;&nbsp;math_02_triangle_trig.png<br>
+          &nbsp;&nbsp;math_02_normal_screening.png<br>
+          &nbsp;&nbsp;math_02_binomial_ict.png<br>
+          &nbsp;&nbsp;math_02_mean_median_rail.png
+        </div>
+      </div>
+    </div>
+
+    <!-- ════════════════════════════════════════════
+         TAB: Q1 — TRIGONOMETRY
+    ════════════════════════════════════════════ -->
+    <div id="tab-q1-trig" class="tab-panel">
+      <div class="section-title">Q1 — Trigonometry: Law of Sines</div>
+      <div class="sub-title">Plane Geometry + Trigonometry → Connector Misalignment Diagnosis</div>
+
+      <div class="problem-tag">FE Practice Exam — Question 1 — Mathematics</div>
+
+      <div class="card">
+        <h3>FE Problem Statement</h3>
+        <p style="line-height:1.7; margin-bottom:12px;">
+          In the following triangle, the length (cm) of Side AB is most nearly:
+          <br>Angle A = 45°, Angle B = 110°, Angle C = 25°, Side AC = 10 cm
+        </p>
+        <div style="font-size:12px; color:var(--text-muted); margin-bottom:10px;">Choices: A. 4.5 &nbsp; B. 7.1 &nbsp; C. 7.5 &nbsp; D. 192</div>
+        <div class="answer-highlight">Answer: A — 4.5 cm</div>
+      </div>
+
+      <div class="card">
+        <h3>Worked Solution — Law of Sines</h3>
+        <div class="formula-box">
+          <div class="label">FE Reference Handbook — Trigonometry (p.38)</div>
+          Law of Sines:   a / sin(A) = b / sin(B) = c / sin(C)<br><br>
+          Given:  AC = 10 cm,  ∠A = 45°,  ∠B = 110°<br>
+          →  ∠C = 180° - 45° - 110° = 25°<br><br>
+          AB / sin(C) = AC / sin(B)<br>
+          AB = AC × sin(C) / sin(B)<br>
+          AB = 10 × sin(25°) / sin(110°)<br>
+          AB = 10 × 0.4226 / 0.9397<br>
+          <span class="answer">AB = 4.50 cm  →  Answer A</span>
+        </div>
+      </div>
+
+      <div class="plot-container">
+        <img src="analysis_output/math_02_triangle_trig.png"
+             alt="Law of Sines triangle and EET connector application"
+             onerror="this.style.background='#1a1a2e'; this.style.padding='20px';
+                      this.alt='Run simulate_fe_math_02.py to generate this plot';">
+        <div class="plot-caption">
+          Left: FE Q1 triangle solved with Law of Sines — AB = 4.5 cm.
+          Right: EET application — connector pin-to-fiducial distance verification. Altium footprint
+          mismatch (4.1 cm vs. 4.5 cm calculated/measured) → NCR filed.
+        </div>
+      </div>
+
+      <div class="talking-pts">
+        <h4>Key Concepts</h4>
+        <ul>
+          <li>Law of Sines connects any triangle's angles to its opposite sides — no right angle required</li>
+          <li>∠C is always solved last: 180° minus the two given angles</li>
+          <li>This comes up on PCBs whenever you're checking connector placement vs. drawing reference points</li>
+          <li>Altium PCB Inspector reports exact x/y coordinates — but manual trig confirms when the drawing geometry doesn't match</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- ════════════════════════════════════════════
+         TAB: Q13 — NORMAL DISTRIBUTION
+    ════════════════════════════════════════════ -->
+    <div id="tab-q13-normal" class="tab-panel">
+      <div class="section-title">Q13 — Normal Distribution / Statistical Inference</div>
+      <div class="sub-title">Probability &amp; Statistics → ESR Component Acceptance Screening</div>
+
+      <div class="problem-tag">FE Practice Exam — Question 13 — Probability &amp; Statistics</div>
+
+      <div class="card">
+        <h3>FE Problem Statement</h3>
+        <p style="line-height:1.7; margin-bottom:12px;">
+          Suppose the lengths of telephone calls form a normal distribution with a mean length of 8.0 min
+          and a standard deviation of 2.5 min. The probability that a telephone call selected at random will
+          last more than 15.5 min is most nearly:
+        </p>
+        <div style="font-size:12px; color:var(--text-muted); margin-bottom:10px;">Choices: A. 0.0013 &nbsp; B. 0.0026 &nbsp; C. 0.2600 &nbsp; D. 0.9987</div>
+        <div class="answer-highlight">Answer: A — 0.0013</div>
+      </div>
+
+      <div class="card">
+        <h3>Worked Solution — Z-Score &amp; Normal Table</h3>
+        <div class="formula-box">
+          <div class="label">FE Reference Handbook — Engineering Probability and Statistics (p.67)</div>
+          Normal PDF:   f(x) = (1/σ√2π) × e^(-½((x-μ)/σ)²)<br><br>
+          Standardize:  z = (x - μ) / σ<br>
+          z = (15.5 - 8.0) / 2.5<br>
+          z = 7.5 / 2.5 = 3.0<br><br>
+          From z-table:  F(3.0) = 0.9987   (area left of z=3)<br>
+          P(X &gt; 15.5) = 1 - F(3.0) = 1 - 0.9987<br>
+          <span class="answer">P(X &gt; 15.5) = 0.0013  →  Answer A</span>
+        </div>
+        <div style="margin-top:10px; font-size:13px; line-height:1.7;">
+          This is the <strong>3-sigma rule</strong>: only 0.13% of a normal distribution lies beyond
+          z = 3. In quality engineering, staying within ±3σ means 99.73% of parts are within spec.
+        </div>
+      </div>
+
+      <div class="plot-container">
+        <img src="analysis_output/math_02_normal_screening.png"
+             alt="Normal distribution FE Q13 and EET ESR screening"
+             onerror="this.style.background='#1a1a2e'; this.style.padding='20px';
+                      this.alt='Run simulate_fe_math_02.py to generate this plot';">
+        <div class="plot-caption">
+          Left: FE Q13 — tail probability P(X &gt; 15.5) = 0.0013 at z = 3.
+          Right: EET application — capacitor ESR acceptance screening, 3σ boundary = 95 mΩ, fail rate = 0.13%.
+        </div>
+      </div>
+
+      <div class="talking-pts">
+        <h4>Key Concepts</h4>
+        <ul>
+          <li>z = (x - μ) / σ converts any normal distribution to the standard table</li>
+          <li>z = 3 corresponds to 0.0013 tail probability — this is the 3-sigma rule used in SPC and Cpk</li>
+          <li>Cpk uses this same reasoning: Cpk = min((USL-μ)/3σ, (μ-LSL)/3σ) — a Cpk of 1.0 means 3σ = USL</li>
+          <li>MES systems can enforce statistical triggers automatically — the engineer sets the threshold</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- ════════════════════════════════════════════
+         TAB: Q14 — BINOMIAL PROBABILITY
+    ════════════════════════════════════════════ -->
+    <div id="tab-q14-binomial" class="tab-panel">
+      <div class="section-title">Q14 — Binomial Distribution</div>
+      <div class="sub-title">Probability → ICT Defect Rate Modeling for Intermittent Solder Joint</div>
+
+      <div class="problem-tag">FE Practice Exam — Question 14 — Probability &amp; Statistics</div>
+
+      <div class="card">
+        <h3>FE Problem Statement</h3>
+        <p style="line-height:1.7; margin-bottom:12px;">
+          You have a fair coin that you toss ten times. The probability of getting exactly four heads in ten
+          tosses is most nearly:
+        </p>
+        <div style="font-size:12px; color:var(--text-muted); margin-bottom:10px;">Choices: A. 0.1 &nbsp; B. 0.2 &nbsp; C. 0.4 &nbsp; D. 0.5</div>
+        <div class="answer-highlight">Answer: B — 0.2 (0.2051)</div>
+      </div>
+
+      <div class="card">
+        <h3>Worked Solution — Binomial PMF</h3>
+        <div class="formula-box">
+          <div class="label">FE Reference Handbook — Binomial Distribution (p.66)</div>
+          P(X=k) = C(n,k) × p^k × (1-p)^(n-k)<br><br>
+          n = 10 trials,  p = 0.5,  k = 4<br><br>
+          C(10,4) = 10! / (4! × 6!) = 210<br><br>
+          P(X=4) = 210 × (0.5)^4 × (0.5)^6<br>
+          P(X=4) = 210 × (0.5)^10<br>
+          P(X=4) = 210 / 1024<br>
+          <span class="answer">P(X=4) = 0.2051  ≈  0.2  →  Answer B</span>
+        </div>
+      </div>
+
+      <div class="plot-container">
+        <img src="analysis_output/math_02_binomial_ict.png"
+             alt="Binomial distribution FE Q14 and EET ICT defect modeling"
+             onerror="this.style.background='#1a1a2e'; this.style.padding='20px';
+                      this.alt='Run simulate_fe_math_02.py to generate this plot';">
+        <div class="plot-caption">
+          Left: FE Q14 — binomial PMF n=10, p=0.5, P(X=4) ≈ 0.2 (highlighted).
+          Right: EET application — ICT defect modeling for intermittent solder joint. Even with a
+          50/50 defect, only 20% chance of seeing exactly 4 failures in 10 boards.
+        </div>
+      </div>
+
+      <div class="talking-pts">
+        <h4>Key Concepts</h4>
+        <ul>
+          <li>Binomial applies whenever: fixed n trials, each independent, binary outcome (pass/fail), constant p</li>
+          <li>ICT test nodes are exactly this model — each board either passes or fails the test point</li>
+          <li>C(n,k) = n! / (k!(n-k)!) — calculators have this as "nCr" button; FE handbook shows it too</li>
+          <li>For large n, the binomial approaches normal — at that scale you use z-scores instead</li>
+          <li>Defect rate p comes from historical ICT yield data or process FMEA — not a guess</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- ════════════════════════════════════════════
+         TAB: Q12 — MEAN vs MEDIAN
+    ════════════════════════════════════════════ -->
+    <div id="tab-q12-median" class="tab-panel">
+      <div class="section-title">Q12 — Mean vs. Median (Statistical Inference)</div>
+      <div class="sub-title">Measures of Central Tendency → Voltage Rail QC, Skew Detection</div>
+
+      <div class="problem-tag">FE Practice Exam — Question 12 — Probability &amp; Statistics</div>
+
+      <div class="card">
+        <h3>FE Problem Statement</h3>
+        <p style="line-height:1.7; margin-bottom:12px;">
+          For a series of measurements resulting in values of 11, 11, 11, 11, 12, 13, 13, 14,
+          the arithmetic mean is 12. The median value is:
+        </p>
+        <div style="font-size:12px; color:var(--text-muted); margin-bottom:10px;">Choices: A. 12.5 &nbsp; B. 12.0 &nbsp; C. 11.5 &nbsp; D. 11.0</div>
+        <div class="answer-highlight">Answer: C — 11.5</div>
+      </div>
+
+      <div class="card">
+        <h3>Worked Solution — Median of Even-Count Dataset</h3>
+        <div class="formula-box">
+          <div class="label">FE Reference Handbook — Dispersion, Mean, Median, Mode (p.63)</div>
+          Data sorted: [11, 11, 11, 11, 12, 13, 13, 14]<br>
+          n = 8 (even number of data points)<br><br>
+          Median = average of (n/2)th and (n/2 + 1)th values<br>
+          Median = average of 4th and 5th values<br>
+          Median = (11 + 12) / 2<br>
+          <span class="answer">Median = 11.5  →  Answer C</span><br><br>
+          Mean = 12.0  &gt;  Median = 11.5<br>
+          → Right-skewed: outlier (14) is pulling the mean up
+        </div>
+      </div>
+
+      <div class="plot-container">
+        <img src="analysis_output/math_02_mean_median_rail.png"
+             alt="Mean vs Median FE Q12 and EET rail voltage QC"
+             onerror="this.style.background='#1a1a2e'; this.style.padding='20px';
+                      this.alt='Run simulate_fe_math_02.py to generate this plot';">
+        <div class="plot-caption">
+          Left: FE Q12 — dataset [11,11,11,11,12,13,13,14], mean=12, median=11.5.
+          Right: EET application — 3.3V rail QC on 8-board batch. Median (11.5 mV deviation)
+          is more robust than mean (12 mV) when Board 8 is an outlier. Traces to high-DCR inductor.
+        </div>
+      </div>
+
+      <div class="talking-pts">
+        <h4>Key Concepts</h4>
+        <ul>
+          <li>For even n: median = average of the two middle values after sorting</li>
+          <li>Mean &gt; Median = right-skewed (outlier pulling mean up) — classic in small-batch QC</li>
+          <li>Median is more robust than mean when outliers exist — use it for small test batches (n &lt; 30)</li>
+          <li>For large batches, use mean + standard deviation; for small batches, median + range is often more telling</li>
+          <li>This maps to SPC control charts: individuals (X) charts flag outliers; R charts track spread</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- ════════════════════════════════════════════
+         TAB: CAD NOTES
+    ════════════════════════════════════════════ -->
+    <div id="tab-cad-notes" class="tab-panel">
+      <div class="section-title">CAD Notes</div>
+      <div class="sub-title">Altium Designer / OrCAD / Eagle — Design Verification Tied to Math Scenarios</div>
+
+      <div class="cad-notes">
+        <h3>◆ CAD NOTE — Trigonometry &amp; Footprint Verification (Q1)</h3>
+        <ul>
+          <li><strong>Altium PCB Inspector:</strong> Right-click any component → PCB Inspector → inspect X/Y coordinates and rotation angle. Compare to assembly drawing reference dimensions.</li>
+          <li><strong>Altium Measurement Tool:</strong> Place → Measurement → 2-point measurement to verify pin-to-fiducial distances directly on the layout.</li>
+          <li><strong>DRC — Courtyard Check:</strong> Tools → Design Rule Check → Clearance rules. If footprint has wrong dimensions, component courtyards will overlap adjacent parts and DRC will flag it.</li>
+          <li><strong>IPC-2221:</strong> Footprint land pattern dimensions should match IPC-SM-782 — Altium's library footprints reference this standard. Always verify against the physical component datasheet mechanical drawing.</li>
+          <li><strong>OrCAD Footprint Comparison:</strong> In OrCAD PCB Editor → Padstack Editor → verify pad dimensions match your measurement calculations.</li>
+        </ul>
+      </div>
+
+      <div class="cad-notes">
+        <h3>◆ CAD NOTE — Statistical Screening &amp; Component Tolerance (Q13, Q12)</h3>
+        <ul>
+          <li><strong>Altium BOM Analysis:</strong> Use ActiveBOM → compare vendor tolerance columns against your 3σ acceptance limits. Components with ±20% tolerance on ESR have higher σ than ±10% parts.</li>
+          <li><strong>Cpk in MES:</strong> Process Capability Index Cpk = min((USL-μ)/3σ, (μ-LSL)/3σ). A Cpk ≥ 1.33 means less than 0.003% defect rate — tighter than the 0.13% at Cpk=1.0 (z=3).</li>
+          <li><strong>IPC-A-610H — Component Placement:</strong> Section 8.3 covers component orientation and placement tolerances. Dimensional verification using the Law of Sines applies when assembly drawings use angular references rather than Cartesian offsets.</li>
+          <li><strong>OrCAD PSpice:</strong> Monte Carlo analysis in PSpice lets you assign σ to component values and run statistical simulation — the same z-score math applies to simulate how spread in ESR affects rail voltage.</li>
+          <li><strong>Rail Voltage QC:</strong> When measuring voltage rail deviations across a board batch, use median as primary metric for n &lt; 15 boards. Flag any board where deviation exceeds μ + 2σ of the batch for root-cause investigation.</li>
+        </ul>
+      </div>
+
+      <div class="cad-notes">
+        <h3>◆ CAD NOTE — Binomial Defect Rate &amp; Test Coverage (Q14)</h3>
+        <ul>
+          <li><strong>ICT Test Coverage:</strong> JTAG/boundary-scan and in-circuit test coverage percentages are probability calculations. If a node has 85% test coverage and p=0.05 defect rate, the probability of an escape per board is (1 - 0.85) × 0.05 — binomial thinking applied to test planning.</li>
+          <li><strong>Altium DRC:</strong> Not all defects are detectable at DRC. DRC catches design-rule violations (clearance, annular ring, net shorts) but not manufacturing variation. Binomial modeling fills this gap.</li>
+          <li><strong>Defect Rate Tracking:</strong> MES systems track yield per test step. If ICT yield on a net drops below historical baseline by more than 2σ (using a p-chart in SPC), escalate — the binomial distribution tells you how rare that drop should be under normal process conditions.</li>
+          <li><strong>IPC-7711/7721 Rework:</strong> When deciding whether to rework a cold joint or scrap a board, the binomial model of pass probability per rework attempt informs whether repeated rework attempts will yield a reliable joint or whether you're wasting cycles on a structurally compromised pad.</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <h3>Related Files in This Project</h3>
+        <div style="font-size:13px; line-height:2.0;">
+          <a href="simulate_fe_math_02.py" style="color:var(--accent)">simulate_fe_math_02.py</a> — Python: 4 plots for Q1/Q12/Q13/Q14<br>
+          <a href="simulate_math_applied_01.py" style="color:var(--accent)">simulate_math_applied_01.py</a> — Python: Cpk, phasor trig, trace geometry, measurement uncertainty<br>
+          <a href="scenario_math_applied_01.html" style="color:var(--accent)">scenario_math_applied_01.html</a> — HTML: Math Set 01 EET scenario<br>
+          <a href="signal_analysis_deep.py" style="color:var(--accent)">signal_analysis_deep.py</a> — Python: ESR, RLC Bode, FFT, step response<br>
+          <a href="instrument_automation.py" style="color:var(--accent)">instrument_automation.py</a> — Python: pyvisa SCPI bring-up automation<br>
+          <a href="../Electrical_Engineer/interview_ee1_star.html" style="color:var(--accent)">interview_ee1_star.html</a> — HTML: EE I interview STAR conversations
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<script>
+  function switchTab(id, el) {
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.layer-tab').forEach(t => t.classList.remove('active'));
+    document.getElementById('tab-' + id).classList.add('active');
+    el.classList.add('active');
+  }
+</script>
+
+</body>
+</html>

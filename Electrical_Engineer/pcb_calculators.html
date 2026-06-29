@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PCB Engineering Calculators — EE I Reference</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: "Segoe UI", Arial, sans-serif; background: #f4f6f9; color: #222; }
+
+    header { background: #1a237e; color: #fff; padding: 14px 32px; display: flex; justify-content: space-between; align-items: center; }
+    header h1 { font-size: 1.05rem; }
+    .badge { background: #ffd600; color: #1a237e; font-size: 0.72rem; font-weight: bold; padding: 3px 10px; border-radius: 12px; }
+    .sub { background: #e8eaf6; border-bottom: 2px solid #1a237e; padding: 8px 32px; font-size: 0.82rem; color: #444; }
+
+    .page { max-width: 1000px; margin: 24px auto; padding: 0 16px 80px; }
+
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(450px, 1fr)); gap: 20px; }
+
+    .card { background: #fff; border: 1px solid #dde0ef; border-radius: 6px; overflow: hidden; box-shadow: 0 1px 4px rgba(0,0,0,0.06); }
+    .card-head { background: #1a237e; color: #fff; padding: 10px 18px; font-size: 0.88rem; font-weight: bold; display: flex; justify-content: space-between; align-items: center; }
+    .card-head .ref { font-size: 0.7rem; opacity: 0.75; font-weight: normal; }
+    .card-body { padding: 18px; }
+
+    .goal-tag { font-size: 0.75rem; color: #7986cb; margin-bottom: 10px; font-style: italic; }
+
+    .formula-box { background: #e8eaf6; border-left: 3px solid #1a237e; padding: 8px 12px; font-family: "Courier New", monospace; font-size: 0.82rem; margin-bottom: 14px; line-height: 1.7; }
+
+    .field-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+    .field-row label { width: 210px; font-size: 0.85rem; color: #444; flex-shrink: 0; }
+    .field-row input, .field-row select { flex: 1; padding: 7px 10px; border: 1px solid #ccc; border-radius: 4px; font-size: 0.88rem; font-family: inherit; }
+    .field-row input:focus, .field-row select:focus { outline: 2px solid #1a237e; }
+    .field-row .unit { font-size: 0.78rem; color: #777; width: 46px; }
+
+    .btn-calc { display: block; width: 100%; margin-top: 14px; padding: 10px; background: #1a237e; color: #fff; border: none; border-radius: 4px; font-size: 0.9rem; font-family: inherit; cursor: pointer; transition: background 0.15s; }
+    .btn-calc:hover { background: #283593; }
+
+    .result-panel { margin-top: 14px; background: #f0f4ff; border: 1px solid #c5cae9; border-radius: 4px; padding: 12px 14px; display: none; }
+    .result-panel.show { display: block; }
+    .result-main { font-size: 1.1rem; font-weight: bold; color: #1a237e; margin-bottom: 6px; }
+    .result-detail { font-size: 0.82rem; color: #444; line-height: 1.8; font-family: "Courier New", monospace; white-space: pre; }
+    .result-warn { margin-top: 8px; font-size: 0.82rem; color: #b71c1c; font-weight: bold; }
+    .result-ok   { margin-top: 8px; font-size: 0.82rem; color: #2e7d32; font-weight: bold; }
+
+    .workflow-note { background: #fffde7; border: 1px solid #f9a825; border-radius: 4px; padding: 10px 12px; font-size: 0.80rem; color: #555; margin-top: 10px; line-height: 1.6; }
+
+    footer { background: #1a237e; color: #aaa; text-align: center; padding: 10px; font-size: 0.75rem; position: fixed; bottom: 0; width: 100%; }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>PCB Engineering Calculators — Afternoon Analysis Block</h1>
+  <span class="badge">EE Calculations</span>
+</header>
+<div class="sub">
+  Goal: Afternoon desk work (25% of weekly workflow) · IPC-2221 trace width · RC transient · Power · Resonance · Voltage divider
+</div>
+
+<div class="page">
+<div class="grid">
+
+  <!-- ── IPC-2221 Trace Width ───────────────────────────────────── -->
+  <div class="card">
+    <div class="card-head">IPC-2221 Trace Width Calculator <span class="ref">IPC-2221 Table 6-1 · IPC-2152</span></div>
+    <div class="card-body">
+      <p class="goal-tag">Workflow goal: Verify trace width for power rails during CAD review. Flag under-spec traces before they cause voltage sag.</p>
+      <div class="formula-box">Area (mil²) = [I / (k · ΔT^0.44)]^(1/0.725)
+Width (mil) = Area / (Cu_thickness_mils)
+Width (mm)  = Width_mil × 0.0254
+k = 0.048 external layer | 0.024 internal layer</div>
+      <div class="field-row"><label>Current (I)</label><input type="number" id="tw-i" value="0.5" step="0.1" min="0.01"><span class="unit">A</span></div>
+      <div class="field-row"><label>Temp rise allowed (ΔT)</label><input type="number" id="tw-dt" value="10" step="1" min="1"><span class="unit">°C</span></div>
+      <div class="field-row"><label>Copper weight</label>
+        <select id="tw-oz">
+          <option value="1.378">1 oz Cu (35 µm)</option>
+          <option value="2.756">2 oz Cu (70 µm)</option>
+          <option value="0.689">0.5 oz Cu (17.5 µm)</option>
+        </select><span class="unit"></span></div>
+      <div class="field-row"><label>Layer</label>
+        <select id="tw-layer">
+          <option value="ext">External (outer)</option>
+          <option value="int">Internal (inner)</option>
+        </select><span class="unit"></span></div>
+      <button class="btn-calc" onclick="calcTW()">Calculate Minimum Width</button>
+      <div class="result-panel" id="tw-res">
+        <div class="result-main" id="tw-main"></div>
+        <div class="result-detail" id="tw-detail"></div>
+        <div id="tw-flag"></div>
+      </div>
+      <div class="workflow-note">📋 Workflow tie-in: During afternoon CAD review in Altium, cross-reference this result against the actual trace width shown in the PCB Inspector. If the measured width is below the minimum, write it up for the senior engineer.</div>
+    </div>
+  </div>
+
+  <!-- ── RC Transient ──────────────────────────────────────────── -->
+  <div class="card">
+    <div class="card-head">RC Transient Response Calculator <span class="ref">FE Handbook p.363 — Topic 7A</span></div>
+    <div class="card-body">
+      <p class="goal-tag">Workflow goal: Calculate bypass cap charge/discharge times. Directly ties to FE exam Linear Systems Topic 7A and the power rail scenario.</p>
+      <div class="formula-box">τ = R × C
+v_C(t) = V · (1 − e^(−t/τ))   ← charging from 0
+v_C(t) = V₀ · e^(−t/τ)        ← discharging
+Settled at 5τ (99.3% charged)</div>
+      <div class="field-row"><label>Resistance (R)</label><input type="number" id="rc-r" value="2000" step="100" min="1"><span class="unit">Ω</span></div>
+      <div class="field-row"><label>Capacitance (C)</label><input type="number" id="rc-c" value="0.5" step="0.1" min="0.001"><span class="unit">µF</span></div>
+      <div class="field-row"><label>Supply voltage (V)</label><input type="number" id="rc-v" value="10" step="0.1" min="0.1"><span class="unit">V</span></div>
+      <div class="field-row"><label>Time to evaluate (t)</label><input type="number" id="rc-t" value="2" step="0.1" min="0"><span class="unit">ms</span></div>
+      <button class="btn-calc" onclick="calcRC()">Calculate v_C(t)</button>
+      <div class="result-panel" id="rc-res">
+        <div class="result-main" id="rc-main"></div>
+        <div class="result-detail" id="rc-detail"></div>
+      </div>
+      <div class="workflow-note">📋 Workflow tie-in: This is FE Practice Q1. Also use it to estimate how fast a decoupling cap can respond to a load transient — if τ is too large, the cap can't supply charge fast enough, causing a sag event on the scope.</div>
+    </div>
+  </div>
+
+  <!-- ── Power Dissipation / Ohm's Law ─────────────────────────── -->
+  <div class="card">
+    <div class="card-head">Power & Ohm's Law — Voltage Drop Calculator <span class="ref">V=IR · P=I²R</span></div>
+    <div class="card-body">
+      <p class="goal-tag">Workflow goal: Calculate voltage drop across trace resistance. Used daily in power-on bring-up analysis and NCR root cause documentation.</p>
+      <div class="formula-box">V = I × R          (Ohm's Law — solve for V)
+I = V / R          (solve for I)
+R = V / I          (solve for R)
+P = V × I = I²R = V²/R
+Enter any two → third is calculated</div>
+      <div class="field-row"><label>Voltage (V)</label><input type="number" id="pw-v" value="" placeholder="blank = solve"><span class="unit">V</span></div>
+      <div class="field-row"><label>Current (I)</label><input type="number" id="pw-i" value="0.15" placeholder="blank = solve"><span class="unit">A</span></div>
+      <div class="field-row"><label>Resistance (R)</label><input type="number" id="pw-r" value="0.8" placeholder="blank = solve"><span class="unit">Ω</span></div>
+      <button class="btn-calc" onclick="calcPW()">Calculate Power & Missing Value</button>
+      <div class="result-panel" id="pw-res">
+        <div class="result-main" id="pw-main"></div>
+        <div class="result-detail" id="pw-detail"></div>
+      </div>
+      <div class="workflow-note">📋 Workflow tie-in: Scenario 01 default values (I=150mA, R_trace=0.8Ω) are pre-loaded. This is the exact calculation behind the brownout root cause: V_drop = 0.15 × 0.8 = 0.12V — enough to push the MCU below brownout threshold.</div>
+    </div>
+  </div>
+
+  <!-- ── RLC Resonance ─────────────────────────────────────────── -->
+  <div class="card">
+    <div class="card-head">RLC Resonance Calculator <span class="ref">FE Handbook p.363 — Topic 7B</span></div>
+    <div class="card-body">
+      <p class="goal-tag">Workflow goal: Verify filter resonant frequency for bypass cap networks. Used in Thursday simulation/design support block.</p>
+      <div class="formula-box">ω₀ = 1/√(LC)     f₀ = ω₀/2π
+Series Q:   Q = ω₀L/R  |  BW = ω₀/Q
+Parallel Q: Q = ω₀RC   |  BW = ω₀/Q
+ζ = 1/(2Q)  →  underdamped if ζ &lt; 1</div>
+      <div class="field-row"><label>Resistance (R)</label><input type="number" id="rlc-r" value="5" step="0.1" min="0.001"><span class="unit">Ω</span></div>
+      <div class="field-row"><label>Inductance (L)</label><input type="number" id="rlc-l" value="50" step="1" min="0.001"><span class="unit">mH</span></div>
+      <div class="field-row"><label>Capacitance (C)</label><input type="number" id="rlc-c" value="20" step="1" min="0.001"><span class="unit">µF</span></div>
+      <div class="field-row"><label>Type</label>
+        <select id="rlc-type">
+          <option value="series">Series RLC</option>
+          <option value="parallel">Parallel RLC</option>
+        </select><span class="unit"></span></div>
+      <button class="btn-calc" onclick="calcRLC()">Calculate Resonance</button>
+      <div class="result-panel" id="rlc-res">
+        <div class="result-main" id="rlc-main"></div>
+        <div class="result-detail" id="rlc-detail"></div>
+      </div>
+      <div class="workflow-note">📋 Workflow tie-in: FE Practice Q2 defaults are pre-loaded (answer: Q=10). In practice, use this to verify that a bypass cap + trace inductance doesn't create an unwanted resonance peak inside the signal bandwidth.</div>
+    </div>
+  </div>
+
+  <!-- ── Voltage Divider ───────────────────────────────────────── -->
+  <div class="card">
+    <div class="card-head">Voltage Divider with Load Effect <span class="ref">V_out = V_in × R2/(R1+R2)</span></div>
+    <div class="card-body">
+      <p class="goal-tag">Workflow goal: Verify ADC input scaling networks and feedback resistors on power supply circuits. Common Thursday design-support task.</p>
+      <div class="formula-box">V_out (no load) = V_in × R2 / (R1 + R2)
+R2_eff (with load) = R2 ∥ R_L = R2·R_L/(R2+R_L)
+V_out (loaded)  = V_in × R2_eff / (R1 + R2_eff)
+Loading error % = (V_noload - V_loaded)/V_noload × 100</div>
+      <div class="field-row"><label>Input Voltage (V_in)</label><input type="number" id="vd-vin" value="12" step="0.1" min="0.1"><span class="unit">V</span></div>
+      <div class="field-row"><label>R1 (top)</label><input type="number" id="vd-r1" value="10000" step="100" min="1"><span class="unit">Ω</span></div>
+      <div class="field-row"><label>R2 (bottom)</label><input type="number" id="vd-r2" value="4700" step="100" min="1"><span class="unit">Ω</span></div>
+      <div class="field-row"><label>Load (R_L)</label><input type="number" id="vd-rl" value="100000" step="1000" min="1"><span class="unit">Ω</span></div>
+      <button class="btn-calc" onclick="calcVD()">Calculate Output & Loading Error</button>
+      <div class="result-panel" id="vd-res">
+        <div class="result-main" id="vd-main"></div>
+        <div class="result-detail" id="vd-detail"></div>
+        <div id="vd-flag"></div>
+      </div>
+      <div class="workflow-note">📋 Workflow tie-in: If the loading error is &gt;5%, the measured voltage at the test point will differ from the no-load schematic calculation — this is a common source of confusion during bring-up. The loaded value is what your multimeter will actually read.</div>
+    </div>
+  </div>
+
+  <!-- ── ESR / Bypass Cap Health ───────────────────────────────── -->
+  <div class="card">
+    <div class="card-head">Bypass Cap ESR Voltage Drop Calculator <span class="ref">Scenario 01 Root Cause</span></div>
+    <div class="card-body">
+      <p class="goal-tag">Workflow goal: Calculate voltage sag caused by degraded bypass capacitor ESR — the exact root cause in EET Scenario 01.</p>
+      <div class="formula-box">V_sag = I_peak × (R_trace + ESR_cap)
+V_rail = V_supply − V_sag
+Headroom = V_rail − V_brownout
+Negative headroom = BROWNOUT EVENT</div>
+      <div class="field-row"><label>Supply Voltage</label><input type="number" id="esr-vs" value="3.3" step="0.1" min="0.1"><span class="unit">V</span></div>
+      <div class="field-row"><label>Peak Load Current</label><input type="number" id="esr-i" value="0.15" step="0.01" min="0.001"><span class="unit">A</span></div>
+      <div class="field-row"><label>Trace Resistance</label><input type="number" id="esr-rt" value="0.8" step="0.05" min="0"><span class="unit">Ω</span></div>
+      <div class="field-row"><label>Cap ESR (degraded)</label><input type="number" id="esr-ec" value="2.0" step="0.1" min="0"><span class="unit">Ω</span></div>
+      <div class="field-row"><label>Brownout Threshold</label><input type="number" id="esr-vb" value="2.97" step="0.01" min="0.1"><span class="unit">V</span></div>
+      <button class="btn-calc" onclick="calcESR()">Calculate Rail Voltage & Headroom</button>
+      <div class="result-panel" id="esr-res">
+        <div class="result-main" id="esr-main"></div>
+        <div class="result-detail" id="esr-detail"></div>
+        <div id="esr-flag"></div>
+      </div>
+      <div class="workflow-note">📋 Workflow tie-in: Default values match Scenario 01 exactly. This is the math behind the oscilloscope sag you see at TP3. Use this calculator when writing the root cause section of an NCR for a power-related failure.</div>
+    </div>
+  </div>
+
+</div>
+</div>
+
+<footer>PCB Engineering Calculators · IPC-2221 · FE Handbook Ref · EE I Afternoon Workflow Tool</footer>
+
+<script>
+  function show(id) { document.getElementById(id).classList.add('show'); }
+
+  function calcTW() {
+    var I  = parseFloat(document.getElementById('tw-i').value);
+    var dT = parseFloat(document.getElementById('tw-dt').value);
+    var oz = parseFloat(document.getElementById('tw-oz').value);
+    var lyr= document.getElementById('tw-layer').value;
+    var k  = lyr === 'ext' ? 0.048 : 0.024;
+    var area = Math.pow(I / (k * Math.pow(dT, 0.44)), 1/0.725);
+    var w_mil= area / oz;
+    var w_mm = w_mil * 0.0254;
+    document.getElementById('tw-main').textContent = 'Min width: ' + w_mm.toFixed(3) + ' mm  (' + w_mil.toFixed(1) + ' mil)';
+    document.getElementById('tw-detail').textContent =
+      'I = ' + I + ' A    ΔT = ' + dT + '°C    Cu = ' + oz + ' oz\n' +
+      'k = ' + k + ' (' + lyr + ' layer)\n' +
+      'Cross-section area = ' + area.toFixed(2) + ' mil²\n' +
+      'Min trace width    = ' + w_mm.toFixed(4) + ' mm  (' + w_mil.toFixed(2) + ' mil)';
+    var f = document.getElementById('tw-flag');
+    if (w_mm < 0.1) { f.className='result-warn'; f.textContent='⚠ Below 0.1 mm — verify fab capability. Consider copper pour.'; }
+    else { f.className='result-ok'; f.textContent='✓ Within standard fab capability. Cross-check with Altium PCB Inspector.'; }
+    show('tw-res');
+  }
+
+  function calcRC() {
+    var R = parseFloat(document.getElementById('rc-r').value);
+    var C = parseFloat(document.getElementById('rc-c').value) * 1e-6;
+    var V = parseFloat(document.getElementById('rc-v').value);
+    var t = parseFloat(document.getElementById('rc-t').value) * 1e-3;
+    var tau = R * C;
+    var vt  = V * (1 - Math.exp(-t/tau));
+    document.getElementById('rc-main').textContent =
+      'v_C(' + (t*1e3).toFixed(2) + ' ms) = ' + vt.toFixed(4) + ' V  (' + (vt/V*100).toFixed(1) + '% of V)';
+    document.getElementById('rc-detail').textContent =
+      'τ = RC    = ' + (tau*1000).toFixed(4) + ' ms\n' +
+      't/τ       = ' + (t/tau).toFixed(3) + '\n' +
+      'At 1τ: ' + (V*(1-Math.exp(-1))).toFixed(3) + ' V (63.2%)\n' +
+      'At 2τ: ' + (V*(1-Math.exp(-2))).toFixed(3) + ' V (86.5%)\n' +
+      'At 3τ: ' + (V*(1-Math.exp(-3))).toFixed(3) + ' V (95.0%)\n' +
+      'At 5τ: ' + (V*(1-Math.exp(-5))).toFixed(3) + ' V (99.3% — settled)';
+    show('rc-res');
+  }
+
+  function calcPW() {
+    var vs = document.getElementById('pw-v').value;
+    var is = document.getElementById('pw-i').value;
+    var rs = document.getElementById('pw-r').value;
+    var V = vs !== '' ? parseFloat(vs) : null;
+    var I = is !== '' ? parseFloat(is) : null;
+    var R = rs !== '' ? parseFloat(rs) : null;
+    var filled = [V,I,R].filter(function(x){return x!==null;}).length;
+    if (filled < 2) { alert('Enter at least two of V, I, R.'); return; }
+    if (V===null) V=I*R; else if (I===null) I=V/R; else if (R===null) R=V/I;
+    var P = V*I;
+    document.getElementById('pw-main').textContent =
+      'Power = ' + (P>=1 ? P.toFixed(4)+' W' : (P*1000).toFixed(3)+' mW') +
+      '  |  V_drop = ' + V.toFixed(4) + ' V';
+    document.getElementById('pw-detail').textContent =
+      'V = ' + V.toFixed(4) + ' V' + (vs===''?' ← solved':'') + '\n' +
+      'I = ' + (I*1000).toFixed(3) + ' mA' + (is===''?' ← solved':'') + '\n' +
+      'R = ' + R.toFixed(4) + ' Ω' + (rs===''?' ← solved':'') + '\n' +
+      'P = I²R = ' + (I*I*R).toFixed(4) + ' W\n' +
+      'P = V²/R= ' + (V*V/R).toFixed(4) + ' W\n' +
+      'P = VI  = ' + (V*I).toFixed(4) + ' W';
+    show('pw-res');
+  }
+
+  function calcRLC() {
+    var R  = parseFloat(document.getElementById('rlc-r').value);
+    var L  = parseFloat(document.getElementById('rlc-l').value)*1e-3;
+    var C  = parseFloat(document.getElementById('rlc-c').value)*1e-6;
+    var tp = document.getElementById('rlc-type').value;
+    var w0 = 1/Math.sqrt(L*C);
+    var f0 = w0/(2*Math.PI);
+    var Q  = tp==='series' ? w0*L/R : w0*R*C;
+    var BW = w0/Q;
+    var z  = 1/(2*Q);
+    var damp = z<1?'Underdamped (oscillatory)':z===1?'Critically damped':'Overdamped';
+    document.getElementById('rlc-main').textContent =
+      'ω₀ = ' + w0.toFixed(1) + ' rad/s  |  f₀ = ' + f0.toFixed(1) + ' Hz  |  Q = ' + Q.toFixed(2);
+    document.getElementById('rlc-detail').textContent =
+      'ω₀ = 1/√(LC) = ' + w0.toFixed(3) + ' rad/s\n' +
+      'f₀ = ω₀/2π   = ' + f0.toFixed(3) + ' Hz\n' +
+      'Q (' + tp + ') = ' + Q.toFixed(4) + '\n' +
+      'BW = ω₀/Q    = ' + BW.toFixed(3) + ' rad/s  (' + (BW/(2*Math.PI)).toFixed(3) + ' Hz)\n' +
+      'ζ  = 1/(2Q)  = ' + z.toFixed(4) + '\n' +
+      'System:        ' + damp;
+    show('rlc-res');
+  }
+
+  function calcVD() {
+    var Vin = parseFloat(document.getElementById('vd-vin').value);
+    var R1  = parseFloat(document.getElementById('vd-r1').value);
+    var R2  = parseFloat(document.getElementById('vd-r2').value);
+    var RL  = parseFloat(document.getElementById('vd-rl').value);
+    var R2e = R2*RL/(R2+RL);
+    var Vno = Vin*R2/(R1+R2);
+    var Vld = Vin*R2e/(R1+R2e);
+    var err = (Vno-Vld)/Vno*100;
+    var I   = Vin/(R1+R2e);
+    document.getElementById('vd-main').textContent =
+      'V_out (loaded) = ' + Vld.toFixed(4) + ' V  |  Loading error = ' + err.toFixed(2) + '%';
+    document.getElementById('vd-detail').textContent =
+      'V_out no load  = ' + Vno.toFixed(4) + ' V\n' +
+      'V_out loaded   = ' + Vld.toFixed(4) + ' V\n' +
+      'R2 effective   = ' + R2e.toFixed(1) + ' Ω\n' +
+      'Loading error  = ' + err.toFixed(3) + '%\n' +
+      'Current drawn  = ' + (I*1000).toFixed(3) + ' mA\n' +
+      'P_R1           = ' + (I*I*R1*1000).toFixed(2) + ' mW\n' +
+      'P_R2           = ' + (Vld*Vld/R2*1000).toFixed(2) + ' mW';
+    var f = document.getElementById('vd-flag');
+    if (err>5) { f.className='result-warn'; f.textContent='⚠ Loading error >5% — use a buffer op-amp or reduce R1/R2 values.'; }
+    else { f.className='result-ok'; f.textContent='✓ Loading error acceptable (<5%). Multimeter reading will match calculated V_out.'; }
+    show('vd-res');
+  }
+
+  function calcESR() {
+    var Vs = parseFloat(document.getElementById('esr-vs').value);
+    var I  = parseFloat(document.getElementById('esr-i').value);
+    var Rt = parseFloat(document.getElementById('esr-rt').value);
+    var Ec = parseFloat(document.getElementById('esr-ec').value);
+    var Vb = parseFloat(document.getElementById('esr-vb').value);
+    var Vsag  = I*(Rt+Ec);
+    var Vrail = Vs - Vsag;
+    var hdroom= Vrail - Vb;
+    document.getElementById('esr-main').textContent =
+      'V_rail during sag = ' + Vrail.toFixed(3) + ' V  |  Headroom = ' + hdroom.toFixed(3) + ' V';
+    document.getElementById('esr-detail').textContent =
+      'V_supply          = ' + Vs + ' V\n' +
+      'I_peak            = ' + (I*1000).toFixed(0) + ' mA\n' +
+      'V_drop (trace)    = I×R_trace = ' + (I*Rt).toFixed(4) + ' V\n' +
+      'V_drop (ESR)      = I×ESR     = ' + (I*Ec).toFixed(4) + ' V\n' +
+      'Total sag         = ' + Vsag.toFixed(4) + ' V\n' +
+      'V_rail at MCU     = ' + Vrail.toFixed(4) + ' V\n' +
+      'Brownout threshold= ' + Vb + ' V\n' +
+      'Headroom          = ' + hdroom.toFixed(4) + ' V';
+    var f = document.getElementById('esr-flag');
+    if (hdroom < 0) {
+      f.className='result-warn';
+      f.textContent='⚠ BROWNOUT — V_rail below threshold by ' + Math.abs(hdroom).toFixed(3) + ' V. Replace bypass cap, add bulk capacitance.';
+    } else {
+      f.className='result-ok';
+      f.textContent='✓ Rail above brownout threshold. Headroom = +' + hdroom.toFixed(3) + ' V.';
+    }
+    show('esr-res');
+  }
+</script>
+</body>
+</html>

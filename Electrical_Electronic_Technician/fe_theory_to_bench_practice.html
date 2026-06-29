@@ -1,0 +1,997 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FE Theory → EET Bench Practice</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: "Segoe UI", Arial, sans-serif; background: #eceff1; color: #212121; }
+
+    /* ── header ── */
+    header { background: #1a1a2e; }
+    .hdr-top {
+      background: #16213e; padding: 10px 24px;
+      display: flex; justify-content: space-between; align-items: center;
+      border-bottom: 1px solid #0f3460;
+    }
+    .hdr-top h1 { font-size: 0.95rem; letter-spacing: 0.02em; color: #e0e0e0; }
+    .hdr-badges { display: flex; gap: 6px; flex-wrap: wrap; }
+    .badge { font-size: 0.67rem; font-weight: bold; padding: 3px 10px; border-radius: 3px; }
+    .b-teal   { background: #004d40; color: #80cbc4; }
+    .b-blue   { background: #0d47a1; color: #90caf9; }
+    .b-amber  { background: #e65100; color: #ffcc80; }
+    .b-purple { background: #4a148c; color: #e1bee7; }
+    .b-cad    { background: #37474f; color: #b0bec5; border: 1px solid #546e7a; }
+
+    .hdr-sub {
+      padding: 7px 24px; background: #1a1a2e;
+      font-size: 0.76rem; color: #78909c;
+      display: flex; gap: 20px; flex-wrap: wrap;
+    }
+    .hdr-sub span { color: #80cbc4; font-weight: bold; }
+    .hdr-sub a    { color: #80cbc4; }
+
+    /* ── layout ── */
+    .layout {
+      display: grid;
+      grid-template-columns: 200px 1fr;
+      max-width: 1100px;
+      margin: 20px auto;
+      gap: 18px;
+      padding: 0 14px 80px;
+      align-items: start;
+    }
+    @media (max-width: 700px) { .layout { grid-template-columns: 1fr; } .sidebar { display: none; } }
+
+    /* ── sidebar nav ── */
+    .sidebar {
+      position: sticky; top: 16px;
+      background: #fff; border: 1px solid #cfd8dc; border-radius: 5px; overflow: hidden;
+    }
+    .sb-head {
+      background: #1a1a2e; color: #80cbc4;
+      font-size: 0.7rem; font-weight: bold;
+      text-transform: uppercase; letter-spacing: 0.07em;
+      padding: 9px 14px;
+    }
+    .sb-item {
+      display: flex; gap: 9px; align-items: flex-start;
+      padding: 9px 13px; cursor: pointer;
+      border-bottom: 1px solid #f0f0f0;
+      border-left: 3px solid transparent;
+      transition: background 0.12s;
+    }
+    .sb-item:last-child { border-bottom: none; }
+    .sb-item:hover { background: #f5f5f5; }
+    .sb-item.active { background: #e8f5e9; border-left-color: #2e7d32; }
+    .sb-dot {
+      width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; margin-top: 3px;
+    }
+    .sb-label { font-size: 0.72rem; font-weight: bold; color: #37474f; }
+    .sb-sub   { font-size: 0.67rem; color: #9e9e9e; line-height: 1.3; margin-top: 1px; }
+
+    /* ── section cards ── */
+    .section-card {
+      background: #fff; border: 1px solid #cfd8dc; border-radius: 5px;
+      overflow: hidden; margin-bottom: 22px; scroll-margin-top: 18px;
+    }
+    .card-head {
+      padding: 11px 18px;
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .card-head .ch-left { display: flex; flex-direction: column; gap: 3px; }
+    .card-head .ch-num  { font-size: 0.7rem; opacity: 0.7; font-family: monospace; }
+    .card-head .ch-title{ font-size: 0.94rem; font-weight: bold; }
+    .card-head .ch-tag  {
+      font-size: 0.67rem; padding: 2px 9px; border-radius: 3px;
+      background: rgba(255,255,255,0.2); align-self: flex-start;
+    }
+
+    /* head color themes */
+    .head-blue   { background: #0d47a1; color: #fff; }
+    .head-teal   { background: #004d40; color: #fff; }
+    .head-purple { background: #4a148c; color: #fff; }
+    .head-red    { background: #b71c1c; color: #fff; }
+    .head-amber  { background: #e65100; color: #fff; }
+    .head-dark   { background: #1a1a2e; color: #fff; }
+
+    /* ── two-column theory/practice layout ── */
+    .tp-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0;
+      border-bottom: 1px solid #eceff1;
+    }
+    @media (max-width: 800px) { .tp-grid { grid-template-columns: 1fr; } }
+
+    .tp-col { padding: 14px 16px; }
+    .tp-col + .tp-col { border-left: 1px solid #eceff1; }
+
+    .tp-label {
+      font-size: 0.67rem; text-transform: uppercase; letter-spacing: 0.08em;
+      font-weight: bold; margin-bottom: 8px; padding-bottom: 5px;
+      border-bottom: 2px solid;
+    }
+    .lbl-theory  { color: #0d47a1; border-color: #0d47a1; }
+    .lbl-practice{ color: #004d40; border-color: #009688; }
+
+    /* ── FE exam PNG image ── */
+    .fe-img {
+      width: 100%; border: 1px solid #e0e0e0;
+      border-radius: 3px; display: block;
+    }
+    .img-caption {
+      font-size: 0.72rem; color: #78909c;
+      text-align: center; margin-top: 5px; font-style: italic;
+    }
+
+    /* ── oscilloscope canvas ── */
+    .scope-wrap {
+      background: #0d1117; border: 1px solid #222;
+      border-radius: 3px; padding: 7px 7px 0; position: relative;
+    }
+    .scope-wrap canvas { display: block; width: 100%; }
+    .scope-strip {
+      background: #0d1117; padding: 4px 8px 7px;
+      font-size: 0.67rem; color: #546e6a;
+      font-family: monospace; display: flex; gap: 12px; flex-wrap: wrap;
+    }
+    .scope-strip span { color: #80cbc4; }
+    .scope-meta-top {
+      position: absolute; top: 10px; right: 10px;
+      font-size: 0.65rem; color: #80cbc4; text-align: right;
+      font-family: monospace; line-height: 1.7;
+    }
+
+    /* ── below-grid info block ── */
+    .card-body { padding: 14px 18px 16px; }
+    .card-body h4 {
+      font-size: 0.77rem; text-transform: uppercase; letter-spacing: 0.06em;
+      color: #37474f; margin-bottom: 8px; padding-bottom: 4px;
+      border-bottom: 1px solid #eceff1;
+    }
+    .card-body p  { font-size: 0.85rem; line-height: 1.75; color: #444; margin-bottom: 6px; }
+    .card-body ul { font-size: 0.85rem; line-height: 1.85; color: #444; padding-left: 18px; margin-bottom: 8px; }
+
+    /* callout */
+    .callout {
+      border-left: 3px solid; padding: 9px 13px;
+      font-size: 0.82rem; line-height: 1.72; margin: 10px 0; color: #333;
+    }
+    .co-teal   { background: #e0f2f1; border-color: #009688; }
+    .co-teal strong { color: #004d40; }
+    .co-amber  { background: #fff8e1; border-color: #f9a825; }
+    .co-amber strong { color: #e65100; }
+    .co-blue   { background: #e3f2fd; border-color: #1565c0; }
+    .co-blue strong { color: #0d47a1; }
+    .co-purple { background: #f3e5f5; border-color: #7b1fa2; }
+    .co-purple strong { color: #6a1b9a; }
+
+    /* formula line */
+    .formula {
+      background: #1a1a2e; color: #90caf9;
+      font-family: monospace; font-size: 0.84rem;
+      padding: 8px 14px; border-radius: 3px; margin: 8px 0;
+      letter-spacing: 0.02em;
+    }
+    .formula .f-result { color: #a5d6a7; font-weight: bold; }
+    .formula .f-label  { color: #546e6a; font-size: 0.72rem; }
+
+    /* step row */
+    .step-row {
+      display: flex; gap: 10px; align-items: flex-start;
+      padding: 6px 0; border-bottom: 1px solid #f5f5f5;
+      font-size: 0.84rem; color: #333; line-height: 1.65;
+    }
+    .step-row:last-child { border-bottom: none; }
+    .step-n {
+      background: #004d40; color: #fff; font-size: 0.67rem; font-weight: bold;
+      width: 19px; height: 19px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 2px;
+    }
+
+    /* link table */
+    table.link-table {
+      width: 100%; border-collapse: collapse; font-size: 0.82rem; margin-top: 8px;
+    }
+    .link-table th {
+      background: #004d40; color: #fff; padding: 6px 10px;
+      text-align: left; font-size: 0.72rem;
+    }
+    .link-table td { padding: 6px 10px; border-bottom: 1px solid #eceff1; }
+    .link-table tr:nth-child(even) td { background: #f9fafb; }
+    .link-table a { color: #004d40; }
+
+    footer {
+      background: #1a1a2e; color: #546e6a;
+      text-align: center; padding: 10px; font-size: 0.72rem;
+      position: fixed; bottom: 0; width: 100%;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="hdr-top">
+    <h1>FE Exam Theory → EET Bench Practice — Linear Systems on the Oscilloscope</h1>
+    <div class="hdr-badges">
+      <span class="badge b-blue">FE Topic 7: Linear Systems</span>
+      <span class="badge b-teal">Oscilloscope · Multimeter</span>
+      <span class="badge b-purple">RC · RLC · Laplace · Transfer Fn</span>
+      <span class="badge b-amber">+ Triangle Wave</span>
+      <span class="badge b-cad">Altium Designer / OrCAD / Eagle view</span>
+    </div>
+  </div>
+  <div class="hdr-sub">
+    <div>Source plots: <span><a href="../FE_exam/linear_systems/practice.html">FE exam/linear_systems/practice.html</a></span></div>
+    <div>Generated by: <span><a href="../FE_exam/linear_systems/analysis.py">analysis.py</a></span></div>
+    <div>Daily workflow: <span><a href="daily_workflow_simulation.html">daily_workflow_simulation.html</a></span></div>
+  </div>
+</header>
+
+<div class="layout">
+
+  <!-- ── sidebar ── -->
+  <aside class="sidebar">
+    <div class="sb-head">FE → EET Bridge</div>
+    <div class="sb-item active" onclick="goTo('s-intro')">
+      <div class="sb-dot" style="background:#546e7a;"></div>
+      <div><div class="sb-label">Overview</div><div class="sb-sub">Why FE math shows up on the bench</div></div>
+    </div>
+    <div class="sb-item" onclick="goTo('s-q1')">
+      <div class="sb-dot" style="background:#1565c0;"></div>
+      <div><div class="sb-label">Q1 — RC Transient</div><div class="sb-sub">τ=RC · power rail recovery</div></div>
+    </div>
+    <div class="sb-item" onclick="goTo('s-q2')">
+      <div class="sb-dot" style="background:#009688;"></div>
+      <div><div class="sb-label">Q2 — RLC Resonance</div><div class="sb-sub">ω₀ · noise on scope</div></div>
+    </div>
+    <div class="sb-item" onclick="goTo('s-q3')">
+      <div class="sb-dot" style="background:#6a1b9a;"></div>
+      <div><div class="sb-label">Q3 — Laplace / Sine</div><div class="sb-sub">Poles · AC ripple waveform</div></div>
+    </div>
+    <div class="sb-item" onclick="goTo('s-q4')">
+      <div class="sb-dot" style="background:#b71c1c;"></div>
+      <div><div class="sb-label">Q4 — Transfer Fn</div><div class="sb-sub">ζ · ringing on clock edges</div></div>
+    </div>
+    <div class="sb-item" onclick="goTo('s-tri')">
+      <div class="sb-dot" style="background:#e65100;"></div>
+      <div><div class="sb-label">Triangle Wave</div><div class="sb-sub">PWM carrier · RC integrator</div></div>
+    </div>
+    <div class="sb-item" onclick="goTo('s-int')">
+      <div class="sb-dot" style="background:#2e7d32;"></div>
+      <div><div class="sb-label">Interview Bridge</div><div class="sb-sub">Connecting theory to experience</div></div>
+    </div>
+    <div class="sb-item" onclick="goTo('s-cad')">
+      <div class="sb-dot" style="background:#546e7a;"></div>
+      <div><div class="sb-label">CAD Notes</div><div class="sb-sub">Altium · DRC · IPC-2221 · Impedance</div></div>
+    </div>
+  </aside>
+
+  <!-- ── main content ── -->
+  <div>
+
+    <!-- ══ INTRO ═══════════════════════════════════════════════════ -->
+    <div class="section-card" id="s-intro">
+      <div class="card-head head-dark">
+        <div class="ch-left">
+          <span class="ch-num">Overview</span>
+          <span class="ch-title">Why the FE Exam Math Shows Up on the Bench</span>
+          <span class="ch-tag">Linear Systems · Topic 7 · Oscilloscope Connection</span>
+        </div>
+      </div>
+      <div class="card-body">
+        <p>The FE exam tests whether you can solve equations. The bench tests whether you can <em>recognize those equations in what you see on the oscilloscope</em>. This file bridges that gap — each plot generated by <code>analysis.py</code> maps directly to a signal behavior you will encounter as an Electronic Engineering Technician on a PCBA.</p>
+        <table class="link-table">
+          <thead><tr><th>FE Exam Plot</th><th>What the Math Describes</th><th>Where You See It on the Bench</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Q1 — RC Transient</strong></td><td>v<sub>C</sub>(t) = V(1−e<sup>−t/τ</sup>)</td><td>Power rail voltage recovering after a load transient; bypass cap charging/discharging during MCU active cycles</td></tr>
+            <tr><td><strong>Q2 — RLC Resonance</strong></td><td>|Z(jω)| vs ω, ω₀=1/√(LC), Q=ω₀L/R</td><td>The noise frequency that dominates a power rail; why one bypass cap value attenuates switching noise better than another</td></tr>
+            <tr><td><strong>Q3 — Laplace / Sine</strong></td><td>ℒ{sin(ωt)} = ω/(s²+ω²), poles at ±jω</td><td>AC ripple waveform on the oscilloscope; purely imaginary poles = sustained, non-decaying sinusoidal oscillation</td></tr>
+            <tr><td><strong>Q4 — Transfer Function</strong></td><td>H(s)=50/(s²+7s+50), ζ=0.495, underdamped</td><td>Ringing on digital clock or data bus edges; complex left-half-plane poles = stable but oscillatory transient</td></tr>
+            <tr><td><strong>Triangle Wave (new)</strong></td><td>v(t) piecewise linear, harmonic series ∝ 1/n²</td><td>PWM controller carrier signal; output of an RC integrator driven by a square wave; slew-rate measurement</td></tr>
+          </tbody>
+        </table>
+        <div class="callout co-teal" style="margin-top:10px;">
+          
+        </div>
+      </div>
+
+      <div class="card-body">
+        <h4>How Q1 Appears on the Bench</h4>
+        <p>The FE exam gives you a clean step input and asks you to calculate v<sub>C</sub> at a specific time. On the bench, you're doing the inverse: you see the waveform on the oscilloscope and need to infer τ from the shape.</p>
+        <div class="formula">
+          v<sub>C</sub>(t) = V(1 − e<sup>−t/τ</sup>)  &nbsp;→&nbsp;  τ = RC<br>
+          <span class="f-label">On bench: R = ESR of bypass cap, C = capacitance · High ESR → large τ → slow recovery → brownout</span><br>
+          <span class="f-result">τ = 2.0Ω × 22µF = 44µs &nbsp;(degraded C2) &nbsp;vs.&nbsp; τ = 0.05Ω × 22µF = 1.1µs (good MLCC)</span>
+        </div>
+        <div class="step-row"><div class="step-n">1</div><div><strong>Recognizing τ on the scope:</strong> Zoom to the recovery edge after a sag. The voltage rises from the sag floor to 63.2% of its total recovery in exactly one τ. Measure that time division → τ.</div></div>
+        <div class="step-row"><div class="step-n">2</div><div><strong>Calculating ESR from τ:</strong> τ = ESR × C. Rearrange: ESR = τ / C. If you measure τ = 44µs and C = 22µF → ESR = 2.0Ω. Compare to the component's datasheet maximum ESR (typically &lt; 0.05Ω for a good MLCC at this value).</div></div>
+        <div class="step-row"><div class="step-n">3</div><div><strong>Why V = 10V in the FE plot vs. 3.3V on the bench:</strong> The math is identical — only the supply voltage and τ values change. The exponential shape is universal. This is why FE exam math transfers directly to bench work.</div></div>
+          "I studied the RC transient formula for the FE exam — v<sub>C</sub>(t) = V(1−e<sup>−t/τ</sup>). When I built the power rail simulation in my study folder, I realized that's the exact same equation that describes a bypass cap charging during an MCU load transient. The time constant τ = ESR × C tells you how fast the voltage recovers. A degraded cap with ESR of 2Ω has τ = 44µs — long enough that the voltage sags past the MCU's 2.97V brownout threshold. <strong>That's where the FE exam math directly explains a real failure mode.</strong>"
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ Q2 — RLC RESONANCE ════════════════════════════════════════ -->
+    <div class="section-card" id="s-q2">
+      <div class="card-head head-teal">
+        <div class="ch-left">
+          <span class="ch-num">FE Exam · Topic 7B · Linear Systems</span>
+          <span class="ch-title">Q2 — Series RLC Resonance</span>
+          <span class="ch-tag">ω₀ = 1/√(LC) · Q = ω₀L/R · BW = ω₀/Q</span>
+        </div>
+      </div>
+
+      <div class="tp-grid">
+        <div class="tp-col">
+          <div class="tp-label lbl-theory">FE Exam — Theory Plot</div>
+          <img class="fe-img" src="../FE_exam/linear_systems/plots/q2_rlc_resonance.png"
+               alt="Q2 RLC Resonance — FE Exam analysis.py output">
+          <div class="img-caption">|Z(jω)| vs ω · R=5Ω · L=50mH · C=20µF · ω₀=1000 rad/s · Q=10</div>
+        </div>
+        <div class="tp-col">
+          <div class="tp-label lbl-practice">Oscilloscope — Resonant Noise on Power Rail</div>
+          <div class="scope-wrap" style="position:relative;">
+            <canvas id="cv-rlc" width="440" height="220"></canvas>
+            <div class="scope-meta-top">CH1 — 100mV/div<br>0.2ms/div<br>AC coupling<br>Resonant ripple</div>
+          </div>
+          <div class="scope-strip">
+            <span>Ripple freq: ~159Hz</span>
+            <span>Amplitude: ~300mV p-p</span>
+            <span>ω₀ = 1/√(LC)</span>
+            <span>AC coupled</span>
+          </div>
+          <p style="font-size:0.78rem;color:#546e6a;margin-top:6px;line-height:1.6;">
+            The switching regulator drives noise at the resonant frequency of the PCB trace inductance + decoupling cap LC tank. Minimum impedance at ω₀ = maximum noise coupling.
+          </p>
+        </div>
+      </div>
+
+      <div class="card-body">
+        <h4>How Q2 Appears on the Bench</h4>
+        <p>The FE exam asks you to find ω₀ and Q for an RLC circuit. On a PCB, every power rail trace has parasitic inductance (~1nH/mm) and every decoupling capacitor adds capacitance. Together they form an LC filter — or, if not designed carefully, an LC resonator that amplifies noise at ω₀.</p>
+        <div class="formula">
+          ω₀ = 1/√(LC) &nbsp;→&nbsp; f₀ = ω₀/(2π)<br>
+          <span class="f-label">Trace: 10mm trace ≈ 10nH parasitic inductance. Cap: 100nF bypass cap</span><br>
+          <span class="f-result">f₀ = 1/(2π × √(10×10⁻⁹ × 100×10⁻⁹)) = 1/(2π × 1µs) ≈ 159 kHz</span><br>
+          <span class="f-label">A switching regulator at 159kHz would drive maximum noise into this power rail</span>
+        </div>
+        <div class="step-row"><div class="step-n">1</div><div><strong>Measuring noise frequency on the scope:</strong> AC couple the probe on the power rail. Measure the dominant frequency of the ripple using time/div. If ripple period = 6.3µs → f = 159kHz → compare to regulator switching frequency and LC resonant frequency.</div></div>
+        <div class="step-row"><div class="step-n">2</div><div><strong>Decoupling cap selection:</strong> To move ω₀ away from the regulator frequency, change C. Lower C → higher ω₀; higher C → lower ω₀. The FE exam Q formula (Q = ω₀L/R) tells you how sharp the resonance is — high Q = narrow band but severe amplification at exactly ω₀.</div></div>
+        <div class="step-row"><div class="step-n">3</div><div><strong>Multiple caps in parallel:</strong> A 100nF + 10µF combination provides low impedance across a wider frequency range — the 100nF handles high-frequency noise (MHz), the 10µF handles lower-frequency load transients (kHz).</div></div>
+          "The RLC resonance question from the FE exam is directly relevant to why PCBs use multiple decoupling capacitor values in parallel. ω₀ = 1/√(LC) tells you the frequency at which a particular cap-trace combination has minimum impedance — and therefore maximum noise suppression. If the switching regulator runs near that frequency, the decoupling works well. If it doesn't, you choose a different cap value to tune ω₀ to where you need it."
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ Q3 — LAPLACE / SINE ════════════════════════════════════════ -->
+    <div class="section-card" id="s-q3">
+      <div class="card-head head-purple">
+        <div class="ch-left">
+          <span class="ch-num">FE Exam · Topic 7C · Linear Systems</span>
+          <span class="ch-title">Q3 — Laplace Transform &amp; Pole Map</span>
+          <span class="ch-tag">ℒ{3sin(2t)} = 6/(s²+4) · Poles at s = ±j2</span>
+        </div>
+      </div>
+
+      <div class="tp-grid">
+        <div class="tp-col">
+          <div class="tp-label lbl-theory">FE Exam — Theory Plot</div>
+          <img class="fe-img" src="../FE_exam/linear_systems/plots/q3_laplace.png"
+               alt="Q3 Laplace — FE Exam analysis.py output">
+          <div class="img-caption">f(t) = 3sin(2t) &nbsp;↔&nbsp; F(s) = 6/(s²+4) · Poles at s = ±j2</div>
+        </div>
+        <div class="tp-col">
+          <div class="tp-label lbl-practice">Oscilloscope — AC Ripple on Power Rail</div>
+          <div class="scope-wrap" style="position:relative;">
+            <canvas id="cv-sine" width="440" height="220"></canvas>
+            <div class="scope-meta-top">CH1 — 100mV/div<br>0.2ms/div<br>AC coupling<br>1kHz ripple</div>
+          </div>
+          <div class="scope-strip">
+            <span>f = 1kHz</span>
+            <span>Vpp ≈ 400mV</span>
+            <span>Poles: ±j2π×1000</span>
+            <span>Sustained oscillation</span>
+          </div>
+          <p style="font-size:0.78rem;color:#546e6a;margin-top:6px;line-height:1.6;">
+            Poles on the imaginary axis (no real part) = zero damping = the sine never decays. This is why power supply ripple at a fixed frequency sustains indefinitely.
+          </p>
+        </div>
+      </div>
+
+      <div class="card-body">
+        <h4>How Q3 Appears on the Bench</h4>
+        <p>The FE exam asks you to find the Laplace transform of a sinusoidal function. On the bench, the oscilloscope displays AC ripple that looks exactly like 3sin(2t) — just scaled to different amplitude and frequency. The pole map from Q3 explains a subtle but important point: <em>why does the ripple sustain without dying out?</em></p>
+        <div class="formula">
+          F(s) = ω/(s² + ω²) &nbsp;→&nbsp; poles at s = ±jω<br>
+          <span class="f-label">Purely imaginary poles → zero real part → e<sup>0·t</sup> = 1 → no exponential decay</span><br>
+          <span class="f-result">A sustained sine wave = poles exactly on the jω axis (marginally stable)</span><br>
+          <span class="f-label">If poles were in left half-plane: signal would decay. Right half-plane: signal would grow.</span>
+        </div>
+        <div class="step-row"><div class="step-n">1</div><div><strong>Reading frequency from the scope:</strong> The scope displays exactly f(t) = A·sin(2πf·t). Count divisions per cycle in time: if one cycle spans 5 horizontal divisions at 0.2ms/div → T = 5 × 0.2ms = 1ms → f = 1kHz → ω = 2π×1000 = 6283 rad/s.</div></div>
+        <div class="step-row"><div class="step-n">2</div><div><strong>Pole location tells you signal character:</strong> The FE pole map for Q3 shows poles at exactly ±j2. For a 1kHz ripple waveform, the poles are at ±j6283 — the same structure, different scale. Purely imaginary = sustained sine. No real component = no decay, no growth.</div></div>
+        <div class="step-row"><div class="step-n">3</div><div><strong>AC coupling reveals only the sinusoidal component:</strong> DC coupling shows the full rail (3.3V DC + ripple). AC coupling blocks the DC component, showing only the oscillatory part — exactly the f(t) = A·sin(ωt) that maps to the Laplace transform in Q3.</div></div>
+          "The Q3 Laplace transform has poles at ±j2 — purely imaginary, zero real part. That tells you the signal is a sustained sinusoid that neither grows nor decays. When I see AC ripple on a power rail that maintains a consistent amplitude cycle after cycle, those are the same pole conditions. The Laplace framework tells you what kind of signal you're looking at just from the pole locations — which is exactly what an oscilloscope's AC coupling mode is isolating."
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ Q4 — TRANSFER FUNCTION / RINGING ═══════════════════════════ -->
+    <div class="section-card" id="s-q4">
+      <div class="card-head head-red">
+        <div class="ch-left">
+          <span class="ch-num">FE Exam · Topic 7D · Linear Systems</span>
+          <span class="ch-title">Q4 — Transfer Function &amp; Underdamped Response</span>
+          <span class="ch-tag">H(s) = 50/(s²+7s+50) · ζ = 0.495 · Poles: −3.5 ± j6.14</span>
+        </div>
+      </div>
+
+      <div class="tp-grid">
+        <div class="tp-col">
+          <div class="tp-label lbl-theory">FE Exam — Theory Plot</div>
+          <img class="fe-img" src="../FE_exam/linear_systems/plots/q4_transfer_fn.png"
+               alt="Q4 Transfer Function — FE Exam analysis.py output">
+          <div class="img-caption">H(s) = 50/(s²+7s+50) · ζ = 0.495 · Poles in left half-plane → stable but oscillatory</div>
+        </div>
+        <div class="tp-col">
+          <div class="tp-label lbl-practice">Oscilloscope — Ringing on a Digital Edge</div>
+          <div class="scope-wrap" style="position:relative;">
+            <canvas id="cv-ring" width="440" height="220"></canvas>
+            <div class="scope-meta-top">CH1 — 500mV/div<br>50ns/div<br>DC coupling<br>Ringing: ζ ≈ 0.5</div>
+          </div>
+          <div class="scope-strip">
+            <span>Rise to 3.3V</span>
+            <span>Overshoot ~30%</span>
+            <span>ζ ≈ 0.495</span>
+            <span>Stable: poles in LHP</span>
+          </div>
+          <p style="font-size:0.78rem;color:#546e6a;margin-top:6px;line-height:1.6;">
+            Complex poles in the left half-plane → stable, but oscillatory step response. The ringing decays because the real part (σ = −3.5) provides exponential damping.
+          </p>
+        </div>
+      </div>
+
+      <div class="card-body">
+        <h4>How Q4 Appears on the Bench</h4>
+        <p>Every time a CMOS output switches from LOW to HIGH, it drives through a PCB trace that has parasitic inductance. The receiving IC has input capacitance. Together: a second-order system. If ζ &lt; 1, the step response <em>rings</em> — exactly the H(s) = ωn²/(s² + 2ζωns + ωn²) transfer function from Q4.</p>
+        <div class="formula">
+          Poles of H(s) = 50/(s²+7s+50):<br>
+          s = (−7 ± √(49−200))/2 = <span class="f-result">−3.5 ± j6.14</span><br>
+          <span class="f-label">Real part −3.5 → exponential decay envelope e<sup>−3.5t</sup></span><br>
+          <span class="f-label">Imaginary part j6.14 → oscillation at ωd = 6.14 rad/s (scaled to circuit frequency in practice)</span><br>
+          ζ = 7/(2√50) = <span class="f-result">0.495 → underdamped (0 &lt; ζ &lt; 1) → ringing occurs</span>
+        </div>
+        <div class="step-row"><div class="step-n">1</div><div><strong>Identifying ringing on the scope:</strong> Zoom to 10–50 ns/div on a clock edge. If the waveform overshoots and oscillates before settling, the system is underdamped (ζ &lt; 1). Count the number of oscillation cycles before the waveform settles to estimate ζ: more cycles = lower ζ.</div></div>
+        <div class="step-row"><div class="step-n">2</div><div><strong>Stability check from pole locations:</strong> Q4's poles are at −3.5 ± j6.14 — in the left half-plane (real part negative). The system is stable: ringing decays to zero. If poles were in the right half-plane (positive real part), the ringing would grow → oscillator or instability. Poles exactly on the jω axis → sustained ringing forever.</div></div>
+        <div class="step-row"><div class="step-n">3</div><div><strong>Reducing ringing on a PCB:</strong> Add a series termination resistor (33Ω) at the output pin. This increases the real part of the system's effective damping, moving ζ toward 1 (critically damped) and eliminating overshoot. IPC-2221 trace length and impedance matching also affect the ringing amplitude.</div></div>
+        <div class="callout co-blue">
+          <strong>Scope measurement tip:</strong> Overshoot % = (V_peak − V_final) / V_final × 100%. For Q4's ζ = 0.495: theoretical overshoot ≈ e<sup>−πζ/√(1−ζ²)</sup> × 100% ≈ 16.5%. On the scope, measure the first peak above the settled voltage and compare to the settled level. This gives you an experimental estimate of ζ without knowing L or C.
+        </div>
+          "The FE exam Q4 transfer function has poles at −3.5 ± j6.14. That means ζ = 0.495 — underdamped. When I see ringing on a digital clock edge on the oscilloscope, I know I'm looking at a second-order underdamped system: trace inductance + load capacitance forming H(s). The ringing decays because the poles are in the left half-plane — the system is stable. If I needed to fix it, I'd add a series termination resistor to increase damping."
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ TRIANGLE WAVE ═══════════════════════════════════════════ -->
+    <div class="section-card" id="s-tri">
+      <div class="card-head head-amber">
+        <div class="ch-left">
+          <span class="ch-num">New Waveform — EET Bench Reference</span>
+          <span class="ch-title">Triangle Wave — PWM Carrier &amp; RC Integrator Output</span>
+          <span class="ch-tag">Piecewise Linear · Harmonic Series 1/n² · Slew Rate</span>
+        </div>
+      </div>
+
+      <div class="tp-grid">
+        <!-- LEFT: math description (no FE PNG for this one — it's new) -->
+        <div class="tp-col">
+          <div class="tp-label lbl-theory">Theory — What Makes a Triangle Wave</div>
+          <div style="font-size:0.83rem;line-height:1.8;color:#333;">
+            <p>A triangle wave is a piecewise-linear periodic signal. Unlike a square wave (infinite bandwidth) or sine wave (single frequency), it occupies a middle ground: <em>only odd harmonics, falling off as 1/n²</em> — far less high-frequency energy than a square wave.</p>
+            <div class="formula">
+              v(t) = (8A/π²) Σ [( −1)ⁿ / (2n+1)²] · sin((2n+1)ωt)<br>
+              <span class="f-label">n = 0, 1, 2, ... &nbsp; · &nbsp; Only odd harmonics (same as square wave)</span><br>
+              <span class="f-label">Amplitudes ∝ 1/n² — 3rd harmonic is 1/9 of fundamental (vs. 1/3 for square)</span><br>
+              <span class="f-result">Result: much lower EMI than a square wave at the same frequency</span>
+            </div>
+            <p><strong>Key measurements on the scope:</strong></p>
+            <ul style="padding-left:16px;margin-top:4px;">
+              <li>Amplitude (peak-to-peak)</li>
+              <li>Frequency (from period T)</li>
+              <li>Rise time = fall time = T/2 (symmetric triangle)</li>
+              <li>Slew rate = 2A/T (V/s) — the slope of the linear ramp</li>
+              <li>Symmetry check: if rise ≠ fall → circuit fault or asymmetric drive</li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- RIGHT: scope canvas of triangle wave -->
+        <div class="tp-col">
+          <div class="tp-label lbl-practice">Oscilloscope — Triangle Wave</div>
+          <div class="scope-wrap" style="position:relative;">
+            <canvas id="cv-tri" width="440" height="220"></canvas>
+            <div class="scope-meta-top">CH1 — 1V/div<br>0.3ms/div<br>DC coupling<br>1kHz triangle</div>
+          </div>
+          <div class="scope-strip">
+            <span>f = 1kHz · T = 1ms</span>
+            <span>Vpeak = 2.5V</span>
+            <span>Vpp = 5V</span>
+            <span>Slew = 5000 V/s</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="card-body">
+        <h4>Where You See Triangle Waves on a PCB</h4>
+
+        <div class="callout co-amber">
+          <strong>Application 1 — PWM Controller Carrier Signal:</strong> Inside a switching voltage regulator or PWM motor driver IC, a triangle (or sawtooth) wave is generated internally and compared against a reference voltage. The comparator output goes HIGH when the triangle exceeds the reference, LOW when it falls below. The duty cycle of the PWM output = (reference voltage / peak triangle voltage) × 100%. If the PWM frequency shifts unexpectedly, the internal oscillator RC circuit may have drifted — and you can observe the triangle wave on a test pin with the scope.
+        </div>
+
+        <div class="callout co-teal">
+          <strong>Application 2 — RC Integrator Output:</strong> If you drive an RC low-pass filter with a square wave where RC &gt;&gt; T/2, the capacitor never fully charges or discharges — it sees only the linear portion of the exponential. The output approximates a triangle wave. This is a classic bench verification test: apply a known square wave, observe the triangle output, confirm the RC time constant from the slope.
+          <br><br>
+          <strong>Slew rate verification:</strong> Slope = ΔV/Δt = (V_supply × duty_cycle) / (R × C). Compare measured slope to calculated — a discrepancy points to incorrect R or C values, or a capacitor with high ESR (which reduces effective capacitance).
+        </div>
+
+        <div class="formula">
+          Slew rate = 2 × V_peak / T = 2 × V_peak × f<br>
+          <span class="f-label">Example: V_peak = 2.5V, f = 1kHz → Slew rate = 2 × 2.5 × 1000 = 5000 V/s = 5 mV/µs</span><br>
+          <span class="f-result">Measure on scope: ΔV between two cursors / Δt between same cursors = slew rate</span>
+        </div>
+
+        <h4 style="margin-top:14px;">Triangle vs. Square vs. Sine — At a Glance</h4>
+        <div style="overflow-x:auto;">
+          <table class="link-table">
+            <thead><tr><th>Property</th><th>Sine Wave</th><th>Triangle Wave</th><th>Square Wave</th></tr></thead>
+            <tbody>
+              <tr><td>Harmonic content</td><td>Fundamental only</td><td>Odd harmonics (1/n²)</td><td>Odd harmonics (1/n)</td></tr>
+              <tr><td>EMI risk</td><td>Lowest</td><td>Low-moderate</td><td>Highest</td></tr>
+              <tr><td>FE exam math</td><td>ℒ{sin(ωt)} = ω/(s²+ω²)</td><td>Fourier series 1/n² terms</td><td>Fourier series 1/n terms</td></tr>
+              <tr><td>Bench generation</td><td>Function generator, oscillator IC</td><td>RC integrator from square, PWM carrier</td><td>CMOS logic output, function generator</td></tr>
+              <tr><td>Scope measurement</td><td>Amplitude, f, Vrms = Vpeak/√2</td><td>Amplitude, f, slew rate, symmetry</td><td>Amplitude, f, duty cycle, rise time</td></tr>
+            </tbody>
+          </table>
+        </div>
+          "A triangle wave shows up in two places on a PCB: as the carrier signal inside a PWM switching regulator, and as the output of an RC integrator driven by a square wave. The Fourier series for a triangle wave has only odd harmonics, but they fall off as 1/n² instead of 1/n for a square wave — so a triangle wave generates far less EMI. On the scope, I'd verify a triangle wave by measuring the slew rate (slope = 2A/T) and checking that rise time equals fall time — asymmetry indicates a circuit problem."
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ INTERVIEW BRIDGE ════════════════════════════════════════ -->
+    <div class="section-card" id="s-int">
+      <div class="card-head head-dark">
+        <div class="ch-left">
+          <span class="ch-num">Interview Preparation</span>
+          <span class="ch-title">Connecting FE Theory to EET Experience — Complete Bridge</span>
+          
+        </div>
+      </div>
+      <div class="card-body">
+        <h4>The Full Story You Can Tell</h4>
+        <p>You don't have formal PCB technician experience on your resume. But you can say this — and mean every word of it:</p>
+        <div class="callout co-teal">
+          <strong>"While preparing for the FE Electrical exam, I recognized that the Linear Systems topic — RC transients, RLC resonance, Laplace transforms, and transfer functions — wasn't abstract math. Each of those is describing something you would see on an oscilloscope on a PCB test bench. So I built a study workspace that connects the FE theory directly to what an Electronic Engineering Technician does with those tools."</strong>
+        </div>
+
+        <h4 style="margin-top:14px;">Topic-by-Topic Talking Points</h4>
+        <table class="link-table">
+          <thead><tr><th>FE Topic</th><th>What to Say</th><th>File to Reference</th></tr></thead>
+          <tbody>
+            <tr>
+              <td><strong>RC Transient (Q1)</strong></td>
+              <td>"τ = ESR × C explains why a degraded bypass cap causes brownout resets — I simulated this exact failure in my power rail scenario."</td>
+              <td><a href="scenario_power_rail_01/scenario_power_rail_01.html">scenario_power_rail_01</a></td>
+            </tr>
+            <tr>
+              <td><strong>RLC Resonance (Q2)</strong></td>
+              <td>"ω₀ = 1/√(LC) tells you which noise frequency will dominate a power rail — I tied this to decoupling capacitor selection in my PCB calculators."</td>
+              <td><a href="../Electrical_Engineer/pcb_calculators.html">pcb_calculators.html</a></td>
+            </tr>
+            <tr>
+              <td><strong>Laplace / Sine (Q3)</strong></td>
+              <td>"Purely imaginary poles = sustained sinusoidal ripple. That's why AC coupling on the scope reveals the ripple frequency that the multimeter misses."</td>
+              <td><a href="waveform_visualization.html">waveform_visualization.html</a></td>
+            </tr>
+            <tr>
+              <td><strong>Transfer Function (Q4)</strong></td>
+              <td>"Underdamped poles (ζ &lt; 1) produce the ringing you see on clock edges. I tied this to the boundary-scan signal integrity section of my EE reference."</td>
+              <td><a href="../Electrical_Engineer/waveform_boundary_scan.html">waveform_boundary_scan.html</a></td>
+            </tr>
+            <tr>
+              <td><strong>Triangle Wave</strong></td>
+              <td>"The triangle wave is the PWM carrier and the RC integrator output — two things I'd expect to see on the scope during bring-up of a switching regulator circuit."</td>
+              <td>This file (current page)</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h4 style="margin-top:14px;">The Differentiating Statement</h4>
+          <strong>"Most of my study for the FE exam has been directly applicable to this role. Take the Linear Systems topic — I worked through RC transients, RLC resonance, and transfer functions. But instead of just solving the equations, I built an oscilloscope reference that shows what each of those looks like on an actual scope trace. The RC transient formula is why a high-ESR bypass cap causes brownout resets. The underdamped poles in a transfer function are why you see ringing on a clock edge. I added a triangle wave section because I know PWM switching regulators use triangle wave carriers internally — and if the carrier frequency drifts, you'd see it on a test pin. That's the kind of connection between math and measurement that I've been building deliberately so that I can hit the ground running when I'm at the bench."</strong>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ CAD NOTES ══════════════════════════════════════════════ -->
+    <div class="section-card" id="s-cad">
+      <div class="card-head" style="background:#263238;color:#fff;">
+        <div class="ch-left">
+          <span class="ch-num">Altium Designer / OrCAD / Eagle view</span>
+          <span class="ch-title">CAD Notes — Footprint, DRC, Trace Width &amp; Net Impedance</span>
+          <span class="ch-tag">IPC-2221 · IPC-2152 · Altium Net Inspector · DRC</span>
+        </div>
+      </div>
+      <div class="card-body">
+        <h4>Footprint Verification — Decoupling Caps (C2 / RC &amp; RLC Context)</h4>
+        <p>Every decoupling capacitor involved in the RC transient and RLC resonance scenarios (Q1, Q2) has a physical footprint on the PCB. Before replacing C2 or selecting a new cap value, verify the following in the Altium board file:</p>
+        <div class="step-row"><div class="step-n">1</div><div><strong>Altium → Tools → PCB Inspector → select C2:</strong> Confirm footprint is 0805 (2012 metric). If the replacement cap is 0402, the footprint is incompatible — a rework technician cannot place it without a board-level ECO.</div></div>
+        <div class="step-row"><div class="step-n">2</div><div><strong>Component clearance check (DRC):</strong> After a footprint change, run Design → Design Rule Check → Clearance. Confirm the replacement pad does not violate minimum clearance to adjacent components. A 0805 cap has larger pads than 0402 — direction matters.</div></div>
+        <div class="step-row"><div class="step-n">3</div><div><strong>Net Inspector → 3V3 rail net:</strong> Confirm C2 is connected to both the 3V3 power net and GND net. If the net connection is missing (dangling pad), DRC will flag it — but a tech replacing the component without checking the schematic can accidentally solder it to the wrong pads.</div></div>
+        <div class="step-row"><div class="step-n">4</div><div><strong>OrCAD / PSpice connection:</strong> The Q1 RC transient plot and Q2 RLC resonance plot can both be validated using OrCAD PSpice before any physical change. Simulate the new cap value's ESR in the model and confirm the voltage at TP3 stays above 2.97V during a 150mA load step.</div></div>
+
+        <div class="divider" style="height:1px;background:#eceff1;margin:14px 0;"></div>
+
+        <h4>Trace Width — IPC-2221 for Power Rail Carrying RC/RLC Current</h4>
+        <p>The 3.3V rail that feeds into the RC and RLC circuits on PCBA-REV2 carries up to 500mA. IPC-2221 defines the minimum trace width required for that current without exceeding the allowable temperature rise.</p>
+        <div class="formula">
+          IPC-2221: Area (mil²) = [I / (k × ΔT<sup>0.44</sup>)]<sup>1/0.725</sup><br>
+          <span class="f-label">k = 0.048 (external layer) · k = 0.024 (internal layer) · ΔT = 10°C max rise</span><br>
+          I = 500mA: Area = [0.5 / (0.048 × 10<sup>0.44</sup>)]<sup>1/0.725</sup> = [0.5 / 0.132]<sup>1.379</sup> ≈ <span class="f-result">11.7 mil² → ~0.25mm width (1oz Cu, external)</span>
+        </div>
+        <div class="callout co-amber">
+          <strong>Altium DRC trace width rule:</strong> In the Altium PCB editor, add a Width Constraint rule for the net 3V3: minimum = 0.25mm, preferred = 0.5mm. Run DRC to verify no existing trace on that net falls below the minimum. If a trace is undersized, the board runs hotter and the actual RC behavior deviates from the simulated model — the R in τ = RC is not just ESR; it includes trace resistance.
+        </div>
+
+        <h4 style="margin-top:14px;">Net Impedance Review — Signal Integrity for Q4 (Ringing / Underdamped)</h4>
+        <p>The ringing behavior described in Q4 is driven by trace inductance + capacitive load forming a second-order system. In Altium, the net impedance can be estimated using the Layer Stack Manager and Net Inspector:</p>
+        <div class="step-row"><div class="step-n">1</div><div><strong>Altium → Design → Layer Stack Manager:</strong> Identify the dielectric thickness between the signal layer and its reference (ground) plane. This determines characteristic impedance Z₀ for microstrip or stripline traces.</div></div>
+        <div class="step-row"><div class="step-n">2</div><div><strong>Microstrip impedance (approximate):</strong> Z₀ ≈ (87/√(εr + 1.41)) × ln(5.98h / (0.8w + t)). For FR4 (εr ≈ 4.5), h = 0.1mm, w = 0.15mm, t = 0.035mm → Z₀ ≈ 65Ω. A series termination resistor (33Ω at source) brings effective source impedance to ~65Ω, damping the ringing seen in Q4.</div></div>
+        <div class="step-row"><div class="step-n">3</div><div><strong>Net Inspector → CLOCK net → length:</strong> Trace length converts to parasitic inductance (~1nH/mm). A 30mm clock trace = ~30nH. With 10pF load capacitance: ω₀ = 1/√(30nH × 10pF) ≈ 58 Mrad/s → f₀ ≈ 9.2MHz. This sets the ringing frequency you observe on the scope — directly computable from the Q2 formula ω₀ = 1/√(LC).</div></div>
+        <div class="step-row"><div class="step-n">4</div><div><strong>Eagle alternative:</strong> In Eagle, use the RATSNEST and DRC commands equivalently. Signal integrity simulation requires an external tool (HyperLynx or SI capabilities in OrCAD/Sigrity), but trace length and width verification is available natively.</div></div>
+
+        <div class="callout co-blue">
+          <strong>IPC-2221 reference for this file:</strong> Use the IPC-2221 trace width calculator at <a href="../Electrical_Engineer/pcb_calculators.html" style="color:#0d47a1;">pcb_calculators.html</a> to verify all power rail traces covered in Q1 and Q2 scenarios. The calculator uses k=0.048 (external) and k=0.024 (internal) per IPC-2221 Table 6-1.
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /main content -->
+</div><!-- /layout -->
+
+<footer>FE Theory → EET Bench Practice · Linear Systems · RC · RLC · Laplace · Transfer Function · Triangle Wave · Interview Prep</footer>
+
+<script>
+  /* ── sidebar nav ─────────────────────────────────────────────── */
+  function goTo(id) {
+    document.getElementById(id).scrollIntoView({ behavior: 'smooth', block: 'start' });
+    document.querySelectorAll('.sb-item').forEach(function(el) { el.classList.remove('active'); });
+    event.currentTarget.classList.add('active');
+  }
+
+  /* ── shared scope drawing helpers ────────────────────────────── */
+  var CW = 440, CH = 220;
+  var PL = 46, PR = 8, PT = 14, PB = 26;
+  var PW, PH;
+  var NX = 10, NY = 6;
+
+  function initCanvas(cv) {
+    PW = CW - PL - PR;
+    PH = CH - PT - PB;
+    var ctx = cv.getContext('2d');
+    ctx.fillStyle = '#0d1117';
+    ctx.fillRect(0, 0, CW, CH);
+    ctx.strokeStyle = '#1a3a3a'; ctx.lineWidth = 1;
+    for (var i = 0; i <= NX; i++) {
+      var x = PL + (i / NX) * PW;
+      ctx.beginPath(); ctx.moveTo(x, PT); ctx.lineTo(x, PT + PH); ctx.stroke();
+    }
+    for (var j = 0; j <= NY; j++) {
+      var y = PT + (j / NY) * PH;
+      ctx.beginPath(); ctx.moveTo(PL, y); ctx.lineTo(PL + PW, y); ctx.stroke();
+    }
+    ctx.strokeStyle = '#2e6b6b'; ctx.lineWidth = 1.5;
+    var midY = PT + PH / 2;
+    ctx.beginPath(); ctx.moveTo(PL, midY); ctx.lineTo(PL + PW, midY); ctx.stroke();
+    return ctx;
+  }
+
+  function xLabels(ctx, msPerDiv) {
+    ctx.fillStyle = '#546e6a'; ctx.font = '8px monospace'; ctx.textAlign = 'center';
+    for (var i = 0; i <= NX; i++) {
+      ctx.fillText((i * msPerDiv).toFixed(1), PL + (i / NX) * PW, PT + PH + 17);
+    }
+    ctx.fillText('ms', PL + PW + PR - 4, PT + PH + 17);
+  }
+
+  function yLabels(ctx, vPerDiv, vOff) {
+    PH = CH - PT - PB;
+    vOff = vOff || 0;
+    ctx.fillStyle = '#546e6a'; ctx.font = '8px monospace'; ctx.textAlign = 'right';
+    for (var j = 0; j <= NY; j++) {
+      var y = PT + (j / NY) * PH;
+      var v = vOff + (NY / 2 - j) * vPerDiv;
+      ctx.fillText(v.toFixed(1) + 'V', PL - 3, y + 3);
+    }
+  }
+
+  function pt(t_ms, v, totT_ms, totV, vOff) {
+    PW = CW - PL - PR; PH = CH - PT - PB;
+    vOff = vOff || 0;
+    return {
+      x: PL + (t_ms / totT_ms) * PW,
+      y: PT + PH / 2 - ((v - vOff) / totV) * PH
+    };
+  }
+
+  function dashLine(ctx, color, y1, x1, x2) {
+    ctx.save();
+    ctx.strokeStyle = color; ctx.lineWidth = 1; ctx.setLineDash([3, 3]);
+    ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y1); ctx.stroke();
+    ctx.restore();
+  }
+
+  /* ── Q1: RC transient — power rail recovery ──────────────────── */
+  function drawRC() {
+    var cv = document.getElementById('cv-rc');
+    var ctx = initCanvas(cv);
+    PW = CW - PL - PR; PH = CH - PT - PB;
+
+    var msD = 0.2, vD = 0.5, vOff = 3.1;   // 200µs/div, 500mV/div, centered near 3.1V
+    var totT = NX * msD, totV = NY * vD;    // 2ms window, 3V span
+    xLabels(ctx, msD); yLabels(ctx, vD, vOff);
+
+    // Nominal rail at 3.18V with two RC-recovery sags
+    ctx.strokeStyle = '#ff7043'; ctx.lineWidth = 2; ctx.beginPath();
+    var steps = 800;
+    for (var i = 0; i <= steps; i++) {
+      var t = (i / steps) * totT;
+      var v = 3.18;
+      // Sag events at t=0.4ms and t=1.4ms — gaussian dip + RC recovery
+      [0.4, 1.4].forEach(function(tc) {
+        var dt = t - tc;
+        if (dt < 0 && dt > -0.05) {
+          // descend: fast drop
+          v += 0.30 * dt / 0.05;
+        } else if (dt >= 0 && dt < 0.25) {
+          // RC recovery: v = final + (start - final) * e^(-t/tau)
+          var tau = 0.044; // 44µs in ms = 0.044ms → degraded cap
+          v -= 0.30 * Math.exp(-dt / tau);
+        }
+      });
+      var p = pt(t, v, totT, totV, vOff);
+      if (i === 0) ctx.moveTo(p.x, p.y); else ctx.lineTo(p.x, p.y);
+    }
+    ctx.stroke();
+
+    // Guide lines
+    var nomP = pt(0, 3.3, totT, totV, vOff);
+    var botP = pt(0, 2.97, totT, totV, vOff);
+    dashLine(ctx, 'rgba(105,240,174,0.35)', nomP.y, PL, PL + PW);
+    dashLine(ctx, 'rgba(255,23,68,0.5)',   botP.y, PL, PL + PW);
+
+    ctx.fillStyle = '#a5d6a7'; ctx.font = 'bold 8px monospace'; ctx.textAlign = 'left';
+    ctx.fillText('3.3V nominal', PL + 3, nomP.y - 3);
+    ctx.fillStyle = '#ff1744';
+    ctx.fillText('2.97V brownout', PL + 3, botP.y + 10);
+
+    // τ annotation on first recovery
+    var t0 = 0.4, tau_ms = 0.044;
+    var p0 = pt(t0, 2.88, totT, totV, vOff);
+    var p1 = pt(t0 + tau_ms, 2.88 + 0.30 * (1 - Math.exp(-1)), totT, totV, vOff);
+    ctx.strokeStyle = '#ffcc80'; ctx.lineWidth = 1; ctx.setLineDash([2, 2]);
+    ctx.beginPath(); ctx.moveTo(p0.x, p0.y - 4); ctx.lineTo(p1.x, p0.y - 4); ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.fillStyle = '#ffcc80'; ctx.font = '8px monospace'; ctx.textAlign = 'center';
+    ctx.fillText('τ≈44µs', (p0.x + p1.x) / 2, p0.y - 7);
+  }
+
+  /* ── Q2: RLC resonance — sinusoidal ripple on AC-coupled scope ── */
+  function drawRLC() {
+    var cv = document.getElementById('cv-rlc');
+    var ctx = initCanvas(cv);
+    PW = CW - PL - PR; PH = CH - PT - PB;
+
+    var msD = 0.2, vD = 0.1, vOff = 0;    // 0.2ms/div, 100mV/div, AC coupled (center=0)
+    var totT = NX * msD, totV = NY * vD;
+    xLabels(ctx, msD); yLabels(ctx, vD, vOff);
+
+    // Ripple at 159Hz resonant frequency (period ≈ 6.3ms — too slow for 2ms window)
+    // Use 500Hz instead (period 2ms = 10 divs) to make 1 full cycle visible, representative
+    var f_ripple = 0.5; // kHz → 500Hz → period 2ms
+    var A = 0.15; // 150mV peak
+
+    ctx.strokeStyle = '#ff7043'; ctx.lineWidth = 1.8; ctx.beginPath();
+    for (var i = 0; i <= 600; i++) {
+      var t = (i / 600) * totT;
+      var v = A * Math.sin(2 * Math.PI * f_ripple * t);
+      v += 0.025 * (Math.random() - 0.5); // slight noise
+      var p = pt(t, v, totT, totV, vOff);
+      if (i === 0) ctx.moveTo(p.x, p.y); else ctx.lineTo(p.x, p.y);
+    }
+    ctx.stroke();
+
+    // peak guides
+    var hiP = pt(0, A, totT, totV, vOff);
+    var loP = pt(0, -A, totT, totV, vOff);
+    dashLine(ctx, 'rgba(255,235,59,0.35)', hiP.y, PL, PL + PW);
+    dashLine(ctx, 'rgba(255,235,59,0.35)', loP.y, PL, PL + PW);
+    ctx.fillStyle = '#ffeb3b'; ctx.font = 'bold 8px monospace'; ctx.textAlign = 'left';
+    ctx.fillText('+150mV', PL + 3, hiP.y - 3);
+    ctx.fillText('−150mV', PL + 3, loP.y + 10);
+    ctx.fillStyle = '#ff7043'; ctx.textAlign = 'center';
+    ctx.fillText('Resonant ripple — ω₀ = 1/√(LC)', PL + PW / 2, PT + 11);
+  }
+
+  /* ── Q3: Sine wave — sustained oscillation (AC ripple) ────────── */
+  function drawSine() {
+    var cv = document.getElementById('cv-sine');
+    var ctx = initCanvas(cv);
+    PW = CW - PL - PR; PH = CH - PT - PB;
+
+    var msD = 0.2, vD = 0.1, vOff = 0;
+    var totT = NX * msD, totV = NY * vD;
+    xLabels(ctx, msD); yLabels(ctx, vD, vOff);
+
+    // Clean 1kHz sine (period 1ms → 2 full cycles in 2ms window)
+    ctx.strokeStyle = '#00e5ff'; ctx.lineWidth = 2; ctx.beginPath();
+    for (var i = 0; i <= 600; i++) {
+      var t = (i / 600) * totT;
+      var v = 0.2 * Math.sin(2 * Math.PI * 1.0 * t); // 1kHz
+      var p = pt(t, v, totT, totV, vOff);
+      if (i === 0) ctx.moveTo(p.x, p.y); else ctx.lineTo(p.x, p.y);
+    }
+    ctx.stroke();
+
+    // poles annotation
+    ctx.fillStyle = '#ce93d8'; ctx.font = 'bold 8px monospace'; ctx.textAlign = 'left';
+    ctx.fillText('Poles: ±j2π×1000 = ±j6283 rad/s', PL + 3, PT + 11);
+    ctx.fillStyle = '#90caf9'; ctx.font = '8px monospace';
+    ctx.fillText('No decay → purely imaginary poles', PL + 3, PT + 21);
+
+    // period bracket
+    var p0 = pt(0, 0.2, totT, totV, vOff);
+    var p1 = pt(1.0, 0.2, totT, totV, vOff);
+    ctx.strokeStyle = '#ffcc80'; ctx.lineWidth = 1; ctx.setLineDash([3, 3]);
+    ctx.beginPath(); ctx.moveTo(p0.x, p0.y - 8); ctx.lineTo(p1.x, p0.y - 8); ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.fillStyle = '#ffcc80'; ctx.font = '8px monospace'; ctx.textAlign = 'center';
+    ctx.fillText('T = 1ms → f = 1kHz', (p0.x + p1.x) / 2, p0.y - 11);
+  }
+
+  /* ── Q4: Underdamped step response — ringing on digital edge ──── */
+  function drawRinging() {
+    var cv = document.getElementById('cv-ring');
+    var ctx = initCanvas(cv);
+    PW = CW - PL - PR; PH = CH - PT - PB;
+
+    // 500mV/div, 50ns/div — showing a 0→3.3V step with underdamped ringing
+    var nsD = 50, vD = 0.5, vOff = 1.65; // center at 1.65V (midpoint of 0–3.3)
+    var totT_ns = NX * nsD, totV = NY * vD;
+
+    // x labels in ns
+    ctx.fillStyle = '#546e6a'; ctx.font = '8px monospace'; ctx.textAlign = 'center';
+    for (var i = 0; i <= NX; i++) {
+      ctx.fillText((i * nsD) + 'ns', PL + (i / NX) * PW, PT + PH + 17);
+    }
+    yLabels(ctx, vD, vOff);
+
+    // Pre-edge: LOW = 0V for 0 to 100ns
+    // Rising edge at t=100ns
+    // Post-edge: underdamped response: v(t') = 3.3 * (1 - e^(-σt') * (cos(ωd*t') + σ/ωd*sin(ωd*t')))
+    // Using σ = 3.5 * scale, ωd = 6.14 * scale, with scale so one ringing period ≈ 100ns
+    // ring_period ≈ 2π/ωd = 100ns → ωd = 2π/100e-9 = 62.8M rad/s
+    // σ = (3.5/6.14) * ωd = 0.57 * ωd = 35.8M rad/s → matches Q4 ratio ζ=0.495
+
+    var t_edge = 100; // ns
+    var V_lo = 0, V_hi = 3.3;
+    var omega_d = (2 * Math.PI) / 100; // rad/ns, ring period = 100ns
+    var sigma   = (3.5 / 6.14) * omega_d; // match Q4 damping ratio
+
+    ctx.strokeStyle = '#69f0ae'; ctx.lineWidth = 2; ctx.beginPath();
+    var steps = 800;
+    for (var i = 0; i <= steps; i++) {
+      var t_ns = (i / steps) * totT_ns;
+      var v;
+      if (t_ns < t_edge - 2) {
+        v = V_lo;
+      } else if (t_ns < t_edge + 2) {
+        // fast rise (vertical edge)
+        v = V_lo + (V_hi - V_lo) * (t_ns - (t_edge - 2)) / 4;
+      } else {
+        var tp = t_ns - t_edge; // time after edge in ns
+        var phi = Math.acos(0.495); // ζ = 0.495
+        v = V_hi * (1 - (Math.exp(-sigma * tp) / Math.sqrt(1 - 0.495 * 0.495)) *
+            Math.sin(omega_d * tp + phi));
+      }
+      var p = pt(t_ns, v, totT_ns, totV, vOff);
+      if (i === 0) ctx.moveTo(p.x, p.y); else ctx.lineTo(p.x, p.y);
+    }
+    ctx.stroke();
+
+    // V_hi guide
+    var hiP = pt(0, V_hi, totT_ns, totV, vOff);
+    dashLine(ctx, 'rgba(255,235,59,0.35)', hiP.y, PL, PL + PW);
+    ctx.fillStyle = '#ffeb3b'; ctx.font = 'bold 8px monospace'; ctx.textAlign = 'left';
+    ctx.fillText('VOH = 3.3V', PL + 3, hiP.y - 3);
+
+    // annotation
+    ctx.fillStyle = '#ef9a9a'; ctx.font = 'bold 8px monospace'; ctx.textAlign = 'left';
+    ctx.fillText('ζ = 0.495 → underdamped ringing', PL + 3, PT + 11);
+    ctx.fillStyle = '#90caf9'; ctx.font = '8px monospace';
+    ctx.fillText('Poles: −3.5 ± j6.14 (LHP → stable)', PL + 3, PT + 21);
+  }
+
+  /* ── Triangle wave ───────────────────────────────────────────── */
+  function drawTriangle() {
+    var cv = document.getElementById('cv-tri');
+    var ctx = initCanvas(cv);
+    PW = CW - PL - PR; PH = CH - PT - PB;
+
+    var msD = 0.3, vD = 1.0, vOff = 0;  // 0.3ms/div, 1V/div, centered at 0
+    var totT = NX * msD, totV = NY * vD; // 3ms window = 3 full cycles at 1kHz
+    xLabels(ctx, msD); yLabels(ctx, vD, vOff);
+
+    var A = 2.5; // 2.5V peak (5V peak-to-peak)
+    var f = 1.0; // 1kHz
+
+    function tri(t_ms) {
+      var period = 1.0 / f; // 1ms
+      var p = ((t_ms % period) + period) % period; // 0 to 1ms, positive
+      if (p < period / 4)       return A * (4 * p / period);
+      else if (p < 3 * period / 4) return A * (2 - 4 * p / period);
+      else                        return A * (-4 + 4 * p / period);
+    }
+
+    ctx.strokeStyle = '#ffcc80'; ctx.lineWidth = 2.2; ctx.beginPath();
+    var steps = 600;
+    for (var i = 0; i <= steps; i++) {
+      var t_ms = (i / steps) * totT;
+      var v = tri(t_ms);
+      var p = pt(t_ms, v, totT, totV, vOff);
+      if (i === 0) ctx.moveTo(p.x, p.y); else ctx.lineTo(p.x, p.y);
+    }
+    ctx.stroke();
+
+    // Peak/trough guides
+    var hiP = pt(0, A, totT, totV, vOff);
+    var loP = pt(0, -A, totT, totV, vOff);
+    dashLine(ctx, 'rgba(255,235,59,0.35)', hiP.y, PL, PL + PW);
+    dashLine(ctx, 'rgba(255,235,59,0.35)', loP.y, PL, PL + PW);
+    ctx.fillStyle = '#ffeb3b'; ctx.font = 'bold 8px monospace'; ctx.textAlign = 'left';
+    ctx.fillText('+2.5V peak', PL + 3, hiP.y - 3);
+    ctx.fillText('−2.5V peak', PL + 3, loP.y + 10);
+
+    // Slew rate annotation — slope on first rising edge
+    var t_a = 0.0, t_b = 0.25; // 0 to T/4 = 0 to 0.25ms
+    var pa = pt(t_a, tri(t_a), totT, totV, vOff);
+    var pb = pt(t_b, tri(t_b), totT, totV, vOff);
+    ctx.strokeStyle = '#80cbc4'; ctx.lineWidth = 1.5;
+    // draw the slope line
+    ctx.beginPath(); ctx.moveTo(pa.x, pa.y); ctx.lineTo(pb.x, pb.y); ctx.stroke();
+
+    ctx.fillStyle = '#80cbc4'; ctx.font = 'bold 8px monospace'; ctx.textAlign = 'center';
+    ctx.fillText('Slew = 2A/T = 5 V/ms', (pa.x + pb.x) / 2 + 20, (pa.y + pb.y) / 2 - 8);
+
+    // period bracket
+    var bP0 = pt(0, -A - 0.4, totT, totV, vOff);
+    var bP1 = pt(1.0, -A - 0.4, totT, totV, vOff);
+    ctx.strokeStyle = 'rgba(255,204,128,0.4)'; ctx.lineWidth = 1; ctx.setLineDash([3, 3]);
+    ctx.beginPath(); ctx.moveTo(bP0.x, bP0.y); ctx.lineTo(bP1.x, bP0.y); ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.fillStyle = '#ffcc80'; ctx.font = '8px monospace'; ctx.textAlign = 'center';
+    ctx.fillText('T = 1ms → f = 1kHz', (bP0.x + bP1.x) / 2, bP0.y + 10);
+  }
+
+  /* ── run all on load ─────────────────────────────────────────── */
+  window.onload = function () {
+    drawRC();
+    drawRLC();
+    drawSine();
+    drawRinging();
+    drawTriangle();
+  };
+</script>
+</body>
+</html>

@@ -1,0 +1,1011 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Waveform & Boundary-Scan Reference — EE I</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: "Segoe UI", Arial, sans-serif;
+      background: #f0f2f5;
+      color: #222;
+    }
+
+    /* ── header — Altium-style dark bar ── */
+    header {
+      background: #1a1a2e;
+      color: #fff;
+      padding: 0;
+    }
+    .header-top {
+      background: #16213e;
+      padding: 10px 28px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid #0f3460;
+    }
+    .header-top h1 { font-size: 0.95rem; letter-spacing: 0.03em; color: #e0e0e0; }
+    .header-badges { display: flex; gap: 8px; }
+    .badge {
+      font-size: 0.68rem;
+      font-weight: bold;
+      padding: 3px 10px;
+      border-radius: 3px;
+    }
+    .badge-blue  { background: #0f3460; color: #90caf9; }
+    .badge-green { background: #1b5e20; color: #a5d6a7; }
+    .badge-amber { background: #e65100; color: #ffcc80; }
+
+    /* layer bar — mimics Altium Designer layer selector */
+    .layer-bar {
+      background: #1a1a2e;
+      padding: 6px 28px;
+      display: flex;
+      gap: 4px;
+      align-items: center;
+      font-size: 0.7rem;
+      overflow-x: auto;
+    }
+    .layer-tab {
+      padding: 3px 12px;
+      border-radius: 2px;
+      cursor: pointer;
+      font-weight: bold;
+      white-space: nowrap;
+      transition: opacity 0.15s;
+      opacity: 0.55;
+    }
+    .layer-tab.active { opacity: 1; }
+    .layer-tab:hover  { opacity: 0.85; }
+    .lt-sig  { background: #0d47a1; color: #bbdefb; }
+    .lt-pwr  { background: #b71c1c; color: #ffcdd2; }
+    .lt-bsc  { background: #4a148c; color: #e1bee7; }
+    .lt-diag { background: #1b5e20; color: #c8e6c9; }
+    .lt-cad  { background: #e65100; color: #ffccbc; }
+
+    .layer-sep { color: #444; margin: 0 2px; }
+    .layer-label { color: #546e7a; font-size: 0.68rem; margin-right: 6px; }
+
+    /* ── tab content ── */
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+
+    /* ── page layout ── */
+    .page { max-width: 940px; margin: 22px auto; padding: 0 16px 70px; }
+
+    /* ── section cards ── */
+    .section-card {
+      background: #fff;
+      border: 1px solid #cfd8dc;
+      border-radius: 4px;
+      margin-bottom: 26px;
+      overflow: hidden;
+    }
+    .section-head {
+      padding: 9px 18px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.88rem;
+      font-weight: bold;
+    }
+    .section-head .tag {
+      font-size: 0.68rem;
+      font-weight: normal;
+      padding: 2px 8px;
+      border-radius: 3px;
+    }
+    .sh-blue  { background: #0d47a1; color: #fff; }
+    .sh-red   { background: #b71c1c; color: #fff; }
+    .sh-purple{ background: #4a148c; color: #fff; }
+    .sh-green { background: #1b5e20; color: #fff; }
+    .sh-amber { background: #e65100; color: #fff; }
+
+    /* canvas wrapper — scope-style background */
+    .canvas-wrap {
+      background: #0d1117;
+      padding: 10px 10px 0;
+      position: relative;
+    }
+    canvas { display: block; width: 100%; }
+
+    /* measurement strip under canvas */
+    .meas-strip {
+      background: #0d1117;
+      display: flex;
+      flex-wrap: wrap;
+      padding: 6px 10px 10px;
+      gap: 0;
+    }
+    .meas-item {
+      flex: 1; min-width: 110px;
+      text-align: center;
+      font-size: 0.73rem;
+      color: #80cbc4;
+      border-right: 1px solid #1e3a3a;
+      padding: 2px 8px;
+    }
+    .meas-item:last-child { border-right: none; }
+    .meas-label { color: #546e6a; font-size: 0.66rem; text-transform: uppercase; letter-spacing: 0.05em; }
+    .meas-val   { font-weight: bold; font-size: 0.82rem; margin-top: 2px; }
+    .meas-val.warn { color: #ef9a9a; }
+    .meas-val.ok   { color: #a5d6a7; }
+
+    /* info blocks below canvas */
+    .card-info { padding: 14px 18px 16px; }
+    .card-info h4 {
+      font-size: 0.78rem; text-transform: uppercase;
+      letter-spacing: 0.06em; color: #37474f;
+      margin-bottom: 7px; padding-bottom: 5px;
+      border-bottom: 1px solid #eceff1;
+    }
+    .card-info p  { font-size: 0.86rem; line-height: 1.75; color: #444; margin-bottom: 8px; }
+    .card-info ul { font-size: 0.86rem; line-height: 1.85; color: #444; padding-left: 18px; margin-bottom: 8px; }
+
+    /* callout boxes */
+    .callout {
+      border-left: 3px solid;
+      padding: 9px 13px;
+      font-size: 0.83rem;
+      line-height: 1.7;
+      margin-top: 10px;
+      color: #333;
+    }
+    .callout-green  { background: #e8f5e9; border-color: #388e3c; }
+    .callout-green strong  { color: #2e7d32; }
+    .callout-amber  { background: #fff8e1; border-color: #f9a825; }
+    .callout-amber strong  { color: #e65100; }
+    .callout-purple { background: #f3e5f5; border-color: #7b1fa2; }
+    .callout-purple strong { color: #6a1b9a; }
+    .callout-blue   { background: #e3f2fd; border-color: #1565c0; }
+    .callout-blue strong   { color: #0d47a1; }
+
+    /* scope annotation overlay text */
+    .scope-meta {
+      position: absolute; top: 12px; right: 12px;
+      font-size: 0.68rem; color: #80cbc4;
+      line-height: 1.9; text-align: right;
+      pointer-events: none;
+    }
+
+    /* ── two-column comparison layout ── */
+    .compare-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      padding: 14px 18px;
+    }
+    @media (max-width: 640px) { .compare-grid { grid-template-columns: 1fr; } }
+    .compare-col h5 {
+      font-size: 0.78rem; text-transform: uppercase;
+      letter-spacing: 0.05em; margin-bottom: 8px;
+      padding-bottom: 4px; border-bottom: 2px solid;
+    }
+    .compare-col.scope-col h5 { color: #0d47a1; border-color: #0d47a1; }
+    .compare-col.bscan-col h5 { color: #4a148c; border-color: #4a148c; }
+    .compare-col ul { font-size: 0.84rem; line-height: 1.8; color: #444; padding-left: 16px; }
+
+    /* fault table */
+    table { width: 100%; border-collapse: collapse; font-size: 0.83rem; margin-top: 8px; }
+    th { background: #37474f; color: #fff; padding: 7px 10px; text-align: left; font-size: 0.75rem; }
+    td { padding: 7px 10px; border-bottom: 1px solid #eceff1; vertical-align: top; }
+    tr:last-child td { border-bottom: none; }
+    tr:nth-child(even) td { background: #f9fafb; }
+    td.fault { color: #c62828; font-weight: bold; }
+    td.scope-sig { color: #0d47a1; }
+    td.bscan-sig { color: #4a148c; }
+    td.action-sig { color: #1b5e20; }
+
+    /* CAD note box */
+    .cad-note {
+      background: #1a1a2e;
+      color: #90caf9;
+      border-left: 3px solid #0f3460;
+      padding: 11px 15px;
+      font-size: 0.82rem;
+      line-height: 1.75;
+      margin-top: 10px;
+    }
+    .cad-note .cad-title {
+      font-size: 0.7rem; text-transform: uppercase;
+      letter-spacing: 0.08em; color: #546e6a;
+      margin-bottom: 6px;
+    }
+    .cad-note ul { padding-left: 16px; }
+    .cad-note li { margin-bottom: 4px; }
+    .cad-note strong { color: #bbdefb; }
+
+    /* timing row labels (boundary scan diagram) */
+    .timing-label {
+      position: absolute;
+      left: 0; font-size: 0.68rem;
+      color: #ce93d8; font-family: monospace;
+      font-weight: bold;
+    }
+
+    footer {
+      background: #1a1a2e;
+      color: #546e6a;
+      text-align: center;
+      padding: 10px;
+      font-size: 0.73rem;
+      position: fixed; bottom: 0; width: 100%;
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── Altium-style header ── -->
+<header>
+  <div class="header-top">
+    <h1>Waveform Analysis + Boundary-Scan Reference — Electrical Engineer I</h1>
+    <div class="header-badges">
+      <span class="badge badge-blue">IEEE 1149.1 / JTAG</span>
+      <span class="badge badge-green">Oscilloscope · Multimeter</span>
+      <span class="badge badge-amber">Altium Designer / OrCAD / Eagle view</span>
+    </div>
+  </div>
+  <div class="layer-bar">
+    <span class="layer-label">View:</span>
+    <span class="layer-tab lt-sig active" onclick="switchTab('signals')">Signal Waveforms</span>
+    <span class="layer-sep">|</span>
+    <span class="layer-tab lt-bsc"  onclick="switchTab('bscan')">Boundary-Scan Timing</span>
+    <span class="layer-sep">|</span>
+    <span class="layer-tab lt-diag" onclick="switchTab('diag')">Fault Diagnostics</span>
+    <span class="layer-sep">|</span>
+    <span class="layer-tab lt-cad"  onclick="switchTab('cad')">CAD Notes</span>
+  </div>
+</header>
+
+<!-- ══════════════════════════════════════════════════════════════════
+     TAB 1 — Signal Waveforms
+══════════════════════════════════════════════════════════════════ -->
+<div class="tab-content active" id="tab-signals">
+<div class="page">
+
+  <!-- Clean Sine — power rail health check -->
+  <div class="section-card">
+    <div class="section-head sh-blue">
+      Waveform 1 — Clean AC / Ripple Reference (Power Rail Health)
+      <span class="tag" style="background:#1565c0;color:#fff;">2 V/div · 0.5 ms/div</span>
+    </div>
+    <div class="canvas-wrap" style="position:relative;">
+      <canvas id="c-sine" width="900" height="240"></canvas>
+      <div class="scope-meta">CH1 — 2 V/div<br>0.5 ms/div<br>AC coupling<br>f = 1 kHz</div>
+    </div>
+    <div class="meas-strip">
+      <div class="meas-item"><div class="meas-label">Frequency</div><div class="meas-val ok">1.000 kHz</div></div>
+      <div class="meas-item"><div class="meas-label">Period</div><div class="meas-val ok">1.000 ms</div></div>
+      <div class="meas-item"><div class="meas-label">Vpp</div><div class="meas-val ok">6.00 V</div></div>
+      <div class="meas-item"><div class="meas-label">Vpeak</div><div class="meas-val ok">3.00 V</div></div>
+      <div class="meas-item"><div class="meas-label">Vrms</div><div class="meas-val ok">2.12 V</div></div>
+      <div class="meas-item"><div class="meas-label">Status</div><div class="meas-val ok">PASS</div></div>
+    </div>
+    <div class="card-info">
+      <h4>EE I Application — Power-On Bring-Up</h4>
+      <p>During morning power-on bring-up, after confirming DC rail levels with the multimeter (±5% check), switch the oscilloscope to <strong>AC coupling</strong> to isolate any ripple sitting on the DC supply. A clean rail shows a flat line or at most a small periodic ripple at the switching regulator's frequency. This sine reference represents that ripple waveform when it is within spec.</p>
+      <ul>
+        <li><strong>Period:</strong> 2 divs × 0.5 ms/div = 1 ms → f = 1/0.001 = <strong>1 kHz</strong></li>
+        <li><strong>Vpp:</strong> 3 divs × 2 V/div = <strong>6 V</strong></li>
+        <li><strong>Vrms:</strong> Vpeak / √2 = 3.0 / 1.414 = <strong>2.12 V</strong></li>
+      </ul>
+      <div class="callout callout-green">
+        <strong>Workflow connection (Mid-Morning):</strong> This is step 2 of the bring-up sequence in <a href="workflow_EE1_daily_weekly.md" style="color:#2e7d32;">workflow_EE1_daily_weekly.md</a> — "Oscilloscope checks on clock signals, PWM outputs, and communication buses." A clean waveform here is the green light to proceed to boundary-scan.
+      </div>
+    </div>
+  </div>
+
+  <!-- Noisy Sine — degraded decoupling -->
+  <div class="section-card">
+    <div class="section-head sh-red">
+      Waveform 2 — Noisy Power Rail (Degraded Decoupling / ESR Fault)
+      <span class="tag" style="background:#c62828;color:#fff;">2 V/div · 0.5 ms/div</span>
+    </div>
+    <div class="canvas-wrap" style="position:relative;">
+      <canvas id="c-noisy" width="900" height="240"></canvas>
+      <div class="scope-meta">CH1 — 2 V/div<br>0.5 ms/div<br>AC coupling<br>Noise: ~400 mV p-p</div>
+    </div>
+    <div class="meas-strip">
+      <div class="meas-item"><div class="meas-label">Signal frequency</div><div class="meas-val">~1.000 kHz</div></div>
+      <div class="meas-item"><div class="meas-label">Vpp w/ noise</div><div class="meas-val warn">~6.40 V</div></div>
+      <div class="meas-item"><div class="meas-label">Noise amplitude</div><div class="meas-val warn">~400 mV p-p</div></div>
+      <div class="meas-item"><div class="meas-label">Root cause</div><div class="meas-val warn">High ESR cap</div></div>
+      <div class="meas-item"><div class="meas-label">Next step</div><div class="meas-val warn">Replace C2</div></div>
+      <div class="meas-item"><div class="meas-label">Status</div><div class="meas-val warn">INVESTIGATE</div></div>
+    </div>
+    <div class="card-info">
+      <h4>EE I Application — Fault Isolation</h4>
+      <p>This is the waveform you would observe on the 3.3V power rail in <strong>Scenario 01</strong> — a bypass capacitor (C2) with degraded ESR is failing to filter switching noise. The multimeter reads a normal DC average (~3.18V) and would not flag this fault. Only the oscilloscope reveals the noise component.</p>
+      <ul>
+        <li><strong>Switch to AC coupling</strong> and reduce V/div to 100 mV/div to measure noise amplitude accurately.</li>
+        <li>If the noise is periodic at the regulator's switching frequency → <strong>decoupling cap failure</strong>.</li>
+        <li>If the noise is random → <strong>EMI / crosstalk</strong> from adjacent trace or switching element.</li>
+        <li>ESR test: power off, remove C2, measure with LCR meter. ESR > 0.5Ω on a small MLCC = replace.</li>
+      </ul>
+      <div class="callout callout-amber">
+        <strong>Boundary-scan connection:</strong> A noisy power rail that causes logic threshold violations will generate <em>false boundary-scan failures</em> — a good solder joint reads as an open because the captured logic level is indeterminate. Always verify power rail quality with the oscilloscope <em>before</em> running a boundary-scan test. Power integrity is a prerequisite, not a follow-up.
+      </div>
+    </div>
+  </div>
+
+  <!-- Square Wave — digital logic signal -->
+  <div class="section-card">
+    <div class="section-head sh-green">
+      Waveform 3 — 3.3V CMOS Logic / Clock Signal
+      <span class="tag" style="background:#1b5e20;color:#fff;">1 V/div · 0.5 ms/div</span>
+    </div>
+    <div class="canvas-wrap" style="position:relative;">
+      <canvas id="c-square" width="900" height="240"></canvas>
+      <div class="scope-meta">CH1 — 1 V/div<br>0.5 ms/div<br>DC coupling<br>3.3V CMOS logic</div>
+    </div>
+    <div class="meas-strip">
+      <div class="meas-item"><div class="meas-label">Frequency</div><div class="meas-val ok">1.000 kHz</div></div>
+      <div class="meas-item"><div class="meas-label">Period</div><div class="meas-val ok">1.000 ms</div></div>
+      <div class="meas-item"><div class="meas-label">VOH</div><div class="meas-val ok">3.30 V</div></div>
+      <div class="meas-item"><div class="meas-label">VOL</div><div class="meas-val ok">0.00 V</div></div>
+      <div class="meas-item"><div class="meas-label">Duty cycle</div><div class="meas-val ok">50%</div></div>
+      <div class="meas-item"><div class="meas-label">Status</div><div class="meas-val ok">PASS</div></div>
+    </div>
+    <div class="card-info">
+      <h4>EE I Application — Clock & Logic Signal Verification</h4>
+      <p>Before running a boundary-scan, verify that the TCK (test clock) and TMS (test mode select) lines are switching correctly at the expected levels. A 3.3V CMOS-clean square wave here confirms the JTAG interface is electrically sound before you interpret any scan results.</p>
+      <ul>
+        <li><strong>VOH ≥ VIH(min):</strong> 3.3V output must exceed the receiving device's minimum input HIGH threshold (typically 0.7 × VDD = 2.31V for 3.3V CMOS).</li>
+        <li><strong>VOL ≤ VIL(max):</strong> Output LOW must stay below 0.3 × VDD = 0.99V.</li>
+        <li><strong>Rise time:</strong> Zoom to 50 ns/div — slow edges on TCK reduce scan clock reliability; check for excessive capacitive loading on the JTAG header.</li>
+        <li><strong>Duty cycle:</strong> TCK should be close to 50% for reliable data capture on both rising and falling edges.</li>
+      </ul>
+      <div class="callout callout-purple">
+        <strong>Boundary-scan connection:</strong> TCK is the clock that drives every bit shift in the scan chain. If TCK signal integrity is degraded — slow edges, reduced VOH, ringing — the Toolstick may miss clock edges and shift corrupted data, producing false fault reports. Probe TCK on the JTAG header first.
+      </div>
+    </div>
+  </div>
+
+</div><!-- /page -->
+</div><!-- /tab-signals -->
+
+
+<!-- ══════════════════════════════════════════════════════════════════
+     TAB 2 — Boundary-Scan Timing
+══════════════════════════════════════════════════════════════════ -->
+<div class="tab-content" id="tab-bscan">
+<div class="page">
+
+  <!-- JTAG signal timing diagram -->
+  <div class="section-card">
+    <div class="section-head sh-purple">
+      Boundary-Scan Signal Timing — TCK / TMS / TDI / TDO
+      <span class="tag" style="background:#6a1b9a;color:#fff;">IEEE 1149.1 · TAP Controller</span>
+    </div>
+    <div class="canvas-wrap" style="position:relative;">
+      <canvas id="c-jtag" width="900" height="320"></canvas>
+      <div class="scope-meta">4 channels<br>200 ns/div<br>JTAG @ 1 MHz<br>TCK period = 1 µs</div>
+    </div>
+    <div class="meas-strip">
+      <div class="meas-item"><div class="meas-label">TCK frequency</div><div class="meas-val ok">1.000 MHz</div></div>
+      <div class="meas-item"><div class="meas-label">TCK period</div><div class="meas-val ok">1.000 µs</div></div>
+      <div class="meas-item"><div class="meas-label">TDI setup time</div><div class="meas-val ok">≥ 25 ns</div></div>
+      <div class="meas-item"><div class="meas-label">TDO valid delay</div><div class="meas-val ok">≤ 15 ns</div></div>
+      <div class="meas-item"><div class="meas-label">Scan chain depth</div><div class="meas-val ok">3 devices</div></div>
+      <div class="meas-item"><div class="meas-label">Status</div><div class="meas-val ok">SHIFT-DR</div></div>
+    </div>
+    <div class="card-info">
+      <h4>Reading the JTAG Timing Diagram</h4>
+      <p>The four JTAG signals each have a specific role. When probing with an oscilloscope, set up 4-channel capture with all channels referenced to the same board ground point.</p>
+      <ul>
+        <li><strong>TCK (Test Clock):</strong> Free-running clock generated by the Toolstick. All data shifts occur on the <em>rising edge</em> of TCK. VOH must meet 3.3V CMOS thresholds.</li>
+        <li><strong>TMS (Test Mode Select):</strong> Controls the TAP state machine. The pattern shown (1-1-0-0-0-1-1-0-0...) steps through: Reset → Run-Test/Idle → Shift-DR → Update-DR → Idle.</li>
+        <li><strong>TDI (Test Data In):</strong> Serial data shifted <em>into</em> the first device in the chain on each rising TCK edge. Must be stable before TCK rises (setup time ≥ 25 ns typical).</li>
+        <li><strong>TDO (Test Data Out):</strong> Serial data shifted <em>out of</em> the last device in the chain. Valid after the falling edge of TCK (propagation delay ≤ 15 ns typical). The Toolstick samples TDO on TCK's falling edge.</li>
+      </ul>
+      <div class="callout callout-purple">
+        <strong>What to look for on the scope:</strong> TDO should mirror TDI shifted by N-bits (where N = total scan chain register length). If TDO stays static — stuck HIGH or stuck LOW — the scan chain is broken: a device is missing, unpowered, or has a failed TDI→TDO path. This is a boundary-scan chain fault, not a net fault.
+      </div>
+    </div>
+  </div>
+
+  <!-- Scan chain flow -->
+  <div class="section-card">
+    <div class="section-head sh-purple">
+      Scan Chain Architecture — 3-Device Example
+      <span class="tag" style="background:#6a1b9a;color:#fff;">Saliblabs Toolstick · EXTEST</span>
+    </div>
+    <div class="card-info">
+      <h4>Physical Connections on the PCB</h4>
+      <p>The scan chain daisy-chains every JTAG-compliant device on the board in series. TDI enters IC1, passes through IC1's boundary-scan register, exits as IC1's TDO — which is then wired to IC2's TDI, and so on. The Toolstick's TDO input connects to the final device's TDO.</p>
+
+      <div style="background:#0d1117;color:#ce93d8;font-family:monospace;font-size:0.78rem;padding:16px 18px;line-height:2;border-radius:3px;margin:10px 0;overflow-x:auto;">
+        Toolstick (Host PC via USB)<br>
+        &nbsp;&nbsp;&nbsp;│<br>
+        &nbsp;&nbsp;&nbsp;├── TCK ──────────────────────────────────────► all devices<br>
+        &nbsp;&nbsp;&nbsp;├── TMS ──────────────────────────────────────► all devices<br>
+        &nbsp;&nbsp;&nbsp;│<br>
+        &nbsp;&nbsp;&nbsp;├── TDI ──► [IC1: FPGA] ──TDO→TDI──► [IC2: MCU] ──TDO→TDI──► [IC3: DDR] ──TDO──┐<br>
+        &nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;│<br>
+        &nbsp;&nbsp;&nbsp;└── TDO ◄─────────────────────────────────────────────────────────────────────────────────────┘
+      </div>
+
+      <ul>
+        <li><strong>IDCODE phase:</strong> Toolstick sends IDCODE instruction. Each device returns its 32-bit ID. IC1=0x0364A093 (Xilinx), IC2=0x4BA00477 (ARM Cortex-M), IC3=0x01B30043 (JEDEC DDR).</li>
+        <li><strong>EXTEST phase:</strong> Toolstick loads test vectors. IC1 drives its output pins; IC2 and IC3 capture what arrives on their connected input pins. Toolstick compares captured vs. expected.</li>
+        <li><strong>Fault report:</strong> Output is net-level — e.g., <code>IC1.PIN_A14 → IC2.PIN_PA0 : OPEN (driven=1, captured=0)</code>.</li>
+      </ul>
+
+      <div class="callout callout-blue">
+        <strong>Oscilloscope role here:</strong> If the IDCODE phase fails (no devices detected), probe TDI and TDO with the scope. TDI should show the clock-synchronous data pattern. If TDO is flat, the chain is broken. Scope probe on the TDO of each device identifies exactly which device's output is stuck.
+      </div>
+    </div>
+  </div>
+
+</div>
+</div><!-- /tab-bscan -->
+
+
+<!-- ══════════════════════════════════════════════════════════════════
+     TAB 3 — Fault Diagnostics
+══════════════════════════════════════════════════════════════════ -->
+<div class="tab-content" id="tab-diag">
+<div class="page">
+
+  <!-- side-by-side compare -->
+  <div class="section-card">
+    <div class="section-head sh-green">
+      Tool Comparison — When to Use the Scope vs. Boundary-Scan
+      <span class="tag" style="background:#1b5e20;color:#fff;">EE I Decision Guide</span>
+    </div>
+    <div class="compare-grid">
+      <div class="compare-col scope-col">
+        <h5>Oscilloscope</h5>
+        <ul>
+          <li>Verifying power rail DC levels and ripple</li>
+          <li>Checking clock signal integrity (rise time, VOH, VOL)</li>
+          <li>Observing communication bus activity (SPI, I²C, UART)</li>
+          <li>Catching transient events: brownouts, glitches, ringing</li>
+          <li>Confirming JTAG signal integrity <em>before</em> boundary-scan</li>
+          <li>Measuring noise amplitude and frequency</li>
+        </ul>
+      </div>
+      <div class="compare-col bscan-col">
+        <h5>Boundary-Scan (JTAG / Toolstick)</h5>
+        <ul>
+          <li>Detecting solder joint opens and shorts at pin level</li>
+          <li>Verifying component presence (IDCODE check)</li>
+          <li>Testing interconnects on fine-pitch / BGA components with no probe access</li>
+          <li>Structural test after assembly — before functional test</li>
+          <li>Fault isolation to specific net name and pin reference</li>
+          <li>Programming Flash / FPGA bitstream via JTAG</li>
+        </ul>
+      </div>
+    </div>
+    <div class="card-info" style="padding-top:0;">
+      <div class="callout callout-green">
+        <strong>Rule of thumb:</strong> Scope first, boundary-scan second. The oscilloscope confirms the electrical environment (power rails, clock quality) is valid. Only then does boundary-scan produce reliable structural test results. A failed boundary-scan on a noisy board is ambiguous — fix the power integrity issue first.
+      </div>
+    </div>
+  </div>
+
+  <!-- fault type table -->
+  <div class="section-card">
+    <div class="section-head sh-amber">
+      Fault Type Cross-Reference — Symptom → Detection Method → Action
+      <span class="tag" style="background:#bf360c;color:#fff;">Diagnostic Decision Table</span>
+    </div>
+    <div style="padding:0 0 0 0;overflow-x:auto;">
+      <table>
+        <thead>
+          <tr>
+            <th>Fault</th>
+            <th>Scope Shows</th>
+            <th>Boundary-Scan Shows</th>
+            <th>Primary Tool</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="fault">Solder joint open</td>
+            <td class="scope-sig">Signal absent or floating on net (may show noise/coupling)</td>
+            <td class="bscan-sig">OPEN: driven=1, captured=0 on specific pin</td>
+            <td class="bscan-sig">Boundary-Scan</td>
+            <td class="action-sig">Reflow or rework the flagged pin per IPC-7711</td>
+          </tr>
+          <tr>
+            <td class="fault">Solder bridge (short)</td>
+            <td class="scope-sig">Two nets at same voltage; one may be pulled to wrong level</td>
+            <td class="bscan-sig">SHORT: two nets show identical captured value</td>
+            <td class="bscan-sig">Boundary-Scan</td>
+            <td class="action-sig">Visual inspection + reflow to remove bridge</td>
+          </tr>
+          <tr>
+            <td class="fault">Degraded bypass cap (high ESR)</td>
+            <td class="scope-sig">Noisy rail in AC coupling; periodic voltage sags in DC coupling (Waveform 2)</td>
+            <td class="bscan-sig">May cause false OPEN on nearby logic nets (noise crosses logic threshold)</td>
+            <td class="scope-sig">Oscilloscope</td>
+            <td class="action-sig">Replace C with low-ESR MLCC; confirm rail clean before re-running boundary-scan</td>
+          </tr>
+          <tr>
+            <td class="fault">Missing component</td>
+            <td class="scope-sig">Output pin floating or pulled to supply by internal ESD diode</td>
+            <td class="bscan-sig">No IDCODE returned from expected chain position; chain length mismatch</td>
+            <td class="bscan-sig">Boundary-Scan</td>
+            <td class="action-sig">Cross-check BOM and placement; place missing component</td>
+          </tr>
+          <tr>
+            <td class="fault">Wrong component (mis-load)</td>
+            <td class="scope-sig">Signal levels present but wrong amplitude or frequency</td>
+            <td class="bscan-sig">IDCODE mismatch — returned ID ≠ expected device</td>
+            <td class="bscan-sig">Boundary-Scan</td>
+            <td class="action-sig">Remove and replace with correct part number per BOM</td>
+          </tr>
+          <tr>
+            <td class="fault">Broken scan chain (TDO stuck)</td>
+            <td class="scope-sig">TDO flat HIGH or LOW regardless of TDI pattern; TDI pattern present and correct</td>
+            <td class="bscan-sig">All devices fail IDCODE; zero-length or garbage chain</td>
+            <td class="scope-sig">Oscilloscope</td>
+            <td class="action-sig">Probe each device's TDO to locate break point in chain</td>
+          </tr>
+          <tr>
+            <td class="fault">Power rail undervoltage</td>
+            <td class="scope-sig">DC level below nominal; may show brownout sags (Waveform 2)</td>
+            <td class="bscan-sig">Devices may power up but fail IDCODE or behave erratically</td>
+            <td class="scope-sig">Oscilloscope + Multimeter</td>
+            <td class="action-sig">Fix power supply before any structural test — results are invalid on an underpowered board</td>
+          </tr>
+          <tr>
+            <td class="fault">Clock (TCK) signal integrity fault</td>
+            <td class="scope-sig">Slow rise time, ringing, or reduced VOH on TCK line</td>
+            <td class="bscan-sig">Intermittent failures; incorrect device count or corrupted IDCODE</td>
+            <td class="scope-sig">Oscilloscope</td>
+            <td class="action-sig">Check JTAG header termination; reduce TCK frequency in Toolstick software; check stub length on TCK net</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="card-info">
+      <div class="callout callout-amber">
+        <strong>Test sequence for a board that fails boundary-scan:</strong>
+        (1) Confirm all power rails are within ±5% — multimeter.
+        (2) Scope the 3.3V rail in AC coupling — confirm &lt;50 mV p-p ripple.
+        (3) Scope TCK and TMS on the JTAG header — confirm clean 3.3V CMOS square waves.
+        (4) Scope TDI and TDO simultaneously — confirm TDO responds to TDI pattern.
+        (5) If all four pass → trust the boundary-scan fault report as a real structural fault.
+        (6) If any fail → fix the electrical issue and re-run before logging an NCR.
+      </div>
+    </div>
+  </div>
+
+</div>
+</div><!-- /tab-diag -->
+
+
+<!-- ══════════════════════════════════════════════════════════════════
+     TAB 4 — CAD Notes
+══════════════════════════════════════════════════════════════════ -->
+<div class="tab-content" id="tab-cad">
+<div class="page">
+
+  <div class="section-card">
+    <div class="section-head sh-amber">
+      CAD Notes — Altium Designer / OrCAD / Eagle
+      <span class="tag" style="background:#bf360c;color:#fff;">Design-for-Testability</span>
+    </div>
+    <div class="card-info">
+      <h4>JTAG Header Placement (Altium Designer)</h4>
+      <p>Before a board goes to manufacture, verify the following in the Altium board file:</p>
+      <div class="cad-note">
+        <div class="cad-title">Altium Designer — DFT Checklist</div>
+        <ul>
+          <li><strong>JTAG connector footprint:</strong> Place a dedicated 10-pin (2×5, 1.27mm pitch) or 20-pin Cortex Debug header. Assign net labels: TCK, TMS, TDI, TDO, nTRST, VCC_3V3, GND.</li>
+          <li><strong>Net inspector — scan chain:</strong> Tools → Net Inspector → verify TDO of IC[n] connects to TDI of IC[n+1] with no stubs or T-junctions. Stubs on TCK degrade signal integrity at high scan frequencies.</li>
+          <li><strong>DRC rule — series termination:</strong> Add a 33Ω series resistor on TCK near the driver if the trace is longer than 5 cm. Check DRC clears on the termination resistor net.</li>
+          <li><strong>Layer stack:</strong> Route JTAG signals on an internal signal layer referenced to a ground plane for controlled impedance. Target 50Ω single-ended for high-speed JTAG (> 10 MHz TCK).</li>
+          <li><strong>IPC-2221 trace width:</strong> JTAG signals are low-current (≤ 10 mA). Minimum trace width for signal integrity, not current capacity — 0.1 mm (4 mil) minimum per IPC-2221 for internal layer; 0.15 mm for external.</li>
+        </ul>
+      </div>
+
+      <h4 style="margin-top:16px;">Oscilloscope Probe Points — Design Requirement</h4>
+      <div class="cad-note">
+        <div class="cad-title">Altium Designer — Test Point Footprints</div>
+        <ul>
+          <li><strong>Add TP (test point) footprints</strong> on each power rail: VDD, 3V3, 1V8, GND. Use a 1mm round SMD pad — large enough for an oscilloscope probe tip or multimeter probe.</li>
+          <li><strong>Add test points on JTAG signals</strong>: TCK, TDI, TDO, TMS — allows scope probing of boundary-scan signals without soldering a clip to fine-pitch IC pins.</li>
+          <li><strong>Silkscreen label each TP</strong> with the net name — TP1/3V3, TP2/GND, TP3/TCK. This is what appears in the scenario_power_rail_01 HTML file as TP1, TP2, TP3.</li>
+          <li><strong>Check fabrication clearances:</strong> Test point pads must clear adjacent component courtyard by ≥ 0.2mm (Altium DRC: Clearance rule between TestPoint and Component).</li>
+        </ul>
+      </div>
+
+      <h4 style="margin-top:16px;">BSDL File Verification — Pre-BOM Freeze</h4>
+      <div class="cad-note">
+        <div class="cad-title">OrCAD / Altium — BOM Verification Step</div>
+        <ul>
+          <li>For every JTAG-compliant IC in the BOM, verify a <strong>BSDL file is available</strong> from the manufacturer before the BOM is frozen. No BSDL = no boundary-scan test for that device.</li>
+          <li>BSDL files are downloaded from the manufacturer's website (TI, Xilinx, NXP, STMicro all publish them). Store in <code>project/bsdl/</code> folder alongside the Altium project files.</li>
+          <li>Validate BSDL syntax with the Toolstick software before board manufacture — a BSDL error discovered at test stage costs an ECO and schedule delay.</li>
+          <li><strong>Non-JTAG devices</strong> (passive, simple analog ICs) are tested structurally through their neighboring JTAG device's boundary-scan register — the neighbor drives the net, the non-JTAG device is a passive element on that net.</li>
+        </ul>
+      </div>
+
+      <div class="callout callout-amber" style="margin-top:12px;">
+        <strong>Reference files:</strong>
+        <a href="boundary_scan_toolstick.md" style="color:#e65100;">boundary_scan_toolstick.md</a> —
+        full JTAG reference including TAP controller, IDCODE, EXTEST, scan chain setup, and manufacturing context. ·
+        <a href="pcb_calculators.html" style="color:#e65100;">pcb_calculators.html</a> — IPC-2221 trace width calculator for JTAG signal routing. ·
+        <a href="oscilloscope_guide.html" style="color:#e65100;">oscilloscope_guide.html</a> — probe setup and bring-up checklist.
+      </div>
+    </div>
+  </div>
+
+  <!-- workflow tie-in -->
+  <div class="section-card">
+    <div class="section-head sh-green">
+      Workflow Tie-In — Where This Appears in the EE I Week
+      <span class="tag" style="background:#1b5e20;color:#fff;">workflow_EE1_daily_weekly.md</span>
+    </div>
+    <div style="overflow-x:auto;padding:0 4px 4px;">
+      <table>
+        <thead>
+          <tr>
+            <th>Day / Session</th>
+            <th>Task</th>
+            <th>Scope Used For</th>
+            <th>Boundary-Scan Used For</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Mon — Kickoff</strong></td>
+            <td>Probe compensation, equipment setup</td>
+            <td>Verify probe comp square wave (Waveform 3)</td>
+            <td>Chain test on reference board — confirms Toolstick connectivity</td>
+          </tr>
+          <tr>
+            <td><strong>Tue/Wed — Core Test</strong></td>
+            <td>Power-on bring-up of new boards</td>
+            <td>Rail voltage (DC coupling), ripple check (AC coupling) → Waveforms 1 & 2</td>
+            <td>Structural interconnect test after rails are confirmed clean</td>
+          </tr>
+          <tr>
+            <td><strong>Tue/Wed — Debug</strong></td>
+            <td>Fault isolation on failing boards</td>
+            <td>Waveform 2 pattern → identify power integrity root cause</td>
+            <td>OPEN/SHORT fault report → pin-level fault location for NCR</td>
+          </tr>
+          <tr>
+            <td><strong>Thu — Simulation</strong></td>
+            <td>Python analysis / SPICE</td>
+            <td>Compare simulated waveform to scope capture</td>
+            <td>Review BSDL files; validate netlist against scan results</td>
+          </tr>
+          <tr>
+            <td><strong>Fri — Documentation</strong></td>
+            <td>Test report, design review</td>
+            <td>Export scope screenshots for test report appendix</td>
+            <td>Export boundary-scan fault report; attach to NCR in ERP system</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+</div><!-- /tab-cad -->
+
+
+<footer>
+  Waveform & Boundary-Scan Reference · Electrical Engineer I · IEEE 1149.1 · IPC-2221 · Altium Designer / OrCAD / Eagle view
+</footer>
+
+<!-- ─────────────────────────────────────────────────────────────────
+     JavaScript — tab switching + all canvas drawings
+───────────────────────────────────────────────────────────────────── -->
+<script>
+
+  /* ── tab switching ─────────────────────────────────────────────── */
+  function switchTab(name) {
+    document.querySelectorAll('.tab-content').forEach(function(el) {
+      el.classList.remove('active');
+    });
+    document.querySelectorAll('.layer-tab').forEach(function(el) {
+      el.classList.remove('active');
+    });
+    document.getElementById('tab-' + name).classList.add('active');
+
+    var map = { signals: 0, bscan: 1, diag: 2, cad: 3 };
+    document.querySelectorAll('.layer-tab')[map[name]].classList.add('active');
+  }
+
+  /* ── shared canvas constants ───────────────────────────────────── */
+  var CW = 900, CH_WAVE = 240, CH_JTAG = 320;
+  var PAD_L = 52, PAD_R = 14, PAD_T = 18, PAD_B = 30;
+  var PW = CW - PAD_L - PAD_R;
+
+  var NUM_X = 10, NUM_Y = 6;
+
+  /* draw the oscilloscope grid */
+  function drawGrid(ctx, height) {
+    var ph = height - PAD_T - PAD_B;
+    ctx.fillStyle = '#0d1117';
+    ctx.fillRect(0, 0, CW, height);
+    ctx.strokeStyle = '#1a3a3a';
+    ctx.lineWidth = 1;
+    for (var i = 0; i <= NUM_X; i++) {
+      var x = PAD_L + (i / NUM_X) * PW;
+      ctx.beginPath(); ctx.moveTo(x, PAD_T); ctx.lineTo(x, PAD_T + ph); ctx.stroke();
+    }
+    for (var j = 0; j <= NUM_Y; j++) {
+      var y = PAD_T + (j / NUM_Y) * ph;
+      ctx.beginPath(); ctx.moveTo(PAD_L, y); ctx.lineTo(PAD_L + PW, y); ctx.stroke();
+    }
+    ctx.strokeStyle = '#2e6b6b'; ctx.lineWidth = 1.5;
+    var midY = PAD_T + ph / 2;
+    ctx.beginPath(); ctx.moveTo(PAD_L, midY); ctx.lineTo(PAD_L + PW, midY); ctx.stroke();
+  }
+
+  function drawXLabels(ctx, height, msPerDiv) {
+    var ph = height - PAD_T - PAD_B;
+    ctx.fillStyle = '#546e6a'; ctx.font = '9px monospace'; ctx.textAlign = 'center';
+    for (var i = 0; i <= NUM_X; i++) {
+      var x = PAD_L + (i / NUM_X) * PW;
+      ctx.fillText((i * msPerDiv).toFixed(1) + ' ms', x, PAD_T + ph + 18);
+    }
+  }
+
+  function drawYLabels(ctx, height, vPerDiv, vOff) {
+    var ph = height - PAD_T - PAD_B;
+    vOff = vOff || 0;
+    ctx.fillStyle = '#546e6a'; ctx.font = '9px monospace'; ctx.textAlign = 'right';
+    for (var j = 0; j <= NUM_Y; j++) {
+      var y = PAD_T + (j / NUM_Y) * ph;
+      var v = vOff + (NUM_Y / 2 - j) * vPerDiv;
+      ctx.fillText(v.toFixed(1) + 'V', PAD_L - 4, y + 3);
+    }
+  }
+
+  function toXY(t, v, totalT, totalV, height, vOff) {
+    var ph = height - PAD_T - PAD_B;
+    vOff = vOff || 0;
+    return {
+      x: PAD_L + (t / totalT) * PW,
+      y: PAD_T + ph / 2 - ((v - vOff) / totalV) * ph
+    };
+  }
+
+  /* ── Waveform 1: Clean Sine ──────────────────────────────────────*/
+  function drawSine() {
+    var cv = document.getElementById('c-sine');
+    var ctx = cv.getContext('2d');
+    var h = CH_WAVE, msD = 0.5, vD = 2.0, A = 3.0, f = 1.0;
+    var totT = NUM_X * msD, totV = NUM_Y * vD;
+    drawGrid(ctx, h); drawXLabels(ctx, h, msD); drawYLabels(ctx, h, vD, 0);
+
+    ctx.strokeStyle = '#00e5ff'; ctx.lineWidth = 2; ctx.beginPath();
+    for (var i = 0; i <= 500; i++) {
+      var t = (i / 500) * totT;
+      var v = A * Math.sin(2 * Math.PI * f * t);
+      var p = toXY(t, v, totT, totV, h, 0);
+      if (i === 0) ctx.moveTo(p.x, p.y); else ctx.lineTo(p.x, p.y);
+    }
+    ctx.stroke();
+
+    // peak guide lines
+    [A, -A].forEach(function(amp) {
+      var p = toXY(0, amp, totT, totV, h, 0);
+      ctx.strokeStyle = 'rgba(255,235,59,0.3)'; ctx.lineWidth = 1; ctx.setLineDash([4,4]);
+      ctx.beginPath(); ctx.moveTo(PAD_L, p.y); ctx.lineTo(PAD_L + PW, p.y); ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.fillStyle = '#ffeb3b'; ctx.font = 'bold 9px monospace'; ctx.textAlign = 'left';
+      ctx.fillText((amp > 0 ? '+' : '') + amp.toFixed(1) + ' V peak', PAD_L + 4, p.y + (amp > 0 ? -4 : 12));
+    });
+  }
+
+  /* ── Waveform 2: Noisy Sine ──────────────────────────────────────*/
+  function drawNoisy() {
+    var cv = document.getElementById('c-noisy');
+    var ctx = cv.getContext('2d');
+    var h = CH_WAVE, msD = 0.5, vD = 2.0, A = 3.0, f = 1.0, nAmp = 0.2;
+    var totT = NUM_X * msD, totV = NUM_Y * vD;
+    drawGrid(ctx, h); drawXLabels(ctx, h, msD); drawYLabels(ctx, h, vD, 0);
+
+    // build noise array
+    var noise = [];
+    for (var k = 0; k <= 500; k++) noise.push(nAmp * (Math.random() * 2 - 1) + (nAmp * 0.5) * (Math.random() * 2 - 1));
+
+    // ghost clean reference
+    ctx.strokeStyle = 'rgba(0,229,255,0.18)'; ctx.lineWidth = 1; ctx.setLineDash([3,3]);
+    ctx.beginPath();
+    for (var i = 0; i <= 500; i++) {
+      var t = (i / 500) * totT, v = A * Math.sin(2 * Math.PI * f * t);
+      var p = toXY(t, v, totT, totV, h, 0);
+      if (i === 0) ctx.moveTo(p.x, p.y); else ctx.lineTo(p.x, p.y);
+    }
+    ctx.stroke(); ctx.setLineDash([]);
+
+    // noisy signal
+    ctx.strokeStyle = '#ff7043'; ctx.lineWidth = 1.5; ctx.beginPath();
+    for (var i = 0; i <= 500; i++) {
+      var t = (i / 500) * totT, v = A * Math.sin(2 * Math.PI * f * t) + noise[i];
+      var p = toXY(t, v, totT, totV, h, 0);
+      if (i === 0) ctx.moveTo(p.x, p.y); else ctx.lineTo(p.x, p.y);
+    }
+    ctx.stroke();
+
+    ctx.fillStyle = '#ff7043'; ctx.font = 'bold 9px monospace'; ctx.textAlign = 'left';
+    ctx.fillText('Noisy signal', PAD_L + 4, PAD_T + 14);
+    ctx.fillStyle = 'rgba(0,229,255,0.55)';
+    ctx.fillText('Clean reference (ghost)', PAD_L + 4, PAD_T + 26);
+  }
+
+  /* ── Waveform 3: Square Wave ─────────────────────────────────────*/
+  function drawSquare() {
+    var cv = document.getElementById('c-square');
+    var ctx = cv.getContext('2d');
+    var h = CH_WAVE, msD = 0.5, vD = 1.0;
+    var vH = 3.3, vL = 0.0, vC = (vH + vL) / 2;
+    var totT = NUM_X * msD, totV = NUM_Y * vD, per = 1.0;
+    drawGrid(ctx, h); drawXLabels(ctx, h, msD); drawYLabels(ctx, h, vD, vC);
+
+    ctx.strokeStyle = '#69f0ae'; ctx.lineWidth = 2; ctx.beginPath();
+    var pts = [{ t: 0, v: vL }];
+    for (var t = 0; t < totT + per; t += per) {
+      var tr = Math.round(t * 10000) / 10000;
+      pts.push({ t: tr, v: vL }, { t: tr, v: vH }, { t: tr + 0.5, v: vH }, { t: tr + 0.5, v: vL });
+    }
+    for (var i = 0; i < pts.length; i++) {
+      var p = toXY(pts[i].t, pts[i].v, totT, totV, h, vC);
+      if (i === 0) ctx.moveTo(p.x, p.y); else ctx.lineTo(p.x, p.y);
+    }
+    ctx.stroke();
+
+    [vH, vL].forEach(function(lv, idx) {
+      var p = toXY(0, lv, totT, totV, h, vC);
+      ctx.strokeStyle = 'rgba(255,235,59,0.35)'; ctx.lineWidth = 1; ctx.setLineDash([4,4]);
+      ctx.beginPath(); ctx.moveTo(PAD_L, p.y); ctx.lineTo(PAD_L + PW, p.y); ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.fillStyle = '#ffeb3b'; ctx.font = 'bold 9px monospace'; ctx.textAlign = 'left';
+      ctx.fillText(idx === 0 ? 'VOH = 3.3V' : 'VOL = 0.0V', PAD_L + 4, p.y + (idx === 0 ? -4 : 12));
+    });
+  }
+
+  /* ── Waveform 4: JTAG 4-channel timing diagram ───────────────────
+     Draws TCK, TMS, TDI, TDO as digital waveform rows stacked vertically.
+     Each row is ~60px tall with a label on the left.
+  ──────────────────────────────────────────────────────────────────*/
+  function drawJTAG() {
+    var cv = document.getElementById('c-jtag');
+    var ctx = cv.getContext('2d');
+
+    ctx.fillStyle = '#0d1117';
+    ctx.fillRect(0, 0, CW, CH_JTAG);
+
+    // grid lines (vertical — time divisions only)
+    ctx.strokeStyle = '#1a3a3a'; ctx.lineWidth = 1;
+    for (var i = 0; i <= NUM_X; i++) {
+      var x = PAD_L + (i / NUM_X) * PW;
+      ctx.beginPath(); ctx.moveTo(x, 10); ctx.lineTo(x, CH_JTAG - 24); ctx.stroke();
+    }
+
+    // time labels — 100ns/div (10 divs = 1µs total window, ~1 TCK cycle visible per div)
+    ctx.fillStyle = '#546e6a'; ctx.font = '9px monospace'; ctx.textAlign = 'center';
+    for (var i = 0; i <= NUM_X; i++) {
+      var x = PAD_L + (i / NUM_X) * PW;
+      ctx.fillText((i * 100) + ' ns', x, CH_JTAG - 8);
+    }
+
+    // Four signal rows: TCK, TMS, TDI, TDO
+    // Each row spans from yBase to yBase + rowH, with HIGH and LOW levels inside
+    var rows = [
+      { label: 'TCK',  color: '#80cbc4', yBase: 18  },
+      { label: 'TMS',  color: '#ce93d8', yBase: 90  },
+      { label: 'TDI',  color: '#ffcc80', yBase: 162 },
+      { label: 'TDO',  color: '#a5d6a7', yBase: 234 }
+    ];
+    var rowH = 58, rHi = 12, rLo = 44; // top of HIGH = rHi from yBase, bottom of HIGH = rLo from yBase
+
+    // TCK: symmetric square wave, period = 200px (2 divs at 100ns/div = 200ns = 1MHz)
+    // 10 divs = 1000ns → 5 complete TCK cycles
+    function makeSquarePts(totalPx, halfPeriodPx, startLow) {
+      var pts = []; var state = startLow ? 'lo' : 'hi'; var x = PAD_L;
+      pts.push({ x: x, s: state });
+      while (x < PAD_L + PW) {
+        x += halfPeriodPx;
+        if (x > PAD_L + PW) x = PAD_L + PW;
+        state = state === 'hi' ? 'lo' : 'hi';
+        pts.push({ x: x, s: state });
+      }
+      return pts;
+    }
+
+    // TCK: 10 half-cycles across 10 divs → halfPeriod = 1 div = PW/10
+    var tckPts = makeSquarePts(PW, PW / 10, true);
+
+    // TMS pattern: encodes Capture-DR → Shift-DR (bits: 1,0,0,0,0,1,1,0,0,0)
+    // each bit lasts 1 TCK period = PW/5 pixels
+    var tmsBits = [1, 0, 0, 0, 0, 1, 1, 0, 0, 0];
+    var tmsPts = buildDataBits(tmsBits, PW / 10);
+
+    // TDI: data pattern being shifted in — 1,0,1,1,0,0,1,0,1,1
+    var tdiBits = [1, 0, 1, 1, 0, 0, 1, 0, 1, 1];
+    var tdiPts  = buildDataBits(tdiBits, PW / 10);
+
+    // TDO: same data, shifted by 2.5 bits (represents chain propagation delay through 3 devices)
+    var tdoBits = [0, 0, 1, 0, 1, 1, 0, 0, 1, 0]; // TDI delayed by ~2 bits through chain
+    var tdoPts  = buildDataBits(tdoBits, PW / 10);
+
+    function buildDataBits(bits, bitW) {
+      var pts = [{ x: PAD_L, s: bits[0] === 1 ? 'hi' : 'lo' }];
+      for (var b = 0; b < bits.length; b++) {
+        var xe = PAD_L + (b + 1) * bitW;
+        if (xe > PAD_L + PW) xe = PAD_L + PW;
+        pts.push({ x: xe, s: bits[b] === 1 ? 'hi' : 'lo' });
+        if (b + 1 < bits.length) {
+          pts.push({ x: xe, s: bits[b + 1] === 1 ? 'hi' : 'lo' });
+        }
+      }
+      return pts;
+    }
+
+    var allPts = [tckPts, tmsPts, tdiPts, tdoPts];
+
+    rows.forEach(function(row, ri) {
+      var pts = allPts[ri];
+      var hi_y = row.yBase + rHi;
+      var lo_y = row.yBase + rLo;
+
+      // row background
+      ctx.fillStyle = 'rgba(255,255,255,0.02)';
+      ctx.fillRect(PAD_L, row.yBase, PW, rowH);
+
+      // signal label
+      ctx.fillStyle = row.color;
+      ctx.font = 'bold 10px monospace';
+      ctx.textAlign = 'right';
+      ctx.fillText(row.label, PAD_L - 6, row.yBase + rowH / 2 + 4);
+
+      // draw signal path
+      ctx.strokeStyle = row.color;
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      pts.forEach(function(pt, pi) {
+        var y = pt.s === 'hi' ? hi_y : lo_y;
+        if (pi === 0) { ctx.moveTo(pt.x, y); return; }
+        var prevY = pts[pi - 1].s === 'hi' ? hi_y : lo_y;
+        if (y !== prevY) {
+          ctx.lineTo(pt.x, prevY); // horizontal to transition point
+          ctx.lineTo(pt.x, y);     // vertical transition
+        } else {
+          ctx.lineTo(pt.x, y);     // horizontal continuation
+        }
+      });
+      ctx.stroke();
+
+      // annotate last point
+      ctx.fillStyle = row.color;
+      ctx.font = '8px monospace';
+      ctx.textAlign = 'left';
+    });
+
+    // annotate TDO delay with a bracket
+    ctx.strokeStyle = 'rgba(165,214,167,0.4)'; ctx.lineWidth = 1; ctx.setLineDash([3,3]);
+    var tdoRow = rows[3]; var tdiRow = rows[2];
+    var arrowY = tdiRow.yBase + rowH - 4;
+    ctx.beginPath();
+    ctx.moveTo(PAD_L + PW / 10 * 0, arrowY);
+    ctx.lineTo(PAD_L + PW / 10 * 2, arrowY);
+    ctx.stroke(); ctx.setLineDash([]);
+    ctx.fillStyle = 'rgba(165,214,167,0.7)'; ctx.font = '8px monospace'; ctx.textAlign = 'center';
+    ctx.fillText('TDO = TDI delayed by chain depth', PAD_L + PW / 2, tdiRow.yBase + rowH + 2);
+  }
+
+  /* ── run all drawings on load ────────────────────────────────────*/
+  window.onload = function() {
+    drawSine();
+    drawNoisy();
+    drawSquare();
+    drawJTAG();
+  };
+</script>
+</body>
+</html>

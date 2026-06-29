@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Scenario 01 — 3.3V Power Rail Brownout | EET Workbench</title>
+<style>
+:root {
+  --bg:        #1a1a1a;
+  --bg-panel:  #222222;
+  --bg-card:   #2a2a2a;
+  --border:    #383838;
+  --text:      #d4d4d4;
+  --muted:     #5a5a5a;
+  --dim:       #3a3a3a;
+  --teal:      #00bcd4;
+  --yellow:    #dcdcaa;
+  --blue:      #569cd6;
+  --green:     #4ec9b0;
+  --orange:    #ce9178;
+  --red:       #f44747;
+  --wire:      #29a8e2;
+  --comp:      #4caf50;
+  --scope:     #00ff41;
+  --warn:      #ff6b35;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  height: 100%;
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Consolas', 'Courier New', monospace;
+  font-size: 13px;
+  overflow: hidden;
+}
+
+/* ── Title bar ── */
+#titlebar {
+  background: #252525;
+  border-bottom: 2px solid var(--teal);
+  padding: 7px 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-shrink: 0;
+}
+#titlebar .app  { color: var(--teal);   font-size: 11px; font-weight: bold; letter-spacing: 1px; }
+#titlebar .scen { color: var(--yellow); font-size: 11px; margin-left: 10px; }
+#titlebar .tags { color: var(--muted);  font-size: 10px; }
+#titlebar .badge {
+  background: var(--red); color: #fff;
+  font-size: 9px; padding: 2px 8px; border-radius: 2px;
+}
+
+/* ── Layer bar ── */
+#layerbar {
+  background: #1e1e1e;
+  border-bottom: 1px solid var(--border);
+  padding: 3px 14px;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  flex-shrink: 0;
+}
+.ltab {
+  font-size: 9px; padding: 2px 9px; border-radius: 2px 2px 0 0; user-select: none;
+}
+.ltab.on  { background: #c0392b; color: #fff; }
+.ltab.off { background: #2e2e2e; color: var(--muted); }
+#layerbar .net { margin-left: auto; color: var(--muted); font-size: 9px; }
+
+/* ── Main grid ── */
+#wrap {
+  display: flex;
+  height: calc(100% - 56px); /* titlebar + layerbar */
+}
+
+/* ── Left: schematic ── */
+#schematic-panel {
+  flex: 1;
+  background: #111;
+  border-right: 1px solid var(--border);
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.panel-title {
+  color: var(--muted); font-size: 9px; letter-spacing: 1px;
+  text-transform: uppercase; margin-bottom: 8px;
+  padding-bottom: 5px; border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+#schematic-svg {
+  flex: 1;
+  width: 100%;
+  height: 100%;
+}
+
+/* ── Right: controls ── */
+#right-panel {
+  width: 370px;
+  flex-shrink: 0;
+  background: var(--bg-panel);
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+}
+
+/* Symptom box */
+.symptom {
+  background: var(--bg-card);
+  border-left: 3px solid var(--red);
+  margin: 10px 10px 0;
+  padding: 10px 12px;
+  border-radius: 0 3px 3px 0;
+  flex-shrink: 0;
+}
+.symptom .lbl { color: var(--red); font-size: 9px; font-weight: bold; letter-spacing: 1px; margin-bottom: 5px; }
+.symptom p  { font-size: 11px; line-height: 1.6; }
+.symptom .meta { color: var(--muted); font-size: 10px; margin-top: 5px; }
+
+/* Tool selector */
+.section { padding: 8px 10px 0; flex-shrink: 0; }
+.slbl { color: var(--muted); font-size: 9px; letter-spacing: 1px; text-transform: uppercase; display: block; margin-bottom: 6px; }
+.tools { display: flex; gap: 6px; }
+.tbtn {
+  flex: 1; padding: 7px 8px; border: 1px solid var(--border);
+  background: var(--bg-card); color: #9cdcfe;
+  font-family: 'Consolas', monospace; font-size: 11px;
+  cursor: pointer; border-radius: 3px; text-align: center;
+  transition: border-color 0.12s, background 0.12s;
+  line-height: 1.4;
+}
+.tbtn sub { font-size: 9px; color: var(--muted); display: block; }
+.tbtn:hover { border-color: var(--blue); }
+.tbtn.mm-on  { border-color: var(--orange); background: rgba(206,145,120,.08); color: var(--orange); }
+.tbtn.sc-on  { border-color: var(--scope);  background: rgba(0,255,65,.05);   color: var(--scope); }
+
+/* Probe hint */
+#hint {
+  text-align: center; font-size: 10px; color: var(--muted);
+  padding: 5px 10px; flex-shrink: 0;
+}
+#hint span { color: var(--yellow); }
+
+/* Measurement display */
+#meas {
+  margin: 4px 10px 6px;
+  background: #080808;
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  min-height: 170px;
+  overflow: hidden;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+}
+#meas-placeholder { color: var(--muted); font-size: 11px; text-align: center; }
+#meas-placeholder .icon { font-size: 26px; opacity: .25; margin-bottom: 6px; }
+
+.mmr { display: none; text-align: center; padding: 14px; }
+.mmr .tp-lbl { font-size: 9px; color: var(--muted); letter-spacing: 1px; margin-bottom: 4px; }
+.mmr .val    { font-size: 38px; font-weight: bold; letter-spacing: 2px; }
+.mmr .unit   { font-size: 13px; color: var(--muted); }
+.mmr .stat   { font-size: 10px; margin-top: 5px; }
+
+.scd { display: none; width: 100%; }
+.scd img { width: 100%; display: block; }
+.scd .cap {
+  padding: 4px 10px 6px;
+  font-size: 10px; color: var(--muted);
+  display: flex; justify-content: space-between; align-items: center;
+  background: #0e0e0e;
+}
+.scd .cap span { color: var(--red); }
+.zoom-btn {
+  background: #111; border: 1px solid var(--border);
+  color: var(--scope); font-size: 9px; padding: 2px 7px;
+  cursor: pointer; font-family: 'Consolas', monospace;
+  border-radius: 2px;
+}
+.zoom-btn:hover { border-color: var(--scope); }
+
+/* Diagnosis steps */
+#diag { border-top: 1px solid var(--border); padding: 8px 10px; flex: 1; }
+.step {
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: 3px; margin-bottom: 7px; overflow: hidden;
+  transition: opacity 0.3s;
+}
+.step.locked { opacity: 0.30; pointer-events: none; }
+.step-hdr {
+  padding: 7px 10px; display: flex; align-items: center; gap: 8px;
+}
+.snum {
+  width: 20px; height: 20px; border-radius: 50%; flex-shrink: 0;
+  background: var(--dim); color: var(--muted);
+  font-size: 10px; display: flex; align-items: center; justify-content: center;
+}
+.step.open .snum      { background: var(--green); color: #000; }
+.step.final .snum     { background: var(--yellow); color: #000; }
+.step-ttl { font-size: 11px; color: #9cdcfe; }
+.step-body {
+  display: none;
+  padding: 0 10px 10px 38px;
+  font-size: 11px; line-height: 1.75; color: var(--text);
+}
+.step.open  .step-body { display: block; }
+.step.final .step-body { display: block; }
+.step-body code  { background: #111; padding: 1px 5px; border-radius: 2px; color: var(--orange); font-size: 10px; }
+.step-body .eq   { background: #111; border-left: 2px solid var(--blue); padding: 5px 10px; margin: 5px 0; color: var(--yellow); font-size: 11px; }
+.step-body .bad  { color: var(--red); font-weight: bold; }
+.step-body .fix  { color: var(--green); }
+.step-body ul    { margin: 4px 0 4px 16px; }
+.step-body li    { color: var(--green); margin-bottom: 2px; }
+.step-body .cad  { color: var(--muted); font-size: 10px; margin-top: 6px; border-top: 1px solid var(--border); padding-top: 5px; }
+</style>
+</head>
+<body>
+
+<!-- Title bar -->
+<div id="titlebar">
+  <div>
+    <span class="app">EET WORKBENCH</span>
+    <span class="scen">Scenario 01 — 3.3V Power Rail Brownout Diagnosis</span>
+  </div>
+  <div style="display:flex;gap:8px;align-items:center;">
+    <span class="tags">Circuit Analysis · Power Systems · Instrumentation</span>
+    <span class="badge">ACTIVE</span>
+  </div>
+</div>
+
+<!-- Layer bar -->
+<div id="layerbar">
+  <span class="lbl" style="color:var(--muted);font-size:9px;margin-right:4px;">LAYERS:</span>
+  <span class="ltab on">Top Copper</span>
+  <span class="ltab off">Bottom Copper</span>
+  <span class="ltab off">Silkscreen</span>
+  <span class="ltab off">Schematic</span>
+  <span class="net">Net: +3V3 &nbsp;|&nbsp; Board: PCBA-REV2 &nbsp;|&nbsp; Altium Designer / OrCAD / Eagle view</span>
+</div>
+
+<div id="wrap">
+
+  <!-- ── Left: schematic ── -->
+  <div id="schematic-panel">
+    <div class="panel-title">Schematic — +3V3 Power Distribution Net &nbsp;·&nbsp; Click a test point after selecting instrument</div>
+
+    <svg id="schematic-svg" viewBox="0 0 700 400" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <pattern id="grid" width="20" height="20" patternUnits="userSpaceOnUse">
+          <circle cx="10" cy="10" r="0.5" fill="#252525"/>
+        </pattern>
+        <marker id="arr" markerWidth="6" markerHeight="4" refX="6" refY="2" orient="auto">
+          <polygon points="0 0,6 2,0 4" fill="#ff9800"/>
+        </marker>
+      </defs>
+
+      <!-- background + grid -->
+      <rect width="700" height="400" fill="#101010"/>
+      <rect width="700" height="400" fill="url(#grid)"/>
+      <!-- PCB edge -->
+      <rect x="16" y="16" width="668" height="368" fill="none" stroke="#1e3a1e" stroke-width="1.5" stroke-dasharray="8,4"/>
+      <text x="20" y="28" fill="#1e4a1e" font-size="9" font-family="Consolas">PCB EDGE — PCBA-REV2</text>
+
+      <!-- ═══ J1 Connector ═══ -->
+      <rect x="36" y="150" width="68" height="80" fill="#111a11" stroke="#4caf50" stroke-width="1.5" rx="1"/>
+      <text x="70" y="144" fill="#dcdcaa" font-size="9" font-family="Consolas" text-anchor="middle">J1</text>
+      <text x="70" y="188" fill="#d4d4d4" font-size="9"  font-family="Consolas" text-anchor="middle">PWR</text>
+      <text x="70" y="202" fill="#d4d4d4" font-size="8"  font-family="Consolas" text-anchor="middle">CONN</text>
+      <!-- Pin +3V3 -->
+      <line x1="22" y1="172" x2="36" y2="172" stroke="#ff9800" stroke-width="2"/>
+      <text x="18" y="175" fill="#ff9800" font-size="8" font-family="Consolas" text-anchor="end">+3V3</text>
+      <!-- Pin GND -->
+      <line x1="22" y1="210" x2="36" y2="210" stroke="#666" stroke-width="2"/>
+      <text x="18" y="213" fill="#666" font-size="8" font-family="Consolas" text-anchor="end">GND</text>
+
+      <!-- ═══ Wire J1 → TP1 ═══ -->
+      <line x1="104" y1="172" x2="132" y2="172" stroke="#29a8e2" stroke-width="2"/>
+
+      <!-- TP1 -->
+      <circle cx="145" cy="172" r="8" fill="none" stroke="#f44336" stroke-width="1.5"/>
+      <circle cx="145" cy="172" r="2.5" fill="#f44336"/>
+      <text x="145" y="154" fill="#f44336" font-size="9" font-family="Consolas" text-anchor="middle">TP1</text>
+
+      <!-- Wire TP1 → C1 node -->
+      <line x1="153" y1="172" x2="220" y2="172" stroke="#29a8e2" stroke-width="2"/>
+      <text x="186" y="165" fill="#555" font-size="8" font-family="Consolas" text-anchor="middle">R_trace₁ 0.5Ω</text>
+
+      <!-- ═══ C1 — Bulk cap ═══ -->
+      <!-- vertical cap symbol at x=220, connects wire at y=172 down to GND -->
+      <line x1="220" y1="172" x2="220" y2="192" stroke="#4caf50" stroke-width="1.5"/>
+      <line x1="205" y1="192" x2="235" y2="192" stroke="#4caf50" stroke-width="2.5"/>
+      <line x1="205" y1="200" x2="235" y2="200" stroke="#4caf50" stroke-width="2.5"/>
+      <line x1="220" y1="200" x2="220" y2="228" stroke="#4caf50" stroke-width="1.5"/>
+      <!-- GND lines -->
+      <line x1="210" y1="228" x2="230" y2="228" stroke="#666" stroke-width="1.5"/>
+      <line x1="214" y1="234" x2="226" y2="234" stroke="#666" stroke-width="1.5"/>
+      <line x1="218" y1="240" x2="222" y2="240" stroke="#666" stroke-width="1.5"/>
+      <!-- Junction dot -->
+      <circle cx="220" cy="172" r="3.5" fill="#29a8e2"/>
+      <!-- Labels -->
+      <text x="240" y="196" fill="#dcdcaa" font-size="9" font-family="Consolas">C1</text>
+      <text x="240" y="207" fill="#888" font-size="8"  font-family="Consolas">100µF</text>
+      <text x="240" y="217" fill="#4caf50" font-size="7.5" font-family="Consolas">ESR 0.1Ω ✓</text>
+
+      <!-- ═══ Wire C1 → TP2 ═══ -->
+      <line x1="220" y1="172" x2="312" y2="172" stroke="#29a8e2" stroke-width="2"/>
+
+      <!-- TP2 -->
+      <circle cx="325" cy="172" r="8" fill="none" stroke="#f44336" stroke-width="1.5"/>
+      <circle cx="325" cy="172" r="2.5" fill="#f44336"/>
+      <text x="325" y="154" fill="#f44336" font-size="9" font-family="Consolas" text-anchor="middle">TP2</text>
+
+      <!-- Wire TP2 → C2 node -->
+      <line x1="333" y1="172" x2="410" y2="172" stroke="#29a8e2" stroke-width="2"/>
+      <text x="371" y="165" fill="#555" font-size="8" font-family="Consolas" text-anchor="middle">R_trace₂ 0.3Ω</text>
+
+      <!-- ═══ C2 — Bypass cap (FAULTY) ═══ -->
+      <line x1="410" y1="172" x2="410" y2="192" stroke="#f44336" stroke-width="1.5"/>
+      <line x1="395" y1="192" x2="425" y2="192" stroke="#f44336" stroke-width="2.5"/>
+      <line x1="395" y1="200" x2="425" y2="200" stroke="#f44336" stroke-width="2.5"/>
+      <line x1="410" y1="200" x2="410" y2="228" stroke="#f44336" stroke-width="1.5"/>
+      <!-- GND lines -->
+      <line x1="400" y1="228" x2="420" y2="228" stroke="#666" stroke-width="1.5"/>
+      <line x1="404" y1="234" x2="416" y2="234" stroke="#666" stroke-width="1.5"/>
+      <line x1="408" y1="240" x2="412" y2="240" stroke="#666" stroke-width="1.5"/>
+      <!-- Junction dot -->
+      <circle cx="410" cy="172" r="3.5" fill="#29a8e2"/>
+      <!-- Labels -->
+      <text x="430" y="192" fill="#dcdcaa" font-size="9"  font-family="Consolas">C2</text>
+      <text x="430" y="203" fill="#888" font-size="8"   font-family="Consolas">100nF</text>
+      <text x="430" y="213" fill="#f44336" font-size="7.5" font-family="Consolas">ESR 2.0Ω !</text>
+      <text x="430" y="223" fill="#f44336" font-size="7.5" font-family="Consolas">SUSPECT</text>
+      <!-- Fault flash marker -->
+      <text x="404" y="162" fill="#f44336" font-size="13" font-family="Consolas">⚡</text>
+
+      <!-- ═══ Wire C2 → TP3 ═══ -->
+      <line x1="410" y1="172" x2="495" y2="172" stroke="#29a8e2" stroke-width="2"/>
+
+      <!-- TP3 -->
+      <circle cx="508" cy="172" r="8" fill="none" stroke="#f44336" stroke-width="1.5"/>
+      <circle cx="508" cy="172" r="2.5" fill="#f44336"/>
+      <text x="508" y="154" fill="#f44336" font-size="9" font-family="Consolas" text-anchor="middle">TP3</text>
+
+      <!-- Wire TP3 → U1 -->
+      <line x1="516" y1="172" x2="548" y2="172" stroke="#29a8e2" stroke-width="2"/>
+
+      <!-- ═══ U1 — MCU ═══ -->
+      <rect x="548" y="126" width="118" height="130" fill="#111122" stroke="#569cd6" stroke-width="1.5" rx="1"/>
+      <text x="607" y="119" fill="#dcdcaa" font-size="9" font-family="Consolas" text-anchor="middle">U1</text>
+      <text x="607" y="188" fill="#9cdcfe" font-size="9"  font-family="Consolas" text-anchor="middle">MCU</text>
+      <text x="607" y="201" fill="#9cdcfe" font-size="8"  font-family="Consolas" text-anchor="middle">STM32 / PIC32</text>
+      <!-- VCC pin label -->
+      <text x="546" y="168" fill="#ff9800" font-size="7.5" font-family="Consolas" text-anchor="end">VCC</text>
+      <!-- GND pin -->
+      <line x1="548" y1="215" x2="534" y2="215" stroke="#666" stroke-width="1.5"/>
+      <line x1="534" y1="215" x2="534" y2="230" stroke="#666" stroke-width="1.5"/>
+      <line x1="524" y1="230" x2="544" y2="230" stroke="#666" stroke-width="1.5"/>
+      <line x1="528" y1="236" x2="540" y2="236" stroke="#666" stroke-width="1.5"/>
+      <line x1="532" y1="242" x2="536" y2="242" stroke="#666" stroke-width="1.5"/>
+      <!-- Reset indicator -->
+      <text x="607" y="222" fill="#f44747" font-size="8" font-family="Consolas" text-anchor="middle">↻ RESETTING</text>
+      <!-- Load current arrow -->
+      <line x1="607" y1="142" x2="607" y2="166" stroke="#ff9800" stroke-width="1.2"
+            stroke-dasharray="3,2" marker-end="url(#arr)"/>
+      <text x="637" y="152" fill="#ff9800" font-size="8" font-family="Consolas">I_load</text>
+      <text x="637" y="163" fill="#ff9800" font-size="8" font-family="Consolas">150mA pk</text>
+
+      <!-- TP4 GND ref -->
+      <circle cx="325" cy="310" r="8" fill="none" stroke="#666" stroke-width="1.5"/>
+      <circle cx="325" cy="310" r="2.5" fill="#555"/>
+      <text x="325" y="330" fill="#666" font-size="9" font-family="Consolas" text-anchor="middle">TP4</text>
+      <text x="325" y="342" fill="#444" font-size="8" font-family="Consolas" text-anchor="middle">GND REF</text>
+      <line x1="325" y1="318" x2="325" y2="305" stroke="#555" stroke-width="1"/>
+      <line x1="315" y1="305" x2="335" y2="305" stroke="#555" stroke-width="1.5"/>
+
+      <!-- Net label -->
+      <text x="275" y="163" fill="#ff9800" font-size="9" font-family="Consolas">+3V3</text>
+
+      <!-- Bottom instruction strip -->
+      <rect x="16" y="360" width="668" height="22" fill="#161616" rx="2"/>
+      <text x="350" y="375" fill="#444" font-size="8.5" font-family="Consolas" text-anchor="middle">
+        SELECT INSTRUMENT → CLICK TEST POINT (TP1–TP4) · Schematic style: Altium Designer / OrCAD / Eagle
+      </text>
+
+      <!-- Invisible hit targets — added by JS -->
+    </svg>
+  </div>
+
+  <!-- ── Right panel ── -->
+  <div id="right-panel">
+
+    <!-- Fault report -->
+    <div class="symptom">
+      <div class="lbl">FAULT REPORT</div>
+      <p><strong style="color:var(--red)">Symptom:</strong> MCU (U1) resets intermittently during
+         normal operation. The 3.3V rail reads nominal at the power input connector (J1),
+         but U1 triggers brownout reset. No visible physical damage.</p>
+      <p class="meta">Reported by: Test Engineer &nbsp;|&nbsp; Board: PCBA-REV2 &nbsp;|&nbsp; Qty: 3 units</p>
+    </div>
+
+    <!-- Instrument selector -->
+    <div class="section">
+      <span class="slbl">Select Instrument</span>
+      <div class="tools">
+        <button class="tbtn" id="btn-mm" onclick="pickTool('mm')">
+          ⊡ Multimeter<sub>DC Voltage / Continuity</sub>
+        </button>
+        <button class="tbtn" id="btn-sc" onclick="pickTool('sc')">
+          ∿ Oscilloscope<sub>Waveform / Ripple</sub>
+        </button>
+      </div>
+    </div>
+
+    <!-- Hint -->
+    <div id="hint">Select a tool above, then click a <span>test point</span> on the schematic.</div>
+
+    <!-- Measurement display -->
+    <div id="meas">
+      <div id="meas-ph">
+        <div class="icon">⊡</div>
+        No measurement active
+      </div>
+
+      <!-- Multimeter readings -->
+      <div class="mmr" id="mm-tp1">
+        <div class="tp-lbl">MULTIMETER — TP1 (Power Input)</div>
+        <div class="val" style="color:var(--green)">3.30</div>
+        <div class="unit">V DC</div>
+        <div class="stat" style="color:var(--green)">✓ Nominal — source is clean</div>
+      </div>
+      <div class="mmr" id="mm-tp2">
+        <div class="tp-lbl">MULTIMETER — TP2 (Mid-rail)</div>
+        <div class="val" style="color:var(--yellow)">3.28</div>
+        <div class="unit">V DC</div>
+        <div class="stat" style="color:var(--yellow)">~ 20mV drop — minor trace loss</div>
+      </div>
+      <div class="mmr" id="mm-tp3">
+        <div class="tp-lbl">MULTIMETER — TP3 (MCU VCC Pin)</div>
+        <div class="val" style="color:var(--red)">3.18</div>
+        <div class="unit">V DC</div>
+        <div class="stat" style="color:var(--red)">⚠ 120mV below input — probe with scope!</div>
+      </div>
+      <div class="mmr" id="mm-tp4">
+        <div class="tp-lbl">MULTIMETER — TP4 (GND Reference)</div>
+        <div class="val" style="color:var(--muted)">0.00</div>
+        <div class="unit">V DC</div>
+        <div class="stat" style="color:var(--green)">✓ Ground confirmed</div>
+      </div>
+
+      <!-- Scope displays -->
+      <div class="scd" id="sc-tp1">
+        <img src="waveforms/scope_tp1_clean.png" alt="TP1 scope">
+        <div class="cap"><span style="color:var(--green)">TP1: Clean 3.3V — no fault at source ✓</span></div>
+      </div>
+      <div class="scd" id="sc-tp2">
+        <img src="waveforms/scope_tp1_clean.png" alt="TP2 scope">
+        <div class="cap"><span style="color:var(--yellow)">TP2: Minor ripple — no critical sags, fault is downstream</span></div>
+      </div>
+      <div class="scd" id="sc-tp3">
+        <img id="sc-tp3-img" src="waveforms/scope_tp3_noisy.png" alt="TP3 scope">
+        <div class="cap">
+          <span>Periodic sags crossing brownout threshold!</span>
+          <button class="zoom-btn" id="zoom-btn" onclick="toggleZoom()">ZOOM SAG</button>
+        </div>
+      </div>
+      <div class="scd" id="sc-tp4">
+        <div style="padding:24px;text-align:center;color:var(--muted);font-size:11px;">
+          GND reference — 0V flat line as expected
+        </div>
+      </div>
+    </div>
+
+    <!-- Diagnosis steps -->
+    <div id="diag">
+      <span class="slbl">Diagnostic Steps</span>
+
+      <div class="step locked" id="step1">
+        <div class="step-hdr"><div class="snum">1</div><div class="step-ttl">Verify Power Input at TP1</div></div>
+        <div class="step-body">
+          Multimeter reads <code>3.30V DC</code> at TP1. Source is nominal — fault is downstream.
+          <div class="eq">V_input = 3.30V &nbsp;✓ &nbsp;(Spec: 3.3V ± 5% → 3.135V – 3.465V)</div>
+        </div>
+      </div>
+
+      <div class="step locked" id="step2">
+        <div class="step-hdr"><div class="snum">2</div><div class="step-ttl">Measure MCU VCC with Multimeter (TP3)</div></div>
+        <div class="step-body">
+          Multimeter reads <code>3.18V DC</code> at TP3 — 120mV below input. DC alone
+          doesn't reveal the resets, but confirms resistive loss on the net.
+          <div class="eq">ΔV = 3.30 − 3.18 = 0.12V &nbsp;|&nbsp; R_eff = ΔV / I = 0.12 / 0.15A = 0.8Ω</div>
+          Scope needed — multimeter averages out fast transients.
+        </div>
+      </div>
+
+      <div class="step locked" id="step3">
+        <div class="step-hdr"><div class="snum">3</div><div class="step-ttl">Probe TP3 with Oscilloscope — Find Transients</div></div>
+        <div class="step-body">
+          <span class="bad">Scope reveals periodic sags crossing the 2.97V brownout threshold</span>
+          at ~3ms intervals, correlating with MCU active cycles drawing peak current.
+          <div class="eq">V_sag = 3.3 − I × (R_trace + ESR_C2) = 3.3 − 0.15 × (0.8 + 2.0) = 2.88V</div>
+          C2 (100nF) has high ESR (2.0Ω). It cannot supply transient charge fast enough
+          during current spikes — the rail collapses to 2.88V, triggering brownout reset.
+        </div>
+      </div>
+
+      <div class="step locked final" id="step4">
+        <div class="step-hdr"><div class="snum">★</div><div class="step-ttl">Root Cause & Fix</div></div>
+        <div class="step-body">
+          <span class="bad">ROOT CAUSE:</span> Bypass capacitor C2 has degraded ESR
+          (2.0Ω vs. spec &lt;0.1Ω for MLCC). High ESR prevents C2 from sourcing
+          transient current during MCU load steps, causing brownout reset.
+          <br><br>
+          <span class="fix">FIX:</span>
+          <ul>
+            <li>Replace C2 with low-ESR MLCC 100nF (X5R or X7R dielectric)</li>
+            <li>Add 10µF MLCC bulk cap at U1 VCC pin</li>
+            <li>Audit +3V3 trace width — 0.8Ω suggests under-spec or damaged trace</li>
+          </ul>
+          <div class="cad">
+            <strong style="color:var(--teal)">CAD Note (Altium Designer / OrCAD / Eagle):</strong><br>
+            Run DRC — verify C2 footprint is MLCC, not electrolytic.<br>
+            Use PCB trace width calculator: IPC-2221 requires ≥ 0.25mm (1oz Cu) for 150mA.<br>
+            In Altium: <code>Tools → PCB Inspector</code> → inspect +3V3 net trace impedance.
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div><!-- /right-panel -->
+</div><!-- /wrap -->
+
+<script>
+var tool = null;
+var seen = {};
+var zoomed = false;
+
+function pickTool(t) {
+  tool = t;
+  document.getElementById('btn-mm').className = 'tbtn' + (t === 'mm' ? ' mm-on' : '');
+  document.getElementById('btn-sc').className = 'tbtn' + (t === 'sc' ? ' sc-on' : '');
+  document.getElementById('hint').innerHTML =
+    t === 'mm'
+      ? 'Multimeter ready. Click a <span>test point</span> to read DC voltage.'
+      : 'Oscilloscope ready. Click a <span>test point</span> to view waveform.';
+}
+
+function probe(tp) {
+  if (!tool) {
+    document.getElementById('hint').innerHTML =
+      '<span style="color:var(--red)">Select an instrument first!</span>';
+    return;
+  }
+  var key = tp + '-' + tool;
+  seen[key] = true;
+
+  // hide everything
+  document.querySelectorAll('.mmr, .scd').forEach(function(el){ el.style.display = 'none'; });
+  document.getElementById('meas-ph').style.display = 'none';
+
+  var id = (tool === 'mm' ? 'mm-' : 'sc-') + tp.toLowerCase();
+  var el = document.getElementById(id);
+  if (el) el.style.display = 'block';
+
+  advance();
+}
+
+function advance() {
+  var s = seen;
+  if (s['tp1-mm'] || s['tp1-sc'])                       open('step1');
+  if (s['tp3-mm'])                                       open('step2');
+  if (s['tp3-sc'])                                       open('step3');
+  if (s['tp1-mm'] && s['tp3-mm'] && s['tp3-sc'])         openFinal('step4');
+}
+
+function open(id) {
+  var el = document.getElementById(id);
+  if (el) { el.classList.remove('locked'); el.classList.add('open'); }
+}
+function openFinal(id) {
+  var el = document.getElementById(id);
+  if (el) { el.classList.remove('locked'); el.classList.add('open', 'final'); }
+}
+
+function toggleZoom() {
+  zoomed = !zoomed;
+  document.getElementById('sc-tp3-img').src =
+    zoomed ? 'waveforms/scope_tp3_sag_zoom.png' : 'waveforms/scope_tp3_noisy.png';
+  document.getElementById('zoom-btn').textContent = zoomed ? 'FULL VIEW' : 'ZOOM SAG';
+}
+
+// Attach clickable hit circles to each test point
+document.addEventListener('DOMContentLoaded', function() {
+  var svg = document.getElementById('schematic-svg');
+  var tps = [
+    { id: 'TP1', cx: 145, cy: 172 },
+    { id: 'TP2', cx: 325, cy: 172 },
+    { id: 'TP3', cx: 508, cy: 172 },
+    { id: 'TP4', cx: 325, cy: 310 }
+  ];
+  tps.forEach(function(tp) {
+    var c = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+    c.setAttribute('cx', tp.cx);
+    c.setAttribute('cy', tp.cy);
+    c.setAttribute('r', 18);
+    c.setAttribute('fill', 'transparent');
+    c.style.cursor = 'crosshair';
+    c.addEventListener('click', function() { probe(tp.id); });
+    c.addEventListener('mouseenter', function() { c.setAttribute('fill', 'rgba(244,67,54,0.12)'); });
+    c.addEventListener('mouseleave', function() { c.setAttribute('fill', 'transparent'); });
+    svg.appendChild(c);
+  });
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Waveform Visualization — EET Reference</title>
+
+  <!-- ─────────────────────────────────────────────
+       Inline CSS — modify colors/sizes here easily
+  ───────────────────────────────────────────── -->
+  <style>
+    /* ── page reset ── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: "Segoe UI", Arial, sans-serif;
+      background: #f0f2f5;
+      color: #222;
+    }
+
+    /* ── header bar — matches EET file style ── */
+    header {
+      background: #004d40;
+      color: #fff;
+      padding: 14px 28px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    header h1 { font-size: 1rem; letter-spacing: 0.02em; }
+    .badge {
+      background: #80cbc4;
+      color: #004d40;
+      font-size: 0.72rem;
+      font-weight: bold;
+      padding: 3px 10px;
+      border-radius: 12px;
+    }
+
+    /* ── sub-bar ── */
+    .sub {
+      background: #e0f2f1;
+      border-bottom: 2px solid #004d40;
+      padding: 7px 28px;
+      font-size: 0.8rem;
+      color: #444;
+      display: flex;
+      gap: 24px;
+    }
+    .sub span { font-weight: bold; color: #004d40; }
+
+    /* ── main content area ── */
+    .page { max-width: 900px; margin: 24px auto; padding: 0 16px 60px; }
+
+    /* ── waveform card ── */
+    .wave-card {
+      background: #fff;
+      border: 1px solid #b2dfdb;
+      border-radius: 5px;
+      margin-bottom: 28px;
+      overflow: hidden;
+    }
+
+    /* card title bar */
+    .wave-card .card-head {
+      background: #004d40;
+      color: #fff;
+      padding: 9px 18px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .card-head .title { font-weight: bold; font-size: 0.9rem; }
+    .card-head .tag {
+      font-size: 0.7rem;
+      background: rgba(255,255,255,0.2);
+      padding: 2px 9px;
+      border-radius: 3px;
+    }
+
+    /* canvas wrapper — dark scope-style background */
+    .canvas-wrap {
+      background: #0d1117;
+      padding: 10px 10px 0;
+      position: relative;
+    }
+
+    /* the canvas itself */
+    canvas {
+      display: block;
+      width: 100%;
+      /* height is set by the JS drawing — canvas attribute controls resolution */
+    }
+
+    /* measurement labels below canvas */
+    .measurements {
+      display: flex;
+      gap: 0;
+      background: #0d1117;
+      padding: 6px 10px 10px;
+      flex-wrap: wrap;
+    }
+    .meas-item {
+      flex: 1;
+      min-width: 120px;
+      text-align: center;
+      font-size: 0.75rem;
+      color: #80cbc4;
+      border-right: 1px solid #1e3a3a;
+      padding: 2px 8px;
+    }
+    .meas-item:last-child { border-right: none; }
+    .meas-item .meas-label { color: #546e6a; font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.05em; }
+    .meas-item .meas-val   { font-weight: bold; font-size: 0.85rem; margin-top: 2px; }
+
+    /* description area below the scope display */
+    .card-info { padding: 14px 18px 16px; }
+    .card-info h4 { font-size: 0.82rem; color: #004d40; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.05em; }
+    .card-info p  { font-size: 0.86rem; line-height: 1.7; color: #444; margin-bottom: 6px; }
+    .card-info ul { font-size: 0.86rem; line-height: 1.8; color: #444; padding-left: 18px; }
+
+    /* what to look for box */
+    .look-for {
+      background: #e8f5e9;
+      border-left: 3px solid #388e3c;
+      padding: 9px 13px;
+      font-size: 0.82rem;
+      color: #333;
+      line-height: 1.7;
+      margin-top: 8px;
+    }
+    .look-for strong { color: #2e7d32; }
+
+    /* scope scale annotations */
+    .scope-meta {
+      position: absolute;
+      top: 14px;
+      right: 14px;
+      font-size: 0.7rem;
+      color: #80cbc4;
+      line-height: 1.8;
+      text-align: right;
+    }
+
+    footer {
+      background: #004d40;
+      color: #80cbc4;
+      text-align: center;
+      padding: 10px;
+      font-size: 0.75rem;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>Waveform Visualization — Oscilloscope Reference</h1>
+  <span class="badge">EET Interview Prep</span>
+</header>
+<div class="sub">
+  <div>Signals: <span>Sine · Distorted Sine · Square</span></div>
+  <div>Axes: <span>Amplitude (V) · Time (ms)</span></div>
+  
+</div>
+
+<div class="page">
+
+  <!-- ══════════════════════════════════════════════
+       WAVEFORM 1 — Clean Sine Wave
+  ══════════════════════════════════════════════ -->
+  <div class="wave-card">
+    <div class="card-head">
+      <span class="title">Waveform 1 — Clean Sine Wave (AC Signal)</span>
+      <span class="tag">2 V/div · 0.5 ms/div</span>
+    </div>
+    <div class="canvas-wrap" style="position:relative;">
+      <!-- canvas: 860px wide × 260px tall at 2x resolution -->
+      <canvas id="canvas-sine" width="860" height="260"></canvas>
+      <div class="scope-meta">
+        CH1 — 2 V/div<br>
+        0.5 ms/div<br>
+        DC coupling<br>
+        f = 1 kHz
+      </div>
+    </div>
+    <div class="measurements">
+      <div class="meas-item">
+        <div class="meas-label">Frequency</div>
+        <div class="meas-val">1.000 kHz</div>
+      </div>
+      <div class="meas-item">
+        <div class="meas-label">Period</div>
+        <div class="meas-val">1.000 ms</div>
+      </div>
+      <div class="meas-item">
+        <div class="meas-label">Vpp (peak-to-peak)</div>
+        <div class="meas-val">6.00 V</div>
+      </div>
+      <div class="meas-item">
+        <div class="meas-label">Vpeak (0 → peak)</div>
+        <div class="meas-val">3.00 V</div>
+      </div>
+      <div class="meas-item">
+        <div class="meas-label">Vrms (calculated)</div>
+        <div class="meas-val">2.12 V</div>
+      </div>
+    </div>
+    <div class="card-info">
+      <h4>What this represents</h4>
+      <p>A clean sine wave is the ideal output of an AC signal source — a function generator, an audio amplifier output, or the secondary side of a transformer. On a real oscilloscope this waveform should appear smooth with no jagged edges, no noise riding on top, and a consistent amplitude cycle to cycle.</p>
+      <ul>
+        <li><strong>Period calculation:</strong> One full cycle takes 2 divisions × 0.5 ms/div = <strong>1 ms</strong></li>
+        <li><strong>Frequency:</strong> f = 1/T = 1/0.001 = <strong>1,000 Hz = 1 kHz</strong></li>
+        <li><strong>Amplitude:</strong> 3 divisions peak × 2 V/div = <strong>3 V</strong> (6 V peak-to-peak)</li>
+        <li><strong>Vrms:</strong> Vpeak / √2 = 3 / 1.414 ≈ <strong>2.12 V</strong></li>
+      </ul>
+      <div class="look-for">
+        </p>
+      <ul>
+        <li><strong>How to isolate the noise:</strong> Switch the scope to <strong>AC coupling</strong> — this blocks the DC/low-frequency component and lets you zoom in on the noise layer alone.</li>
+        <li><strong>Likely causes:</strong> Faulty bypass cap (high ESR), switching regulator interference, crosstalk from adjacent PCB trace.</li>
+        <li><strong>Next step:</strong> Reduce V/div to 100–200 mV range in AC coupling mode to measure noise amplitude precisely, then cross-reference with the component's datasheet noise tolerance spec.</li>
+      </ul>
+      <div class="look-for">
+        </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════
+       WAVEFORM 3 — Square Wave (Digital Signal)
+  ══════════════════════════════════════════════ -->
+  <div class="wave-card">
+    <div class="card-head">
+      <span class="title">Waveform 3 — Square Wave (Digital Logic Signal)</span>
+      <span class="tag">1 V/div · 0.5 ms/div</span>
+    </div>
+    <div class="canvas-wrap" style="position:relative;">
+      <canvas id="canvas-square" width="860" height="260"></canvas>
+      <div class="scope-meta">
+        CH1 — 1 V/div<br>
+        0.5 ms/div<br>
+        DC coupling<br>
+        3.3V CMOS logic
+      </div>
+    </div>
+    <div class="measurements">
+      <div class="meas-item">
+        <div class="meas-label">Frequency</div>
+        <div class="meas-val">1.000 kHz</div>
+      </div>
+      <div class="meas-item">
+        <div class="meas-label">Period</div>
+        <div class="meas-val">1.000 ms</div>
+      </div>
+      <div class="meas-item">
+        <div class="meas-label">High level (VOH)</div>
+        <div class="meas-val">3.30 V</div>
+      </div>
+      <div class="meas-item">
+        <div class="meas-label">Low level (VOL)</div>
+        <div class="meas-val">0.00 V</div>
+      </div>
+      <div class="meas-item">
+        <div class="meas-label">Duty cycle</div>
+        <div class="meas-val">50%</div>
+      </div>
+    </div>
+    <div class="card-info">
+      <h4>What this represents</h4>
+      <p>A 3.3V CMOS logic signal — the kind you would see on a clock line, GPIO toggle, SPI chip select, or PWM output. The waveform transitions sharply between LOW (0V) and HIGH (3.3V). On an ideal scope trace the transitions appear nearly vertical; in practice they have a finite <strong>rise time</strong> and <strong>fall time</strong> (the time to transition from 10% to 90% of the voltage swing).</p>
+      <ul>
+        <li><strong>VOH (output high):</strong> 3.3V — must exceed the receiving device's minimum VIH to register as logic "1"</li>
+        <li><strong>VOL (output low):</strong> 0V — must be below the receiving device's maximum VIL to register as logic "0"</li>
+        <li><strong>Duty cycle:</strong> High time / Period × 100% = 0.5 ms / 1.0 ms × 100% = <strong>50%</strong></li>
+        <li><strong>Rise time measurement:</strong> Zoom to 50 ns/div and measure the transition from 10% (0.33V) to 90% (2.97V) of the voltage swing</li>
+      </ul>
+      <div class="look-for">
+        <strong>Common defects visible on a square wave:</strong>
+        <br>• <em>Ringing on edges</em> — trace inductance + capacitive load, check impedance matching
+        <br>• <em>Slow rise time</em> — excessive capacitive loading or weak driver, compare to datasheet max
+        <br>• <em>Reduced VOH</em> — supply voltage sag, check power rail (connects back to Waveform 1/2 analysis)
+        <br>• <em>Wrong duty cycle</em> — firmware configuration error or missing pull-up resistor
+      </div>
+    </div>
+  </div>
+
+</div><!-- end .page -->
+
+<footer>EET Waveform Visualization · Oscilloscope Reference · Amplitude (V) · Time (ms)</footer>
+
+<!-- ─────────────────────────────────────────────────────────────────
+     JavaScript — draws all three waveforms onto their canvas elements
+     Each function is self-contained and easy to modify independently.
+───────────────────────────────────────────────────────────────────── -->
+<script>
+
+  // ── shared drawing constants ──────────────────────────────────────
+  var CANVAS_W   = 860;      // canvas width in pixels
+  var CANVAS_H   = 260;      // canvas height in pixels
+
+  var GRID_COLOR = '#1a3a3a'; // color of the scope grid lines
+  var BG_COLOR   = '#0d1117'; // dark oscilloscope background
+
+  var PAD_LEFT   = 48;        // space for Y-axis labels
+  var PAD_RIGHT  = 12;
+  var PAD_TOP    = 18;
+  var PAD_BOT    = 32;        // space for X-axis labels
+
+  // The drawable area inside the padding
+  var PLOT_W = CANVAS_W - PAD_LEFT - PAD_RIGHT;
+  var PLOT_H = CANVAS_H - PAD_TOP  - PAD_BOT;
+
+  var NUM_X_DIVS = 10; // number of horizontal (time) grid divisions
+  var NUM_Y_DIVS = 6;  // number of vertical (voltage) grid divisions
+
+  // ── helper: draw the oscilloscope grid ───────────────────────────
+  function drawGrid(ctx) {
+    ctx.fillStyle = BG_COLOR;
+    ctx.fillRect(0, 0, CANVAS_W, CANVAS_H);
+
+    ctx.strokeStyle = GRID_COLOR;
+    ctx.lineWidth = 1;
+
+    // vertical grid lines (time divisions)
+    for (var i = 0; i <= NUM_X_DIVS; i++) {
+      var x = PAD_LEFT + (i / NUM_X_DIVS) * PLOT_W;
+      ctx.beginPath();
+      ctx.moveTo(x, PAD_TOP);
+      ctx.lineTo(x, PAD_TOP + PLOT_H);
+      ctx.stroke();
+    }
+
+    // horizontal grid lines (voltage divisions)
+    for (var j = 0; j <= NUM_Y_DIVS; j++) {
+      var y = PAD_TOP + (j / NUM_Y_DIVS) * PLOT_H;
+      ctx.beginPath();
+      ctx.moveTo(PAD_LEFT, y);
+      ctx.lineTo(PAD_LEFT + PLOT_W, y);
+      ctx.stroke();
+    }
+
+    // center horizontal axis (slightly brighter)
+    ctx.strokeStyle = '#2e6b6b';
+    ctx.lineWidth = 1.5;
+    var midY = PAD_TOP + PLOT_H / 2;
+    ctx.beginPath();
+    ctx.moveTo(PAD_LEFT, midY);
+    ctx.lineTo(PAD_LEFT + PLOT_W, midY);
+    ctx.stroke();
+  }
+
+  // ── helper: draw X axis time labels ──────────────────────────────
+  // msPerDiv: the time represented by one horizontal division (in ms)
+  function drawXLabels(ctx, msPerDiv) {
+    ctx.fillStyle = '#546e6a';
+    ctx.font = '10px monospace';
+    ctx.textAlign = 'center';
+
+    for (var i = 0; i <= NUM_X_DIVS; i++) {
+      var x   = PAD_LEFT + (i / NUM_X_DIVS) * PLOT_W;
+      var t   = (i * msPerDiv).toFixed(1); // time label in ms
+      var y   = PAD_TOP + PLOT_H + 16;
+      ctx.fillText(t + ' ms', x, y);
+    }
+  }
+
+  // ── helper: draw Y axis voltage labels ───────────────────────────
+  // vPerDiv: the voltage represented by one vertical division
+  // vOffset: the voltage at the center horizontal line (default 0)
+  function drawYLabels(ctx, vPerDiv, vOffset) {
+    vOffset = vOffset || 0;
+    ctx.fillStyle = '#546e6a';
+    ctx.font = '10px monospace';
+    ctx.textAlign = 'right';
+
+    for (var j = 0; j <= NUM_Y_DIVS; j++) {
+      var y = PAD_TOP + (j / NUM_Y_DIVS) * PLOT_H;
+      // j=0 is top (most positive), j=NUM_Y_DIVS is bottom (most negative)
+      var v = vOffset + (NUM_Y_DIVS / 2 - j) * vPerDiv;
+      ctx.fillText(v.toFixed(1) + 'V', PAD_LEFT - 4, y + 4);
+    }
+  }
+
+  // ── helper: map voltage and time to canvas pixel coordinates ─────
+  // t: time in ms (0 to NUM_X_DIVS * msPerDiv)
+  // v: voltage
+  // vPerDiv: V per vertical division
+  // vOffset: center-line voltage
+  // msPerDiv: ms per horizontal division
+  function toPixel(t, v, msPerDiv, vPerDiv, vOffset) {
+    vOffset = vOffset || 0;
+    var totalTime = NUM_X_DIVS * msPerDiv;
+    var totalVolt = NUM_Y_DIVS * vPerDiv;
+    var px = PAD_LEFT + (t / totalTime) * PLOT_W;
+    var py = PAD_TOP  + PLOT_H / 2 - ((v - vOffset) / totalVolt) * PLOT_H;
+    return { x: px, y: py };
+  }
+
+  // ── WAVEFORM 1: Clean Sine Wave ───────────────────────────────────
+  // Settings: 2 V/div vertical, 0.5 ms/div horizontal, 1 kHz sine, 3V peak
+  function drawSine() {
+    var canvas = document.getElementById('canvas-sine');
+    var ctx    = canvas.getContext('2d');
+
+    var msPerDiv = 0.5;  // 0.5 milliseconds per division
+    var vPerDiv  = 2.0;  // 2 volts per division
+    var freq_kHz = 1.0;  // 1 kHz signal frequency
+    var amplitude= 3.0;  // 3V peak (= 6V peak-to-peak = 3 divisions peak)
+
+    drawGrid(ctx);
+    drawXLabels(ctx, msPerDiv);
+    drawYLabels(ctx, vPerDiv, 0);
+
+    // draw the sine curve
+    ctx.strokeStyle = '#00e5ff';  // bright cyan — typical scope channel 1 color
+    ctx.lineWidth   = 2;
+    ctx.beginPath();
+
+    var steps = 500; // number of sample points — more = smoother curve
+    var totalTime = NUM_X_DIVS * msPerDiv; // 5 ms total time window
+
+    for (var i = 0; i <= steps; i++) {
+      var t = (i / steps) * totalTime;                    // time in ms
+      var v = amplitude * Math.sin(2 * Math.PI * freq_kHz * t); // v = A·sin(2πft)
+      var pt = toPixel(t, v, msPerDiv, vPerDiv, 0);
+
+      if (i === 0) ctx.moveTo(pt.x, pt.y);
+      else         ctx.lineTo(pt.x, pt.y);
+    }
+    ctx.stroke();
+
+    // label the peak amplitude with a dashed guide line
+    var peakPt = toPixel(0.25, amplitude, msPerDiv, vPerDiv, 0); // peak at t=0.25ms
+    ctx.strokeStyle = 'rgba(255,235,59,0.35)';
+    ctx.lineWidth   = 1;
+    ctx.setLineDash([4, 4]);
+    ctx.beginPath();
+    ctx.moveTo(PAD_LEFT, peakPt.y);
+    ctx.lineTo(PAD_LEFT + PLOT_W, peakPt.y);
+    ctx.stroke();
+    ctx.setLineDash([]);
+
+    ctx.fillStyle = '#ffeb3b';
+    ctx.font = 'bold 10px monospace';
+    ctx.textAlign = 'left';
+    ctx.fillText('+3.0 V peak', PAD_LEFT + 4, peakPt.y - 4);
+
+    // label the negative peak
+    var troughPt = toPixel(0.75, -amplitude, msPerDiv, vPerDiv, 0);
+    ctx.strokeStyle = 'rgba(255,235,59,0.35)';
+    ctx.lineWidth = 1;
+    ctx.setLineDash([4, 4]);
+    ctx.beginPath();
+    ctx.moveTo(PAD_LEFT, troughPt.y);
+    ctx.lineTo(PAD_LEFT + PLOT_W, troughPt.y);
+    ctx.stroke();
+    ctx.setLineDash([]);
+
+    ctx.fillStyle = '#ffeb3b';
+    ctx.textAlign = 'left';
+    ctx.fillText('-3.0 V peak', PAD_LEFT + 4, troughPt.y + 12);
+  }
+
+  // ── WAVEFORM 2: Noisy / Distorted Sine Wave ───────────────────────
+  // Same frequency and amplitude as Waveform 1, plus random high-frequency noise
+  function drawNoisySine() {
+    var canvas = document.getElementById('canvas-noisy');
+    var ctx    = canvas.getContext('2d');
+
+    var msPerDiv  = 0.5;
+    var vPerDiv   = 2.0;
+    var freq_kHz  = 1.0;
+    var amplitude = 3.0;
+    var noiseAmpl = 0.2;  // noise amplitude in volts (200 mV peak — visible but not overwhelming)
+
+    // Use a seeded-style noise: pre-generate random offsets for reproducibility
+    // (Math.random() is fine here — we just want it to look consistently noisy)
+    var steps = 500;
+    var noiseArr = [];
+    for (var k = 0; k <= steps; k++) {
+      // sum of two noise terms: slow wobble + fast jitter
+      noiseArr.push(
+        noiseAmpl * (Math.random() * 2 - 1) +
+        (noiseAmpl * 0.5) * (Math.random() * 2 - 1)
+      );
+    }
+
+    drawGrid(ctx);
+    drawXLabels(ctx, msPerDiv);
+    drawYLabels(ctx, vPerDiv, 0);
+
+    // draw the noisy waveform
+    ctx.strokeStyle = '#ff7043';  // orange — indicates a problem
+    ctx.lineWidth   = 1.5;
+    ctx.beginPath();
+
+    var totalTime = NUM_X_DIVS * msPerDiv;
+    for (var i = 0; i <= steps; i++) {
+      var t  = (i / steps) * totalTime;
+      var v  = amplitude * Math.sin(2 * Math.PI * freq_kHz * t) + noiseArr[i];
+      var pt = toPixel(t, v, msPerDiv, vPerDiv, 0);
+
+      if (i === 0) ctx.moveTo(pt.x, pt.y);
+      else         ctx.lineTo(pt.x, pt.y);
+    }
+    ctx.stroke();
+
+    // overlay a faint clean reference sine so the distortion is visible
+    ctx.strokeStyle = 'rgba(0,229,255,0.2)'; // faint cyan ghost
+    ctx.lineWidth   = 1;
+    ctx.setLineDash([3, 3]);
+    ctx.beginPath();
+    for (var i = 0; i <= steps; i++) {
+      var t  = (i / steps) * totalTime;
+      var v  = amplitude * Math.sin(2 * Math.PI * freq_kHz * t); // clean — no noise
+      var pt = toPixel(t, v, msPerDiv, vPerDiv, 0);
+      if (i === 0) ctx.moveTo(pt.x, pt.y);
+      else         ctx.lineTo(pt.x, pt.y);
+    }
+    ctx.stroke();
+    ctx.setLineDash([]);
+
+    // label
+    ctx.fillStyle = '#ff7043';
+    ctx.font = 'bold 10px monospace';
+    ctx.textAlign = 'left';
+    ctx.fillText('Noisy signal (orange)', PAD_LEFT + 4, PAD_TOP + 14);
+    ctx.fillStyle = 'rgba(0,229,255,0.6)';
+    ctx.fillText('Clean reference (ghost)', PAD_LEFT + 4, PAD_TOP + 26);
+  }
+
+  // ── WAVEFORM 3: Square Wave (Digital Logic) ───────────────────────
+  // 3.3V CMOS logic signal: 1 kHz, 50% duty cycle
+  function drawSquareWave() {
+    var canvas = document.getElementById('canvas-square');
+    var ctx    = canvas.getContext('2d');
+
+    var msPerDiv  = 0.5;
+    var vPerDiv   = 1.0;   // 1 V/div to show the 3.3V swing clearly
+    var freq_kHz  = 1.0;
+    var vHigh     = 3.3;   // VOH: 3.3V logic high (3.3V CMOS)
+    var vLow      = 0.0;   // VOL: 0V logic low
+    var dutyCycle = 0.5;   // 50%
+    var vCenter   = (vHigh + vLow) / 2; // center the waveform on screen: 1.65V
+
+    drawGrid(ctx);
+    drawXLabels(ctx, msPerDiv);
+    drawYLabels(ctx, vPerDiv, vCenter); // centered at 1.65V
+
+    ctx.strokeStyle = '#69f0ae'; // green — standard logic signal color
+    ctx.lineWidth   = 2;
+    ctx.beginPath();
+
+    var totalTime = NUM_X_DIVS * msPerDiv; // 5 ms window = 5 complete cycles
+    var period    = 1.0 / freq_kHz;        // 1 ms period
+
+    // Build a staircase of (time, voltage) points for the square wave
+    // Each cycle: rise at t=nT, fall at t=nT + dutyCycle*T
+    var points = [];
+    var t = 0;
+    points.push({ t: 0, v: vLow }); // start low
+
+    while (t < totalTime + period) {
+      // rise edge
+      var tRise = Math.round(t * 10000) / 10000;
+      if (tRise < totalTime + 0.01) {
+        points.push({ t: tRise,                        v: vLow  });
+        points.push({ t: tRise,                        v: vHigh });
+        // fall edge
+        var tFall = tRise + dutyCycle * period;
+        points.push({ t: tFall,                        v: vHigh });
+        points.push({ t: tFall,                        v: vLow  });
+      }
+      t += period;
+    }
+
+    // Draw the staircase
+    for (var i = 0; i < points.length; i++) {
+      var pt = toPixel(points[i].t, points[i].v, msPerDiv, vPerDiv, vCenter);
+      if (i === 0) ctx.moveTo(pt.x, pt.y);
+      else         ctx.lineTo(pt.x, pt.y);
+    }
+    ctx.stroke();
+
+    // dashed guide lines for VOH and VOL
+    ctx.lineWidth   = 1;
+    ctx.setLineDash([4, 4]);
+
+    // VOH line
+    ctx.strokeStyle = 'rgba(255,235,59,0.4)';
+    var vohPt = toPixel(0, vHigh, msPerDiv, vPerDiv, vCenter);
+    ctx.beginPath();
+    ctx.moveTo(PAD_LEFT, vohPt.y);
+    ctx.lineTo(PAD_LEFT + PLOT_W, vohPt.y);
+    ctx.stroke();
+
+    // VOL line
+    var volPt = toPixel(0, vLow, msPerDiv, vPerDiv, vCenter);
+    ctx.beginPath();
+    ctx.moveTo(PAD_LEFT, volPt.y);
+    ctx.lineTo(PAD_LEFT + PLOT_W, volPt.y);
+    ctx.stroke();
+
+    ctx.setLineDash([]);
+
+    // labels
+    ctx.fillStyle = '#ffeb3b';
+    ctx.font = 'bold 10px monospace';
+    ctx.textAlign = 'left';
+    ctx.fillText('VOH = 3.3 V (logic HIGH)', PAD_LEFT + 4, vohPt.y - 4);
+    ctx.fillText('VOL = 0.0 V (logic LOW)',  PAD_LEFT + 4, volPt.y + 12);
+
+    // duty cycle annotation — bracket over first HIGH pulse
+    var t1 = toPixel(0.0,  vHigh + 0.3, msPerDiv, vPerDiv, vCenter);
+    var t2 = toPixel(0.5,  vHigh + 0.3, msPerDiv, vPerDiv, vCenter);
+    ctx.strokeStyle = '#80cbc4';
+    ctx.lineWidth   = 1;
+    ctx.beginPath();
+    ctx.moveTo(t1.x + 2, t1.y);
+    ctx.lineTo(t2.x - 2, t2.y);
+    ctx.stroke();
+
+    ctx.fillStyle = '#80cbc4';
+    ctx.font = '9px monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText('50% HIGH', (t1.x + t2.x) / 2, t1.y - 4);
+  }
+
+  // ── run all three drawings on page load ──────────────────────────
+  window.onload = function () {
+    drawSine();
+    drawNoisySine();
+    drawSquareWave();
+  };
+
+</script>
+</body>
+</html>

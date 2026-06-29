@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Oscilloscope & Multimeter Guide — EE I Reference</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: "Segoe UI", Arial, sans-serif; background: #f4f6f9; color: #222; }
+
+    header {
+      background: #1a237e; color: #fff;
+      padding: 14px 32px;
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    header h1 { font-size: 1.05rem; }
+    header .badge { background: #ffd600; color: #1a237e; font-size: 0.72rem; font-weight: bold; padding: 3px 10px; border-radius: 12px; }
+
+    .sub { background: #e8eaf6; border-bottom: 2px solid #1a237e; padding: 8px 32px; font-size: 0.82rem; color: #444; }
+
+    .page { max-width: 1000px; margin: 24px auto; padding: 0 16px 80px; }
+
+    /* tab nav */
+    .tabs { display: flex; gap: 4px; margin-bottom: 20px; flex-wrap: wrap; }
+    .tab-btn {
+      padding: 9px 20px; border: 1px solid #c5cae9; background: #fff;
+      border-radius: 4px 4px 0 0; cursor: pointer; font-size: 0.85rem;
+      font-family: inherit; color: #444; transition: background 0.15s;
+    }
+    .tab-btn.active { background: #1a237e; color: #fff; border-color: #1a237e; }
+    .tab-btn:hover:not(.active) { background: #e8eaf6; }
+
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+
+    /* cards */
+    .card { background: #fff; border: 1px solid #dde0ef; border-radius: 6px; margin-bottom: 18px; overflow: hidden; }
+    .card-head { background: #1a237e; color: #fff; padding: 9px 16px; font-size: 0.85rem; font-weight: bold; display: flex; justify-content: space-between; }
+    .card-head .tag { font-weight: normal; font-size: 0.72rem; opacity: 0.8; }
+    .card-body { padding: 16px 18px; }
+
+    table { width: 100%; border-collapse: collapse; font-size: 0.84rem; }
+    th { background: #e8eaf6; padding: 8px 10px; text-align: left; border: 1px solid #c5cae9; color: #1a237e; }
+    td { padding: 7px 10px; border: 1px solid #e0e0e0; vertical-align: top; line-height: 1.5; }
+    tr:nth-child(even) td { background: #f9f9ff; }
+
+    .step-list { list-style: none; counter-reset: steps; }
+    .step-list li {
+      counter-increment: steps;
+      padding: 10px 12px 10px 48px;
+      position: relative;
+      border-left: 2px solid #c5cae9;
+      margin-bottom: 10px;
+      font-size: 0.88rem;
+      line-height: 1.6;
+    }
+    .step-list li::before {
+      content: counter(steps);
+      position: absolute; left: 12px; top: 10px;
+      background: #1a237e; color: #fff;
+      width: 22px; height: 22px;
+      border-radius: 50%; display: flex; align-items: center; justify-content: center;
+      font-size: 0.75rem; font-weight: bold;
+    }
+    .step-list li strong { color: #1a237e; }
+
+    .warn-box { background: #fff3e0; border-left: 3px solid #e65100; padding: 10px 14px; font-size: 0.84rem; margin: 10px 0; line-height: 1.6; }
+    .tip-box  { background: #e8f5e9; border-left: 3px solid #2e7d32; padding: 10px 14px; font-size: 0.84rem; margin: 10px 0; line-height: 1.6; }
+    .code { background: #e8eaf6; border: 1px solid #c5cae9; border-radius: 3px; padding: 8px 12px; font-family: "Courier New", monospace; font-size: 0.83rem; margin: 8px 0; line-height: 1.7; }
+
+    /* waveform canvas */
+    #scope-canvas { border: 2px solid #333; border-radius: 4px; background: #0a0a0a; display: block; margin: 0 auto; }
+    .scope-controls { display: flex; gap: 12px; flex-wrap: wrap; margin: 12px 0; align-items: center; font-size: 0.85rem; }
+    .scope-controls label { color: #444; }
+    .scope-controls select, .scope-controls input { padding: 5px 8px; border: 1px solid #ccc; border-radius: 3px; font-family: inherit; }
+    .btn-draw { padding: 7px 20px; background: #1a237e; color: #fff; border: none; border-radius: 3px; cursor: pointer; font-family: inherit; font-size: 0.85rem; }
+    .btn-draw:hover { background: #283593; }
+
+    /* checklist */
+    .checklist { list-style: none; }
+    .checklist li { display: flex; align-items: flex-start; gap: 10px; padding: 7px 0; border-bottom: 1px solid #f0f0f0; font-size: 0.87rem; line-height: 1.5; }
+    .checklist input[type="checkbox"] { margin-top: 2px; accent-color: #1a237e; width: 16px; height: 16px; flex-shrink: 0; }
+
+    footer { background: #1a237e; color: #aaa; text-align: center; padding: 10px; font-size: 0.75rem; position: fixed; bottom: 0; width: 100%; }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>Oscilloscope & Multimeter — EE I Field Reference</h1>
+  <span class="badge">Test Equipment</span>
+</header>
+<div class="sub">
+  Goal: Mid-Morning Testing Block (35% of weekly workflow) · Waveform analysis · Probe technique · Signal identification
+</div>
+
+<div class="page">
+
+  <div class="tabs">
+    <button class="tab-btn active" onclick="switchTab('scope')">Oscilloscope Setup</button>
+    <button class="tab-btn" onclick="switchTab('waveform')">Waveform Simulator</button>
+    <button class="tab-btn" onclick="switchTab('anomalies')">Signal Anomalies</button>
+    <button class="tab-btn" onclick="switchTab('multimeter')">Multimeter Guide</button>
+    <button class="tab-btn" onclick="switchTab('checklist')">Daily Checklist</button>
+  </div>
+
+  <!-- ══ TAB 1: Scope Setup ══════════════════════════════════════════ -->
+  <div class="tab-panel active" id="tab-scope">
+
+    <div class="card">
+      <div class="card-head">Oscilloscope Controls — What Each Setting Does <span class="tag">Keysight / Tektronix / Rigol</span></div>
+      <div class="card-body">
+        <table>
+          <tr><th>Control</th><th>What It Sets</th><th>PCB Typical Starting Point</th></tr>
+          <tr><td><strong>Time/Div (horizontal scale)</strong></td><td>How many seconds fit across one horizontal division (10 divs total)</td><td>1 µs/div for 1 MHz clocks · 1 ms/div for power rail transients</td></tr>
+          <tr><td><strong>Volts/Div (vertical scale)</strong></td><td>Voltage range per vertical division (8 divs total)</td><td>500 mV/div for 3.3V signals · 50 mV/div for ripple/noise</td></tr>
+          <tr><td><strong>Trigger Level</strong></td><td>Voltage threshold that starts the trace capture</td><td>Set to 50% of signal amplitude for stable display</td></tr>
+          <tr><td><strong>Trigger Source</strong></td><td>Which channel the scope watches for the trigger edge</td><td>CH1 for single-channel · EXT for synchronized multi-signal</td></tr>
+          <tr><td><strong>Coupling (AC/DC)</strong></td><td>DC: shows full signal including DC offset · AC: blocks DC, shows only variation</td><td>DC for power rails · AC for ripple and noise measurement</td></tr>
+          <tr><td><strong>Probe Attenuation</strong></td><td>10x probe = 10x attenuation — must be set in scope menu to match</td><td>Always verify 10x selected in menu when using 10x probe</td></tr>
+          <tr><td><strong>Bandwidth Limit</strong></td><td>Low-pass filter on input — reduces high-freq noise</td><td>20 MHz limit for power rails · Full BW for digital signals</td></tr>
+          <tr><td><strong>Persistence</strong></td><td>Keeps old traces visible to reveal rare events</td><td>Use for intermittent glitch capture over time</td></tr>
+        </table>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head">Probe Setup Procedure — Do This Every Session</div>
+      <div class="card-body">
+        <ol class="step-list">
+          <li><strong>Attach the ground clip first</strong> — clip to the nearest ground point on the board. A long ground lead acts as an antenna and adds noise.</li>
+          <li><strong>Check probe compensation</strong> — touch the probe tip to the CAL terminal on the scope. The square wave should have flat tops and bottoms. Adjust the trim capacitor on the probe body if it looks rounded (over-compensated) or has sharp peaks (under-compensated).</li>
+          <li><strong>Set probe attenuation in the scope menu</strong> — match the setting (1x or 10x) to the physical switch on the probe body. Mismatch causes incorrect voltage readings.</li>
+          <li><strong>Select AC or DC coupling</strong> — use DC coupling to see the full signal including DC offset. Switch to AC coupling when measuring small ripple on top of a large DC rail.</li>
+          <li><strong>Set Volts/Div</strong> — start large, then decrease until the waveform fills 4–6 divisions vertically without clipping.</li>
+          <li><strong>Set Time/Div</strong> — start with 1–2 complete cycles visible. For a 1 MHz clock: 1 µs/div shows 10 cycles.</li>
+          <li><strong>Adjust trigger</strong> — set to rising edge, level at 50% of the signal swing for a stable, locked display.</li>
+        </ol>
+        <div class="warn-box">
+          ⚠ Never connect the scope ground clip to a non-ground test point on a live board. The ground clip is directly connected to the mains earth through the scope — connecting it to a signal net will short that net to earth and damage the board or scope.
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head">Common PCB Measurements — Settings & Expected Results</div>
+      <div class="card-body">
+        <table>
+          <tr><th>Signal Type</th><th>Time/Div</th><th>Volts/Div</th><th>Coupling</th><th>What to Look For</th></tr>
+          <tr><td>3.3V / 5V power rail (DC)</td><td>1 ms/div</td><td>500 mV/div</td><td>DC</td><td>Flat line at nominal voltage, ripple &lt; 50 mV p-p</td></tr>
+          <tr><td>Power rail ripple only</td><td>100 µs/div</td><td>20 mV/div</td><td>AC</td><td>Ripple waveform at switching frequency</td></tr>
+          <tr><td>1 MHz clock (SPI/I²C)</td><td>500 ns/div</td><td>1 V/div</td><td>DC</td><td>Clean square wave, 0–3.3V swing, no ringing</td></tr>
+          <tr><td>UART TX line (115200 baud)</td><td>5 µs/div</td><td>1 V/div</td><td>DC</td><td>Idle high, start bit low, 8 data bits, stop bit high</td></tr>
+          <tr><td>PWM output</td><td>50 µs/div</td><td>1 V/div</td><td>DC</td><td>Square wave at set duty cycle — measure with cursor</td></tr>
+          <tr><td>Transient / brownout event</td><td>50 µs/div</td><td>100 mV/div</td><td>AC</td><td>Voltage sag below regulation threshold</td></tr>
+        </table>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ══ TAB 2: Waveform Simulator ══════════════════════════════════ -->
+  <div class="tab-panel" id="tab-waveform">
+    <div class="card">
+      <div class="card-head">Interactive Waveform Simulator — Scope Display Practice</div>
+      <div class="card-body">
+        <div class="scope-controls">
+          <label>Signal Type:
+            <select id="sig-type">
+              <option value="sine">Sine wave</option>
+              <option value="square">Square wave (clock)</option>
+              <option value="pwm">PWM signal</option>
+              <option value="noisy">Noisy power rail</option>
+              <option value="sag">Rail sag / brownout</option>
+            </select>
+          </label>
+          <label>Frequency:
+            <select id="sig-freq">
+              <option value="1">1 kHz</option>
+              <option value="10">10 kHz</option>
+              <option value="100" selected>100 kHz</option>
+              <option value="1000">1 MHz</option>
+            </select>
+          </label>
+          <label>Amplitude:
+            <input type="number" id="sig-amp" value="3.3" step="0.1" min="0.5" max="12" style="width:70px"> V
+          </label>
+          <button class="btn-draw" onclick="drawWave()">Draw Waveform</button>
+        </div>
+        <canvas id="scope-canvas" width="780" height="280"></canvas>
+        <div id="scope-readout" style="font-size:0.82rem;color:#555;margin-top:8px;font-family:monospace;"></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-head">How to Read This Display</div>
+      <div class="card-body" style="font-size:0.87rem;line-height:1.8;">
+        <p><strong>Grid:</strong> 10 horizontal divisions (time) × 8 vertical divisions (voltage). Each division = one Time/Div or Volts/Div step.</p>
+        <p><strong>Period (T):</strong> Measure time for one complete cycle — from rising edge to next rising edge using the horizontal cursors.</p>
+        <p><strong>Frequency:</strong> f = 1/T. A waveform that takes 2 divisions at 1 µs/div has T = 2 µs → f = 500 kHz.</p>
+        <p><strong>Amplitude:</strong> Count vertical divisions peak-to-peak, multiply by Volts/Div. 4 divs at 1 V/div = 4 V p-p.</p>
+        <p><strong>Duty cycle (PWM):</strong> (High time / Period) × 100%. Use horizontal cursors to measure each state.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ TAB 3: Signal Anomalies ════════════════════════════════════ -->
+  <div class="tab-panel" id="tab-anomalies">
+    <div class="card">
+      <div class="card-head">Waveform Anomaly Recognition — What to Report in an NCR</div>
+      <div class="card-body">
+        <table>
+          <tr><th>What You See on Scope</th><th>Name</th><th>Likely Root Cause</th><th>Next Step</th></tr>
+          <tr><td>Sharp spikes at switching edges that decay quickly</td><td>Ringing / overshoot</td><td>Trace inductance, missing termination resistor, poor ground return path</td><td>Check for missing series termination · add ground via near driver</td></tr>
+          <tr><td>Signal rail is low (e.g., 2.8V instead of 3.3V)</td><td>DC undervoltage</td><td>Excessive load current, failing regulator, high trace resistance</td><td>Measure current draw · check regulator output · IPC-2221 trace width</td></tr>
+          <tr><td>Periodic dips below regulation threshold</td><td>Voltage sag / brownout</td><td>Inadequate bulk or bypass capacitance, high ESR cap, load transient</td><td>Replace bypass caps · add bulk capacitance near load</td></tr>
+          <tr><td>Signal toggles at wrong frequency</td><td>Frequency error</td><td>Wrong crystal, wrong PLL configuration, clock source fault</td><td>Verify oscillator component value · check configuration register</td></tr>
+          <tr><td>Waveform never reaches full voltage swing</td><td>Logic level degradation</td><td>Bus contention, wrong pull-up value, failing driver IC</td><td>Check for multiple drivers on same net · measure pull-up voltage</td></tr>
+          <tr><td>Signal present but noisy / fuzz on edges</td><td>EMI / crosstalk noise</td><td>Adjacent trace coupling, poor decoupling, shared ground impedance</td><td>Add decoupling cap · check layout for parallel traces &gt; 1 cm</td></tr>
+          <tr><td>Signal completely absent (0V flat line)</td><td>Open circuit / dead driver</td><td>Broken trace, open solder joint, failed IC, missing power to driver</td><td>Check power to IC · continuity test on trace · boundary-scan</td></tr>
+          <tr><td>Signal stuck at VCC or GND</td><td>Stuck-at fault</td><td>Solder bridge, failed output stage, firmware not toggling pin</td><td>Check for short to rail · boundary-scan EXTEST · verify firmware</td></tr>
+        </table>
+        <div class="tip-box" style="margin-top:14px;">
+          ✓ When writing an NCR: record the test point, the instrument channel, the Time/Div and Volts/Div settings, the measured value, the expected value, and the screenshot filename. This is what the senior engineer needs to reproduce your finding.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ TAB 4: Multimeter ══════════════════════════════════════════ -->
+  <div class="tab-panel" id="tab-multimeter">
+    <div class="card">
+      <div class="card-head">Multimeter Modes — PCB Applications</div>
+      <div class="card-body">
+        <table>
+          <tr><th>Mode</th><th>Symbol</th><th>How to Use on a PCB</th><th>What Good / Bad Looks Like</th></tr>
+          <tr><td><strong>DC Voltage</strong></td><td>V⎓</td><td>Red probe to test point, black to GND. Power on.</td><td>Good: within ±5% of nominal. Bad: 0V on a live rail = open or short.</td></tr>
+          <tr><td><strong>AC Voltage</strong></td><td>V~</td><td>Measure AC mains input side of power supplies only.</td><td>Good: 120V ±10% (US). Never probe AC on logic-level signals.</td></tr>
+          <tr><td><strong>Continuity</strong></td><td>))) or speaker icon</td><td>Power OFF. Probe between two points that should be connected.</td><td>Beep = connected (&lt;~30Ω). Silence = open. Unexpected beep = short.</td></tr>
+          <tr><td><strong>Resistance</strong></td><td>Ω</td><td>Power OFF. Probe across component or between nets.</td><td>Compare to schematic value. 0Ω between isolated nets = short.</td></tr>
+          <tr><td><strong>Diode Test</strong></td><td>→| (diode symbol)</td><td>Red to anode, black to cathode. Forward bias check.</td><td>Good: 0.5–0.7V (silicon). 0V = shorted. OL = open.</td></tr>
+          <tr><td><strong>Capacitance</strong></td><td>⊣| (cap symbol)</td><td>Power OFF, cap discharged. Probe across component.</td><td>Compare to marked value ±20%. 0 µF = open. ∞ = shorted.</td></tr>
+          <tr><td><strong>Current (DC)</strong></td><td>A⎓</td><td>Must break the circuit and insert meter in series. Use correct input jack (mA vs. A).</td><td>Compare to I = V/R expected. Fuse will blow if wrong input jack used.</td></tr>
+        </table>
+        <div class="warn-box" style="margin-top:12px;">
+          ⚠ Never measure resistance or continuity on a powered board — the internal voltage source of the meter will conflict with the circuit and give false readings, or damage the meter.
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head">Power-On Bring-Up Sequence — First Test on a New Board</div>
+      <div class="card-body">
+        <ol class="step-list">
+          <li><strong>Visual inspection first</strong> — check for obvious solder bridges, missing components, wrong polarity electrolytic caps. Do not power on if damage is visible.</li>
+          <li><strong>Check input resistance to GND</strong> (power off) — measure resistance from the main power input to GND. Less than 10Ω suggests a short. Investigate before applying power.</li>
+          <li><strong>Apply power through a current-limited supply</strong> — set current limit to 10–20% above expected max. If the supply folds back immediately, there is a short.</li>
+          <li><strong>Measure each power rail</strong> — probe every test point in sequence: input rail, regulator output, downstream rails (3.3V, 1.8V, 1.2V). Compare to schematic spec.</li>
+          <li><strong>Check GND reference</strong> — probe TP_GND to confirm 0.000V. A floating or elevated GND indicates a broken return path.</li>
+          <li><strong>Move to oscilloscope</strong> — once all DC rails are confirmed, switch to scope for clock signal verification and dynamic load testing.</li>
+        </ol>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ TAB 5: Daily Checklist ═════════════════════════════════════ -->
+  <div class="tab-panel" id="tab-checklist">
+    <div class="card">
+      <div class="card-head">Morning Equipment Setup Checklist</div>
+      <div class="card-body">
+        <ul class="checklist" id="checklist-am">
+          <li><input type="checkbox"><span>Oscilloscope powered on and warmed up (≥5 min before calibration-sensitive measurements)</span></li>
+          <li><input type="checkbox"><span>Probe compensation verified on CAL terminal — square wave top and bottom are flat</span></li>
+          <li><input type="checkbox"><span>Probe attenuation setting in scope menu matches physical probe switch (1x or 10x)</span></li>
+          <li><input type="checkbox"><span>Multimeter battery level checked — low battery causes incorrect readings on resistance and diode mode</span></li>
+          <li><input type="checkbox"><span>Multimeter probes in correct input jacks (V/Ω jack for voltage/resistance, A jack for current)</span></li>
+          <li><input type="checkbox"><span>Schematic and BOM revision confirmed to match board revision number on silkscreen</span></li>
+          <li><input type="checkbox"><span>ESD wrist strap connected and continuity verified</span></li>
+          <li><input type="checkbox"><span>Bench power supply current limit set for the board under test</span></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head">Board Test Completion Checklist — Before Signing Off</div>
+      <div class="card-body">
+        <ul class="checklist" id="checklist-pm">
+          <li><input type="checkbox"><span>All power rails measured and within ±5% of nominal — values recorded in test log</span></li>
+          <li><input type="checkbox"><span>Clock signals verified on scope — correct frequency, amplitude, and duty cycle</span></li>
+          <li><input type="checkbox"><span>Communication bus signals checked (SPI/I²C/UART) — no missing edges or ringing</span></li>
+          <li><input type="checkbox"><span>Boundary-scan run completed (if JTAG header present) — fault report exported</span></li>
+          <li><input type="checkbox"><span>Any failures documented with: test point, instrument, measured value, expected value, screenshot</span></li>
+          <li><input type="checkbox"><span>NCR written for any out-of-spec or failed condition — serial number recorded</span></li>
+          <li><input type="checkbox"><span>Board label updated with test date, result (PASS/FAIL), and technician ID</span></li>
+          <li><input type="checkbox"><span>Test log entry complete — board added to daily yield count</span></li>
+        </ul>
+        <button class="btn-draw" style="margin-top:14px;" onclick="resetChecks()">Reset All Checkboxes</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head">Workflow Connection — Where This Fits in the Week</div>
+      <div class="card-body">
+        <table>
+          <tr><th>Day</th><th>Equipment Focus</th><th>Study File</th></tr>
+          <tr><td>Monday</td><td>Calibrate meters, probe compensation check</td><td>This file — Tab 5 checklist</td></tr>
+          <tr><td>Tue–Wed</td><td>Power-on bring-up, oscilloscope waveform capture, boundary-scan</td><td>This file — Tabs 1–4 · <a href="boundary_scan_toolstick.md">boundary_scan_toolstick.md</a></td></tr>
+          <tr><td>Thursday</td><td>Simulation comparison — does the scope match the model?</td><td><a href="../FE_exam/linear_systems/practice.html">linear_systems/practice.html</a></td></tr>
+          <tr><td>Friday</td><td>Fault pattern review — recurring anomaly type this week?</td><td><a href="../Electrical_Electronic_Technician/pcb_troubleshooting_guide.md">pcb_troubleshooting_guide.md</a></td></tr>
+        </table>
+      </div>
+    </div>
+  </div>
+
+</div><!-- end page -->
+
+<footer>Oscilloscope & Multimeter Reference · EE I Daily Workflow · Test Equipment Knowledge Bridge</footer>
+
+<script>
+  function switchTab(name) {
+    document.querySelectorAll('.tab-panel').forEach(function(p){ p.classList.remove('active'); });
+    document.querySelectorAll('.tab-btn').forEach(function(b){ b.classList.remove('active'); });
+    document.getElementById('tab-' + name).classList.add('active');
+    event.target.classList.add('active');
+  }
+
+  function resetChecks() {
+    document.querySelectorAll('.checklist input[type="checkbox"]').forEach(function(cb){ cb.checked = false; });
+  }
+
+  // ── Waveform simulator ────────────────────────────────────────────
+  function drawWave() {
+    var canvas = document.getElementById('scope-canvas');
+    var ctx    = canvas.getContext('2d');
+    var W = canvas.width, H = canvas.height;
+    var type  = document.getElementById('sig-type').value;
+    var freq  = parseFloat(document.getElementById('sig-freq').value) * 1000;
+    var amp   = parseFloat(document.getElementById('sig-amp').value);
+
+    ctx.clearRect(0, 0, W, H);
+
+    // background
+    ctx.fillStyle = '#0a0a0a';
+    ctx.fillRect(0, 0, W, H);
+
+    // grid
+    ctx.strokeStyle = '#1a2a1a';
+    ctx.lineWidth = 0.8;
+    for (var gx = 0; gx <= 10; gx++) {
+      ctx.beginPath(); ctx.moveTo(gx * W/10, 0); ctx.lineTo(gx * W/10, H); ctx.stroke();
+    }
+    for (var gy = 0; gy <= 8; gy++) {
+      ctx.beginPath(); ctx.moveTo(0, gy * H/8); ctx.lineTo(W, gy * H/8); ctx.stroke();
+    }
+
+    // center lines
+    ctx.strokeStyle = '#2a3a2a';
+    ctx.lineWidth = 1.2;
+    ctx.beginPath(); ctx.moveTo(W/2, 0); ctx.lineTo(W/2, H); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(0, H/2); ctx.lineTo(W, H/2); ctx.stroke();
+
+    // waveform
+    ctx.strokeStyle = '#00FF41';
+    ctx.lineWidth = 1.8;
+    ctx.beginPath();
+
+    var cycles = 3;
+    var period = W / cycles;
+    var midY   = H / 2;
+    var scaleY = (H / 2 - 20) / (amp / 2 * (amp > 5 ? 1.5 : 1));
+
+    for (var px = 0; px < W; px++) {
+      var phase = (px / period) * 2 * Math.PI;
+      var v = 0;
+
+      if (type === 'sine') {
+        v = (amp / 2) * Math.sin(phase);
+      } else if (type === 'square') {
+        v = Math.sin(phase) >= 0 ? amp * 0.45 : -amp * 0.45;
+      } else if (type === 'pwm') {
+        v = ((phase % (2 * Math.PI)) < 1.2 * Math.PI) ? amp * 0.45 : -amp * 0.45;
+      } else if (type === 'noisy') {
+        v = amp / 2 + 0.04 * amp * (Math.random() - 0.5) + 0.03 * amp * Math.sin(phase * 8);
+        v -= amp / 2;
+      } else if (type === 'sag') {
+        var baseV = amp / 2;
+        var sagMag = amp * 0.12;
+        var sagIdx = Math.floor(px / (W / 3));
+        var sagCenter = (sagIdx + 0.5) * (W / 3);
+        var dist = Math.abs(px - sagCenter) / (W * 0.04);
+        var sagDip = sagMag * Math.exp(-dist * dist);
+        v = baseV - sagDip + 0.008 * amp * (Math.random() - 0.5) - baseV;
+      }
+
+      var y = midY - v * (H / (amp * 1.8));
+      px === 0 ? ctx.moveTo(px, y) : ctx.lineTo(px, y);
+    }
+    ctx.stroke();
+
+    // labels
+    ctx.fillStyle = '#888';
+    ctx.font = '10px Courier New';
+    var timescale = (cycles / freq * 1000).toFixed(3);
+    var vdiv = (amp / 4).toFixed(2);
+    ctx.fillText('Time/Div ≈ ' + (timescale / 10).toFixed(3) + ' ms  |  V/Div ≈ ' + vdiv + ' V  |  ' + freq/1000 + ' kHz  |  ' + amp + ' V pk', 10, H - 8);
+
+    document.getElementById('scope-readout').textContent =
+      'Signal: ' + type + '  |  Freq: ' + freq/1000 + ' kHz  |  Period: ' + (1/freq*1e6).toFixed(2) + ' µs  |  Amplitude: ' + amp + ' V  |  Cycles shown: ' + cycles;
+  }
+
+  drawWave();
+</script>
+</body>
+</html>

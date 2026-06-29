@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>IPC-A-610H Workmanship Reference — EE I</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: "Segoe UI", Arial, sans-serif; background: #f4f6f9; color: #222; }
+
+    header { background: #1a237e; color: #fff; padding: 14px 32px; display: flex; justify-content: space-between; align-items: center; }
+    header h1 { font-size: 1.05rem; }
+    .badge { background: #ffd600; color: #1a237e; font-size: 0.72rem; font-weight: bold; padding: 3px 10px; border-radius: 12px; }
+    .sub { background: #e8eaf6; border-bottom: 2px solid #1a237e; padding: 8px 32px; font-size: 0.82rem; color: #444; }
+
+    .page { max-width: 1020px; margin: 24px auto; padding: 0 16px 80px; }
+
+    /* tabs */
+    .tabs { display: flex; gap: 4px; margin-bottom: 18px; flex-wrap: wrap; }
+    .tab-btn { padding: 9px 18px; border: 1px solid #c5cae9; background: #fff; border-radius: 4px 4px 0 0; cursor: pointer; font-size: 0.84rem; font-family: inherit; color: #444; transition: background 0.15s; }
+    .tab-btn.active { background: #1a237e; color: #fff; border-color: #1a237e; }
+    .tab-btn:hover:not(.active) { background: #e8eaf6; }
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+
+    .card { background: #fff; border: 1px solid #dde0ef; border-radius: 6px; margin-bottom: 18px; overflow: hidden; box-shadow: 0 1px 4px rgba(0,0,0,0.06); }
+    .card-head { background: #1a237e; color: #fff; padding: 10px 18px; font-size: 0.88rem; font-weight: bold; display: flex; justify-content: space-between; align-items: center; }
+    .card-head .ref { font-size: 0.7rem; opacity: 0.8; font-weight: normal; }
+    .card-body { padding: 16px 18px; }
+
+    table { width: 100%; border-collapse: collapse; font-size: 0.83rem; }
+    th { background: #e8eaf6; padding: 8px 10px; text-align: left; border: 1px solid #c5cae9; color: #1a237e; font-size: 0.82rem; }
+    td { padding: 8px 10px; border: 1px solid #e0e0e0; vertical-align: top; line-height: 1.55; }
+    tr:nth-child(even) td { background: #f9f9ff; }
+
+    /* condition badges */
+    .cond { display: inline-block; padding: 2px 9px; border-radius: 10px; font-size: 0.72rem; font-weight: bold; white-space: nowrap; }
+    .target   { background: #e8f5e9; color: #1b5e20; border: 1px solid #a5d6a7; }
+    .accept   { background: #e3f2fd; color: #0d47a1; border: 1px solid #90caf9; }
+    .proc-ind { background: #fff8e1; color: #e65100; border: 1px solid #ffcc80; }
+    .defect   { background: #ffebee; color: #b71c1c; border: 1px solid #ef9a9a; }
+
+    /* class chips */
+    .c1 { background: #f5f5f5; color: #555; border: 1px solid #ccc; padding: 1px 6px; border-radius: 3px; font-size: 0.72rem; }
+    .c2 { background: #e3f2fd; color: #0d47a1; border: 1px solid #90caf9; padding: 1px 6px; border-radius: 3px; font-size: 0.72rem; }
+    .c3 { background: #fce4ec; color: #880e4f; border: 1px solid #f48fb1; padding: 1px 6px; border-radius: 3px; font-size: 0.72rem; }
+
+    /* joint visualizer */
+    .joint-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+    .joint-card { border: 1px solid #ddd; border-radius: 5px; overflow: hidden; text-align: center; }
+    .joint-card .jc-header { padding: 7px; font-size: 0.78rem; font-weight: bold; color: #fff; }
+    .joint-card .jc-body { padding: 12px 8px; font-size: 0.78rem; color: #444; line-height: 1.6; }
+    .joint-card canvas { display: block; margin: 8px auto; }
+
+    /* quiz */
+    .quiz-q { margin-bottom: 20px; border: 1px solid #dde0ef; border-radius: 5px; overflow: hidden; }
+    .quiz-q .qhead { background: #e8eaf6; padding: 10px 14px; font-size: 0.85rem; font-weight: bold; color: #1a237e; }
+    .quiz-q .qbody { padding: 12px 14px; }
+    .quiz-opts { list-style: none; margin: 10px 0; }
+    .quiz-opts li { margin: 6px 0; }
+    .quiz-opts label { display: flex; align-items: flex-start; gap: 8px; font-size: 0.85rem; cursor: pointer; line-height: 1.5; }
+    .quiz-opts label:hover { color: #1a237e; }
+    .quiz-opts input { margin-top: 2px; accent-color: #1a237e; flex-shrink: 0; }
+    .btn-check { padding: 7px 18px; background: #1a237e; color: #fff; border: none; border-radius: 3px; cursor: pointer; font-family: inherit; font-size: 0.84rem; margin-top: 8px; }
+    .btn-check:hover { background: #283593; }
+    .q-feedback { margin-top: 10px; padding: 10px 12px; border-radius: 3px; font-size: 0.84rem; display: none; line-height: 1.6; }
+    .q-feedback.correct  { background: #e8f5e9; border: 1px solid #a5d6a7; color: #1b5e20; }
+    .q-feedback.incorrect { background: #ffebee; border: 1px solid #ef9a9a; color: #b71c1c; }
+
+    .workflow-note { background: #fffde7; border: 1px solid #f9a825; border-radius: 4px; padding: 10px 12px; font-size: 0.80rem; color: #555; margin-top: 12px; line-height: 1.6; }
+
+    footer { background: #1a237e; color: #aaa; text-align: center; padding: 10px; font-size: 0.75rem; position: fixed; bottom: 0; width: 100%; }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>IPC-A-610H Workmanship Reference — Rework Handoff & NCR Documentation</h1>
+  <span class="badge">IPC-A-610H</span>
+</header>
+<div class="sub">
+  Goal: NCR writing · Rework handoff vocabulary · Solder joint classification · Classes 1 / 2 / 3 · Interview knowledge bridge
+</div>
+
+<div class="page">
+
+  <div class="tabs">
+    <button class="tab-btn active" onclick="switchTab('classes')">Product Classes</button>
+    <button class="tab-btn" onclick="switchTab('conditions')">Condition Types</button>
+    <button class="tab-btn" onclick="switchTab('joints')">Solder Joint Criteria</button>
+    <button class="tab-btn" onclick="switchTab('defects')">Common Defects</button>
+    <button class="tab-btn" onclick="switchTab('quiz')">Quiz Yourself</button>
+  </div>
+
+  <!-- ══ TAB 1: Product Classes ══════════════════════════════════ -->
+  <div class="tab-panel active" id="tab-classes">
+    <div class="card">
+      <div class="card-head">IPC-A-610H — Three Product Classes <span class="ref">Section 1.4</span></div>
+      <div class="card-body">
+        <table>
+          <tr>
+            <th style="width:120px">Class</th>
+            <th>Name</th>
+            <th>Description</th>
+            <th>Typical Applications</th>
+            <th>Criteria Strictness</th>
+          </tr>
+          <tr>
+            <td><strong><span class="c1">Class 1</span></strong></td>
+            <td>General Electronics</td>
+            <td>Products where the primary requirement is function of the completed assembly. Cosmetic imperfections acceptable.</td>
+            <td>Consumer electronics, toys, non-critical appliances</td>
+            <td>Most permissive — focus on function only</td>
+          </tr>
+          <tr>
+            <td><strong><span class="c2">Class 2</span></strong></td>
+            <td>Dedicated Service Electronics</td>
+            <td>Products where continued performance and extended life is required. Uninterrupted service preferred but not critical.</td>
+            <td>Communications equipment, industrial controls, commercial computers</td>
+            <td>Moderate — cosmetic defects allowed if function is unaffected</td>
+          </tr>
+          <tr>
+            <td><strong><span class="c3">Class 3</span></strong></td>
+            <td>High Reliability Electronics</td>
+            <td>Products where continued performance is critical. Equipment downtime is not acceptable. Harsh environment use.</td>
+            <td>Military, aerospace, medical life-support, defense avionics</td>
+            <td>Most strict — defects that are Class 2 acceptable may be Class 3 defects</td>
+          </tr>
+        </table>
+        <div class="workflow-note">
+          📋 Workflow tie-in: Before writing an NCR, confirm which class the board is built to — it is specified in the work order or customer contract. A solder joint condition that PASSES Class 2 may be a DEFECT for Class 3. The job description specifies defense and aerospace — that means <strong>Class 3</strong> by default.
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head">Class Comparison — Same Joint, Different Verdicts</div>
+      <div class="card-body">
+        <table>
+          <tr><th>Condition</th><th><span class="c1">Class 1</span></th><th><span class="c2">Class 2</span></th><th><span class="c3">Class 3</span></th></tr>
+          <tr><td>Solder ball on board surface (non-bridging)</td>
+            <td><span class="cond accept">Acceptable</span></td>
+            <td><span class="cond proc-ind">Process Indicator</span></td>
+            <td><span class="cond defect">Defect</span></td></tr>
+          <tr><td>Solder wicking up component lead beyond solder joint</td>
+            <td><span class="cond accept">Acceptable</span></td>
+            <td><span class="cond accept">Acceptable</span></td>
+            <td><span class="cond proc-ind">Process Indicator</span></td></tr>
+          <tr><td>Solder bridge between adjacent pads</td>
+            <td><span class="cond defect">Defect</span></td>
+            <td><span class="cond defect">Defect</span></td>
+            <td><span class="cond defect">Defect</span></td></tr>
+          <tr><td>Pinhole / blowhole in solder joint</td>
+            <td><span class="cond accept">Acceptable</span></td>
+            <td><span class="cond proc-ind">Process Indicator</span></td>
+            <td><span class="cond defect">Defect</span></td></tr>
+          <tr><td>Insufficient solder — &lt;75% fill on through-hole</td>
+            <td><span class="cond accept">Acceptable</span></td>
+            <td><span class="cond defect">Defect</span></td>
+            <td><span class="cond defect">Defect</span></td></tr>
+          <tr><td>Cold/disturbed solder joint (dull, grainy surface)</td>
+            <td><span class="cond proc-ind">Process Indicator</span></td>
+            <td><span class="cond defect">Defect</span></td>
+            <td><span class="cond defect">Defect</span></td></tr>
+          <tr><td>Lifted pad (pad separated from board)</td>
+            <td><span class="cond defect">Defect</span></td>
+            <td><span class="cond defect">Defect</span></td>
+            <td><span class="cond defect">Defect</span></td></tr>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ TAB 2: Condition Types ══════════════════════════════════ -->
+  <div class="tab-panel" id="tab-conditions">
+    <div class="card">
+      <div class="card-head">The Three Condition Categories — Core Vocabulary</div>
+      <div class="card-body" style="font-size:0.87rem;line-height:1.8;">
+        <p style="margin-bottom:14px;">Every condition in IPC-A-610H falls into one of three categories. Knowing these three terms cold is the single most important thing to demonstrate in an interview about the standard.</p>
+        <table>
+          <tr>
+            <th style="width:160px">Category</th>
+            <th>Definition</th>
+            <th>Action Required</th>
+            <th>NCR Required?</th>
+          </tr>
+          <tr>
+            <td><span class="cond target">Target Condition</span></td>
+            <td>Near perfect — the ideal workmanship condition. Desirable but not always achievable in production.</td>
+            <td>None — document as pass.</td>
+            <td>No</td>
+          </tr>
+          <tr>
+            <td><span class="cond accept">Acceptable Condition</span></td>
+            <td>Not perfect, but the assembly will function reliably in its intended environment. Within the allowable criteria for its class.</td>
+            <td>None — ship as-is.</td>
+            <td>No</td>
+          </tr>
+          <tr>
+            <td><span class="cond proc-ind">Process Indicator</span></td>
+            <td>Not a defect — the assembly may still function — but indicates a process that is not well controlled and may produce defects in the future. Requires process investigation.</td>
+            <td>Flag for process engineering review. Do not automatically reject.</td>
+            <td>Sometimes — per customer contract</td>
+          </tr>
+          <tr>
+            <td><span class="cond defect">Defect</span></td>
+            <td>A condition that is not acceptable per the applicable class. The assembly must not be shipped in this condition. Requires disposition (rework, repair, scrap, or customer waiver).</td>
+            <td>Write NCR. Dispositioned by engineering before release.</td>
+            <td><strong>Yes — always</strong></td>
+          </tr>
+        </table>
+        <div class="workflow-note" style="margin-top:14px;">
+          📋 Interview tip: When asked "what would you do if you found a cold solder joint during inspection?" — the correct answer is: "Determine which class the board is built to, look up the condition in IPC-A-610H, determine if it is a defect or process indicator for that class, and write an NCR if it qualifies as a defect. I would not rework it myself without engineering authorization."
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ TAB 3: Solder Joint Criteria ════════════════════════════ -->
+  <div class="tab-panel" id="tab-joints">
+    <div class="card">
+      <div class="card-head">Through-Hole Solder Joint Criteria <span class="ref">IPC-A-610H Section 7</span></div>
+      <div class="card-body">
+        <table>
+          <tr><th>Parameter</th><th><span class="c1">Class 1</span></th><th><span class="c2">Class 2</span></th><th><span class="c3">Class 3</span></th></tr>
+          <tr><td><strong>Solder fill (vertical)</strong></td><td>≥ 50% of board thickness</td><td>≥ 75% of board thickness</td><td>100% (full barrel fill)</td></tr>
+          <tr><td><strong>Wetting — topside fillet</strong></td><td>360° not required</td><td>270° minimum</td><td>330° minimum</td></tr>
+          <tr><td><strong>Lead protrusion</strong></td><td>0.5 – 2.5 mm</td><td>0.5 – 2.5 mm</td><td>0.5 – 1.5 mm</td></tr>
+          <tr><td><strong>Wetting angle</strong></td><td>≤ 90°</td><td>≤ 90°</td><td>≤ 90°</td></tr>
+          <tr><td><strong>Solder voids</strong></td><td>Acceptable if barrel filled</td><td>Acceptable if criteria met</td><td>≤ 20% void by cross-section</td></tr>
+        </table>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head">SMT Chip Component (Resistor/Capacitor) Solder Joint <span class="ref">IPC-A-610H Section 8</span></div>
+      <div class="card-body">
+        <table>
+          <tr><th>Parameter</th><th><span class="c2">Class 2 Minimum</span></th><th><span class="c3">Class 3 Minimum</span></th></tr>
+          <tr><td><strong>End joint width</strong></td><td>≥ 50% of component end width</td><td>≥ 75% of component end width</td></tr>
+          <tr><td><strong>Side overhang</strong></td><td>≤ 25% of land width or component end width</td><td>≤ 25% (same — no change)</td></tr>
+          <tr><td><strong>Fillet height (maximum)</strong></td><td>Solder must not wick above termination</td><td>Same — solder must not wick above termination</td></tr>
+          <tr><td><strong>Minimum fillet height</strong></td><td>≥ 25% of component height or solder thickness</td><td>≥ 25%</td></tr>
+          <tr><td><strong>Solder wetting</strong></td><td>Solder wets component termination and pad surface</td><td>360° wetting preferred</td></tr>
+          <tr><td><strong>Component lifted (tombstone)</strong></td><td><span class="cond defect">Defect</span></td><td><span class="cond defect">Defect</span></td></tr>
+        </table>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head">Visual Solder Joint Reference — Condition Examples</div>
+      <div class="card-body">
+        <div class="joint-grid">
+          <div class="joint-card">
+            <div class="jc-header" style="background:#2e7d32;">TARGET</div>
+            <canvas id="c-target" width="140" height="80"></canvas>
+            <div class="jc-body">Smooth concave fillet. Full wetting. Shiny surface. Component well-centered on pad.</div>
+          </div>
+          <div class="joint-card">
+            <div class="jc-header" style="background:#1565c0;">ACCEPTABLE</div>
+            <canvas id="c-accept" width="140" height="80"></canvas>
+            <div class="jc-body">Slightly convex fillet but still wetted to pad and component. No exposed base metal.</div>
+          </div>
+          <div class="joint-card">
+            <div class="jc-header" style="background:#e65100;">PROCESS INDICATOR</div>
+            <canvas id="c-proc" width="140" height="80"></canvas>
+            <div class="jc-body">Dull, grainy surface (cold joint indicator). Function intact but process needs investigation.</div>
+          </div>
+          <div class="joint-card">
+            <div class="jc-header" style="background:#b71c1c;">DEFECT — Insufficient</div>
+            <canvas id="c-insuf" width="140" height="80"></canvas>
+            <div class="jc-body">Very thin solder layer. Pad not fully covered. High-resistance joint. NCR required.</div>
+          </div>
+          <div class="joint-card">
+            <div class="jc-header" style="background:#b71c1c;">DEFECT — Bridge</div>
+            <canvas id="c-bridge" width="140" height="80"></canvas>
+            <div class="jc-body">Solder spans two pads. Electrical short. NCR required. Wick with desoldering braid.</div>
+          </div>
+          <div class="joint-card">
+            <div class="jc-header" style="background:#b71c1c;">DEFECT — Tombstone</div>
+            <canvas id="c-tomb" width="140" height="80"></canvas>
+            <div class="jc-body">One end lifted off pad. Open circuit on that end. Common with small chip components. NCR required.</div>
+          </div>
+        </div>
+        <div class="workflow-note" style="margin-top:14px;">📋 Workflow tie-in: When handing a board to the rework tech, describe the defect using IPC-A-610H language: "Class 3 defect — insufficient solder on R14, pad 2 — less than 25% fillet height." This gives the rework tech exactly what they need and makes your NCR traceable.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ TAB 4: Common Defects ═══════════════════════════════════ -->
+  <div class="tab-panel" id="tab-defects">
+    <div class="card">
+      <div class="card-head">Common Defect Reference — NCR Root Cause Language</div>
+      <div class="card-body">
+        <table>
+          <tr><th>Defect Name</th><th>What It Looks Like</th><th>Root Cause</th><th>IPC-7711/7721 Repair Method</th></tr>
+          <tr><td><strong>Cold solder joint</strong></td><td>Dull, grainy, rough surface — looks frosted instead of shiny</td><td>Insufficient heat during soldering, board movement before solder solidified</td><td>Reflow with correct temperature profile</td></tr>
+          <tr><td><strong>Solder bridge</strong></td><td>Solder connecting two pads or leads that should not be connected</td><td>Excessive solder paste, component misalignment, insufficient paste aperture</td><td>Remove with desoldering wick; verify aperture design</td></tr>
+          <tr><td><strong>Tombstone / drawbridge</strong></td><td>SMT chip component standing on one end, one pad lifted</td><td>Unequal solder paste on pads, unequal thermal mass, component misplacement</td><td>Desolder and reflow; verify stencil aperture balance</td></tr>
+          <tr><td><strong>Insufficient solder</strong></td><td>Thin layer of solder, pad not fully covered, lead visible</td><td>Too little solder paste, solder wash-away, excessive preheat</td><td>Add solder; re-inspect to class criteria</td></tr>
+          <tr><td><strong>Solder ball</strong></td><td>Small spheres of solder on PCB surface away from joints</td><td>Solder spatter, excessive flux outgassing, incorrect reflow profile</td><td>Remove with brush or pick; clean PCB surface</td></tr>
+          <tr><td><strong>Lifted pad</strong></td><td>Copper pad separated from PCB laminate</td><td>Excessive rework heat, poor adhesion, mechanical damage</td><td>IPC-7721 pad repair — jumper wire or conductive epoxy; flag for engineering review</td></tr>
+          <tr><td><strong>Component misalignment</strong></td><td>Component shifted laterally or rotationally off pad</td><td>Pick-and-place error, solder paste pulling, vibration</td><td>Desolder and rework if exceeds overhang criterion</td></tr>
+          <tr><td><strong>Void in BGA ball</strong></td><td>X-ray shows air pocket inside BGA solder ball</td><td>Moisture in component or paste, incorrect reflow profile</td><td>If &gt;25% void by area (Class 3): reject and reballing required</td></tr>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ TAB 5: Quiz ═════════════════════════════════════════════ -->
+  <div class="tab-panel" id="tab-quiz">
+
+    <div class="quiz-q" id="qq1">
+      <div class="qhead">Q1 — Which product class applies to defense and aerospace PCB assemblies?</div>
+      <div class="qbody">
+        <ul class="quiz-opts">
+          <li><label><input type="radio" name="q1" value="A"> (A) Class 1 — General Electronics</label></li>
+          <li><label><input type="radio" name="q1" value="B"> (B) Class 2 — Dedicated Service Electronics</label></li>
+          <li><label><input type="radio" name="q1" value="C"> (C) Class 3 — High Reliability Electronics</label></li>
+          <li><label><input type="radio" name="q1" value="D"> (D) Class 4 — Mission Critical</label></li>
+        </ul>
+        <button class="btn-check" onclick="checkQ('q1','C','Class 3 — High Reliability Electronics — is the correct class for defense and aerospace. These are environments where equipment failure is not acceptable. There is no Class 4 in IPC-A-610H.')">Check Answer</button>
+        <div class="q-feedback" id="q1-fb"></div>
+      </div>
+    </div>
+
+    <div class="quiz-q">
+      <div class="qhead">Q2 — A solder joint has a dull, grainy surface but the component is properly seated and electrically connected. For Class 2, this is a:</div>
+      <div class="qbody">
+        <ul class="quiz-opts">
+          <li><label><input type="radio" name="q2" value="A"> (A) Target condition</label></li>
+          <li><label><input type="radio" name="q2" value="B"> (B) Acceptable condition</label></li>
+          <li><label><input type="radio" name="q2" value="C"> (C) Process indicator</label></li>
+          <li><label><input type="radio" name="q2" value="D"> (D) Defect — write NCR</label></li>
+        </ul>
+        <button class="btn-check" onclick="checkQ('q2','D','For Class 2 and Class 3, a cold (dull/grainy) solder joint is a DEFECT requiring an NCR and rework disposition. It is only a process indicator for Class 1. Always check the class before making the call.')">Check Answer</button>
+        <div class="q-feedback" id="q2-fb"></div>
+      </div>
+    </div>
+
+    <div class="quiz-q">
+      <div class="qhead">Q3 — You find a small solder ball on the PCB surface between two pads but it is not bridging them. The board is Class 3. What is the correct disposition?</div>
+      <div class="qbody">
+        <ul class="quiz-opts">
+          <li><label><input type="radio" name="q3" value="A"> (A) Acceptable — no action required</label></li>
+          <li><label><input type="radio" name="q3" value="B"> (B) Process indicator — note for process engineering but ship</label></li>
+          <li><label><input type="radio" name="q3" value="C"> (C) Defect — write NCR, remove solder ball before shipping</label></li>
+          <li><label><input type="radio" name="q3" value="D"> (D) Escalate to customer for waiver before deciding</label></li>
+        </ul>
+        <button class="btn-check" onclick="checkQ('q3','C','For Class 3, a non-bridging solder ball is a DEFECT. It is acceptable for Class 1 and a process indicator for Class 2. Defense and aerospace = Class 3 = defect. Write the NCR and remove before shipment.')">Check Answer</button>
+        <div class="q-feedback" id="q3-fb"></div>
+      </div>
+    </div>
+
+    <div class="quiz-q">
+      <div class="qhead">Q4 — What minimum vertical solder fill is required for a Class 3 through-hole solder joint?</div>
+      <div class="qbody">
+        <ul class="quiz-opts">
+          <li><label><input type="radio" name="q4" value="A"> (A) 50% of board thickness</label></li>
+          <li><label><input type="radio" name="q4" value="B"> (B) 75% of board thickness</label></li>
+          <li><label><input type="radio" name="q4" value="C"> (C) 100% — full barrel fill</label></li>
+          <li><label><input type="radio" name="q4" value="D"> (D) 25% — solder visible at primary side only</label></li>
+        </ul>
+        <button class="btn-check" onclick="checkQ('q4','C','Class 3 requires 100% vertical fill — full barrel. Class 2 requires ≥75%. Class 1 requires ≥50%. This is one of the most common interview questions about IPC-A-610H.')">Check Answer</button>
+        <div class="q-feedback" id="q4-fb"></div>
+      </div>
+    </div>
+
+    <div class="quiz-q">
+      <div class="qhead">Q5 — A process indicator is found on a Class 2 board. What is the correct immediate action?</div>
+      <div class="qbody">
+        <ul class="quiz-opts">
+          <li><label><input type="radio" name="q5" value="A"> (A) Write an NCR and hold the board for rework</label></li>
+          <li><label><input type="radio" name="q5" value="B"> (B) Notify the process engineer — the board can still ship if otherwise acceptable</label></li>
+          <li><label><input type="radio" name="q5" value="C"> (C) Scrap the board immediately</label></li>
+          <li><label><input type="radio" name="q5" value="D"> (D) Upgrade the board to Class 3 requirements</label></li>
+        </ul>
+        <button class="btn-check" onclick="checkQ('q5','B','A process indicator is NOT a defect. The board can ship. The correct action is to notify process engineering so the root cause can be investigated and the process corrected to prevent future defects. This is a key distinction the standard makes.')">Check Answer</button>
+        <div class="q-feedback" id="q5-fb"></div>
+      </div>
+    </div>
+
+  </div>
+
+</div>
+
+<footer>IPC-A-610H Workmanship Reference · EE I NCR & Rework Handoff Knowledge Bridge · Revision H (2020)</footer>
+
+<script>
+  function switchTab(name) {
+    document.querySelectorAll('.tab-panel').forEach(function(p){ p.classList.remove('active'); });
+    document.querySelectorAll('.tab-btn').forEach(function(b){ b.classList.remove('active'); });
+    document.getElementById('tab-' + name).classList.add('active');
+    event.target.classList.add('active');
+    if (name === 'joints') drawJoints();
+  }
+
+  // ── Solder joint diagrams ─────────────────────────────────────
+  function drawJoint(id, type) {
+    var canvas = document.getElementById(id);
+    if (!canvas) return;
+    var ctx = canvas.getContext('2d');
+    var W = canvas.width, H = canvas.height;
+    ctx.clearRect(0, 0, W, H);
+    ctx.fillStyle = '#f8f8f8'; ctx.fillRect(0, 0, W, H);
+
+    // PCB board
+    ctx.fillStyle = '#2d6e2d';
+    ctx.fillRect(10, H-22, W-20, 12);
+
+    // pad (copper)
+    ctx.fillStyle = '#c8860a';
+    ctx.fillRect(W/2-18, H-28, 36, 8);
+
+    // component body
+    ctx.fillStyle = '#444';
+    ctx.fillRect(W/2-16, 18, 32, 22);
+    ctx.fillStyle = '#777';
+    ctx.fillRect(W/2-14, 20, 28, 18);
+
+    // solder joint shape per type
+    ctx.fillStyle = type==='cold' ? '#aaa' : '#c8a84b';
+    if (type === 'target') {
+      // concave smooth fillet
+      ctx.beginPath();
+      ctx.moveTo(W/2-18, H-28);
+      ctx.quadraticCurveTo(W/2-20, H-35, W/2-14, 40);
+      ctx.lineTo(W/2+14, 40);
+      ctx.quadraticCurveTo(W/2+20, H-35, W/2+18, H-28);
+      ctx.closePath(); ctx.fill();
+    } else if (type === 'accept') {
+      // slightly convex
+      ctx.beginPath();
+      ctx.moveTo(W/2-18, H-28);
+      ctx.quadraticCurveTo(W/2, H-18, W/2+18, H-28);
+      ctx.lineTo(W/2+14, 40); ctx.lineTo(W/2-14, 40);
+      ctx.closePath(); ctx.fill();
+    } else if (type === 'cold') {
+      // grainy — draw rough outline
+      ctx.beginPath();
+      ctx.moveTo(W/2-16, H-28);
+      ctx.lineTo(W/2-18, H-32); ctx.lineTo(W/2-14, H-30);
+      ctx.lineTo(W/2, H-20); ctx.lineTo(W/2+14, H-30);
+      ctx.lineTo(W/2+18, H-32); ctx.lineTo(W/2+16, H-28);
+      ctx.lineTo(W/2+14, 42); ctx.lineTo(W/2-14, 42);
+      ctx.closePath(); ctx.fill();
+    } else if (type === 'insuf') {
+      ctx.fillRect(W/2-16, H-30, 32, 6);
+    } else if (type === 'bridge') {
+      ctx.fillStyle = '#c8a84b';
+      ctx.fillRect(W/2-30, H-30, 60, 8);
+      // second component suggest
+      ctx.fillStyle = '#444';
+      ctx.fillRect(W/2+14, 20, 20, 22);
+    } else if (type === 'tomb') {
+      // one end up
+      ctx.save();
+      ctx.translate(W/2-8, H/2);
+      ctx.rotate(-0.4);
+      ctx.fillStyle = '#444';
+      ctx.fillRect(-16, -12, 32, 22);
+      ctx.restore();
+      ctx.fillStyle = '#c8a84b';
+      ctx.fillRect(W/2-18, H-28, 20, 8);
+    }
+  }
+
+  function drawJoints() {
+    drawJoint('c-target','target');
+    drawJoint('c-accept','accept');
+    drawJoint('c-proc','cold');
+    drawJoint('c-insuf','insuf');
+    drawJoint('c-bridge','bridge');
+    drawJoint('c-tomb','tomb');
+  }
+  drawJoints();
+
+  // ── Quiz ─────────────────────────────────────────────────────
+  var answered = {};
+  function checkQ(name, correct, explanation) {
+    if (answered[name]) return;
+    var radios = document.getElementsByName(name);
+    var sel = null;
+    for (var i=0;i<radios.length;i++) { if(radios[i].checked){sel=radios[i].value;break;} }
+    if (!sel) { alert('Select an answer first.'); return; }
+    answered[name] = true;
+    radios.forEach(function(r){ r.disabled=true; });
+    var fbId = name + '-fb';
+    var fb = document.getElementById(fbId);
+    if (!fb) {
+      // find the feedback div inside the same quiz-q
+      var btn = event.target;
+      fb = btn.nextElementSibling;
+    }
+    fb.style.display = 'block';
+    if (sel === correct) {
+      fb.className = 'q-feedback correct';
+      fb.innerHTML = '<strong>✓ Correct.</strong> ' + explanation;
+    } else {
+      fb.className = 'q-feedback incorrect';
+      fb.innerHTML = '<strong>✗ Incorrect — correct answer is (' + correct + ').</strong> ' + explanation;
+    }
+  }
+</script>
+</body>
+</html>

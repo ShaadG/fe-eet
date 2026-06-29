@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Applied Math — Probability, Statistics, Trig, Geometry on the Bench</title>
+<style>
+  :root {
+    --bg:         #0d1117;
+    --surface:    #161b22;
+    --card:       #1c2128;
+    --border:     #30363d;
+    --accent:     #58a6ff;
+    --green:      #3fb950;
+    --orange:     #ff7b72;
+    --yellow:     #e3b341;
+    --cyan:       #39d353;
+    --txt:        #c9d1d9;
+    --txt-dim:    #8b949e;
+    --altium-top: #1f2937;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: var(--bg);
+    color: var(--txt);
+    font-size: 15px;
+    line-height: 1.7;
+  }
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  code {
+    background: #2d333b;
+    color: var(--cyan);
+    padding: 1px 6px;
+    border-radius: 4px;
+    font-size: 0.88em;
+    font-family: 'Courier New', monospace;
+  }
+
+  /* ── Altium header ─────────────────────────── */
+  .header {
+    background: var(--altium-top);
+    border-bottom: 2px solid #2563eb;
+    padding: 0 28px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    flex-wrap: wrap;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    min-height: 54px;
+  }
+  .header-title {
+    font-size: 1.0em;
+    font-weight: 700;
+    color: #e2e8f0;
+    padding: 14px 0;
+  }
+  .badge {
+    font-size: 0.72em;
+    font-weight: 700;
+    padding: 3px 10px;
+    border-radius: 3px;
+    letter-spacing: 0.05em;
+  }
+  .b-cad  { background: #1d4ed8; color: #e2e8f0; }
+  .b-math { background: #065f46; color: #a7f3d0; }
+  .b-jq   { background: #7c3aed; color: #ede9fe; }
+
+  /* ── Layout ────────────────────────────────── */
+  .layout { display: flex; min-height: calc(100vh - 54px); }
+  .sidebar {
+    width: 220px;
+    min-width: 180px;
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    padding: 22px 0;
+    position: sticky;
+    top: 54px;
+    height: calc(100vh - 54px);
+    overflow-y: auto;
+  }
+  .sb-label {
+    font-size: 0.70em;
+    color: var(--txt-dim);
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    padding: 4px 18px 6px;
+  }
+  .sidebar a {
+    display: block;
+    padding: 7px 18px;
+    color: var(--txt-dim);
+    font-size: 0.87em;
+    border-left: 3px solid transparent;
+    transition: all .15s;
+  }
+  .sidebar a:hover {
+    background: rgba(88,166,255,.08);
+    color: var(--accent);
+    border-left-color: var(--accent);
+    text-decoration: none;
+  }
+  .sb-section { margin-top: 20px; }
+  .main { flex: 1; padding: 32px 36px 80px; max-width: 1050px; }
+
+  /* ── Section ───────────────────────────────── */
+  .section { margin-bottom: 52px; scroll-margin-top: 68px; }
+  .sec-hdr {
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 10px;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  .sec-hdr h2 { font-size: 1.2em; color: #e2e8f0; font-weight: 600; }
+  .sec-tag {
+    font-size: 0.72em;
+    background: rgba(88,166,255,.12);
+    color: var(--accent);
+    border: 1px solid rgba(88,166,255,.3);
+    padding: 2px 8px;
+    border-radius: 3px;
+  }
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 20px 24px;
+    margin-bottom: 18px;
+  }
+  .card h3 { color: var(--accent); font-size: 1em; margin-bottom: 10px; }
+  .card h4 { color: var(--yellow); font-size: 0.9em; margin: 14px 0 6px; }
+
+  /* ── Formula box ───────────────────────────── */
+  .formula-box {
+    background: #0d1117;
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--accent);
+    border-radius: 0 6px 6px 0;
+    padding: 14px 18px;
+    margin: 14px 0;
+    font-family: 'Courier New', monospace;
+    font-size: 0.91em;
+    line-height: 1.9;
+    color: var(--cyan);
+  }
+
+  /* ── Plot image ────────────────────────────── */
+  .plot-img {
+    display: block;
+    width: 100%;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    margin: 16px 0;
+    background: #fff;
+  }
+
+  /* ── Key numbers ───────────────────────────── */
+  .knums { display: flex; flex-wrap: wrap; gap: 10px; margin: 14px 0; }
+  .kn {
+    background: #0c1a2e;
+    border: 1px solid #1e3a5f;
+    border-radius: 6px;
+    padding: 8px 14px;
+    min-width: 110px;
+  }
+  .kn-val { color: var(--cyan); font-size: 1.1em; font-weight: 700; }
+  .kn-lbl { color: var(--txt-dim); font-size: 0.82em; margin-top: 2px; }
+
+  /* ── Two-column ────────────────────────────── */
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+  @media (max-width: 760px) { .two-col { grid-template-columns: 1fr; } }
+
+  /* ── Talking point ─────────────────────────── */
+  .tp {
+    background: #0f1c2e;
+    border-left: 3px solid var(--accent);
+    border-radius: 0 6px 6px 0;
+    padding: 12px 16px;
+    margin-top: 14px;
+    font-size: 0.91em;
+  }
+  .tp-lbl {
+    font-size: 0.70em;
+    color: var(--accent);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+    font-weight: 700;
+  }
+
+  /* ── Alert ─────────────────────────────────── */
+  .alert {
+    border-radius: 6px;
+    padding: 12px 16px;
+    margin: 12px 0;
+    font-size: 0.9em;
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+  }
+  .alert-info { background: #0c1f38; border: 1px solid #1d4ed8; color: #93c5fd; }
+  .alert-icon { flex-shrink: 0; }
+
+  /* ── CAD notes ─────────────────────────────── */
+  .cad-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  @media (max-width: 680px) { .cad-grid { grid-template-columns: 1fr; } }
+  .cad-card {
+    background: #111827;
+    border: 1px solid #374151;
+    border-radius: 6px;
+    padding: 14px 16px;
+  }
+  .cad-card h4 { color: #60a5fa; font-size: 0.88em; margin-bottom: 8px; }
+  .cad-card p, .cad-card li { font-size: 0.86em; color: var(--txt-dim); line-height: 1.65; }
+  .cad-card ul { padding-left: 16px; }
+  .cad-card li { margin-bottom: 4px; }
+</style>
+</head>
+<body>
+
+<!-- ── Altium header ─────────────────────────────────────────────────── -->
+<header class="header">
+  <span class="header-title">Applied Math — Probability · Statistics · Trig · Geometry on the Bench</span>
+  <span class="badge b-cad">Altium Designer / OrCAD / Eagle view</span>
+  <span class="badge b-math">Math Qualification Evidence</span>
+  <span class="badge b-jq">Job Knowledge Requirement</span>
+</header>
+
+<div class="layout">
+
+  <nav class="sidebar">
+    <div class="sb-label">Sections</div>
+    <a href="#overview">Overview</a>
+    <a href="#s1">1 — Measurement Uncertainty</a>
+    <a href="#s2">2 — Process Capability (Cpk)</a>
+    <a href="#s3">3 — Phasor & Trig</a>
+    <a href="#s4">4 — Trace Geometry</a>
+    <a href="#cad">CAD Notes</a>
+
+    <div class="sb-section">
+      <div class="sb-label">Related Files</div>
+      <a href="daily_workflow_simulation.html">Daily Workflow</a>
+      <a href="fe_theory_to_bench_practice.html">FE → Bench</a>
+      <a href="analysis_eet.html">Python Analysis</a>
+      <a href="scenario_power_rail_01/scenario_power_rail_01.html">Scenario 01</a>
+    </div>
+
+    <div class="sb-section">
+      <div class="sb-label">Run This</div>
+      <a href="#run">python3 simulate_math_applied_01.py</a>
+    </div>
+  </nav>
+
+  <main class="main">
+
+    <!-- ── Overview ────────────────────────────────────────────────────── -->
+    <div class="section" id="overview">
+      <div class="sec-hdr">
+        <h2>Why This File Exists</h2>
+        <span class="sec-tag">Job Knowledge Requirement</span>
+      </div>
+      <div class="card">
+        <p>The EE I job description requires: <em>"Ability to work with mathematical concepts such as
+        probability and statistical inference, and fundamentals of plane and solid geometry and
+        trigonometry."</em> This file shows those aren't abstract qualifications — every one of them
+        appears directly in the day-to-day EET bench and test engineering workflow you've already built.</p>
+
+        <div class="two-col" style="margin-top:18px;">
+          <div>
+            <h4>Probability & Statistical Inference</h4>
+            <p>Every DMM measurement has uncertainty — modeled as a normal distribution with σ.
+            Test yield and process capability (Cpk) are how manufacturing tracks whether a
+            component or process stays within spec across a board population, not just one unit.</p>
+          </div>
+          <div>
+            <h4>Trigonometry & Geometry</h4>
+            <p>AC circuit analysis runs entirely on sin, cos, and arctan — phasors, phase angles,
+            impedance triangles. PCB trace routing uses the distance formula and 45° angle
+            geometry to calculate trace length, which then drives inductance and signal timing.</p>
+          </div>
+        </div>
+
+        <div class="alert alert-info" id="run" style="margin-top:18px;">
+          <span class="alert-icon">&#9654;</span>
+          <span>Generate all plots first:
+          <code>cd Electrical_Electronic_Technician &amp;&amp; python3 simulate_math_applied_01.py</code>
+          — output goes to <code>analysis_output/math_0*.png</code></span>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- ── Section 1: Measurement Uncertainty ──────────────────────────── -->
+    <div class="section" id="s1">
+      <div class="sec-hdr">
+        <h2>1 — Measurement Uncertainty</h2>
+        <span class="sec-tag">Probability · Normal Distribution</span>
+      </div>
+
+      <div class="card">
+        <h3>The Concept</h3>
+        <p>A DMM reading is never a single exact value. Every measurement has uncertainty —
+        the true voltage is somewhere within a distribution of possible readings. That
+        distribution follows the normal (Gaussian) curve, described by its mean µ and
+        standard deviation σ.</p>
+
+        <div class="formula-box">
+          PDF(x) = (1/σ√2π) · e^(−½·((x−µ)/σ)²)<br><br>
+          68.3%  of readings fall within  µ ± 1σ<br>
+          95.4%  of readings fall within  µ ± 2σ<br>
+          99.7%  of readings fall within  µ ± 3σ   ← "three-sigma rule"
+        </div>
+
+        <h4>Applied to TP3 (3.3V Rail Measurement)</h4>
+        <p>50 repeated DMM readings of TP3. The rail is actually at 3.285V (slightly low
+        but within the ±5% spec band of 3.135–3.465V). The spread of readings reveals
+        the measurement system's uncertainty — important when setting test limits, because
+        a tight spec combined with high measurement noise creates false rejects.</p>
+
+        <img class="plot-img" src="analysis_output/math_01_measurement_uncertainty.png"
+             alt="Measurement Uncertainty — TP3 Normal Distribution"
+             onerror="this.style.display='none';this.nextElementSibling.style.display='block'">
+        <div class="alert alert-info" style="display:none;">
+          Run <code>python3 simulate_math_applied_01.py</code> to generate this plot.
+        </div>
+
+        <div class="knums">
+          <div class="kn"><div class="kn-val">3.285 V</div><div class="kn-lbl">True mean µ</div></div>
+          <div class="kn"><div class="kn-val">~12 mV</div><div class="kn-lbl">Std deviation σ</div></div>
+          <div class="kn"><div class="kn-val">3.249 V</div><div class="kn-lbl">3σ lower limit</div></div>
+          <div class="kn"><div class="kn-val">3.321 V</div><div class="kn-lbl">3σ upper limit</div></div>
+          <div class="kn"><div class="kn-val">≈ 0%</div><div class="kn-lbl">False reject risk</div></div>
+        </div>
+
+        <div class="tp">
+          <div class="tp-lbl">Interview Talking Point</div>
+          "Probability shows up in test engineering every time you set a pass/fail limit. If the
+          measurement has 12 millivolt standard deviation and your spec limit is only 30 millivolts
+          away from the mean, your 3-sigma band overlaps the spec — meaning good boards fail
+          occasionally just from measurement noise. That's a statistical inference problem. You
+          have to widen the guard band or improve the measurement system, and the normal distribution
+          tells you exactly how much."
+        </div>
+      </div>
+    </div>
+
+
+    <!-- ── Section 2: Process Capability ───────────────────────────────── -->
+    <div class="section" id="s2">
+      <div class="sec-hdr">
+        <h2>2 — Process Capability (Cpk)</h2>
+        <span class="sec-tag">Statistical Inference · Manufacturing Quality</span>
+      </div>
+
+      <div class="card">
+        <h3>The Concept</h3>
+        <p>Cpk measures how well a manufacturing process keeps its output within spec limits.
+        It combines the mean (centering) and standard deviation (spread) of a population into
+        a single quality index. Industry standard target is Cpk ≥ 1.33.</p>
+
+        <div class="formula-box">
+          Cpk = min( (USL − µ) / 3σ ,  (µ − LSL) / 3σ )<br><br>
+          Cpk ≥ 1.33  →  capable process  (target)<br>
+          Cpk = 1.00  →  0.27% defect rate  (2700 PPM)<br>
+          Cpk &lt; 1.00  →  process not capable — too many out-of-spec units
+        </div>
+
+        <h4>Applied to C2 ESR Across a Board Population</h4>
+        <p>Three scenarios model the same ESR spec (≤ 0.10Ω) with different component lot
+        quality. A tight MLCC lot (Cpk 1.83) has near-zero defects. A mixed or aged lot
+        (Cpk 0.28) delivers over 20% failing units — which is exactly why lot traceability
+        and incoming inspection matter in a manufacturing environment.</p>
+
+        <img class="plot-img" src="analysis_output/math_02_process_capability.png"
+             alt="Process Capability Cpk — C2 ESR Batch Analysis"
+             onerror="this.style.display='none';this.nextElementSibling.style.display='block'">
+        <div class="alert alert-info" style="display:none;">
+          Run <code>python3 simulate_math_applied_01.py</code> to generate this plot.
+        </div>
+
+        <div class="knums">
+          <div class="kn"><div class="kn-val">1.83</div><div class="kn-lbl">Cpk — tight lot</div></div>
+          <div class="kn"><div class="kn-val">0.65</div><div class="kn-lbl">Cpk — marginal lot</div></div>
+          <div class="kn"><div class="kn-val">0.28</div><div class="kn-lbl">Cpk — out of control</div></div>
+          <div class="kn"><div class="kn-val">20.2%</div><div class="kn-lbl">Defect rate — worst case</div></div>
+        </div>
+
+        <div class="tp">
+          <div class="tp-lbl">Interview Talking Point</div>
+          "Cpk is how manufacturing translates statistical inference into a procurement decision.
+          If a component lot has Cpk below 1.33 on a critical parameter like ESR, that lot is
+          going to generate failing boards — not randomly, but predictably, in proportion to how
+          far the distribution overlaps the spec limit. That's not a gut feel, it's a number from
+          the statistics. I can calculate it from a sample of measurements and tell you whether
+          a lot is safe to use before it goes into production."
+        </div>
+      </div>
+    </div>
+
+
+    <!-- ── Section 3: Phasor & Trig ────────────────────────────────────── -->
+    <div class="section" id="s3">
+      <div class="sec-hdr">
+        <h2>3 — AC Phasor Analysis</h2>
+        <span class="sec-tag">Trigonometry · AC Circuit Analysis</span>
+      </div>
+
+      <div class="card">
+        <h3>The Concept</h3>
+        <p>Every AC circuit is a geometry problem in disguise. Resistance R and capacitive
+        reactance Xc form two sides of a right triangle — the impedance |Z| is the hypotenuse
+        (Pythagorean theorem), and the phase angle φ is found with arctan. Voltage and current
+        waveforms are then expressed as sin and cos of that angle.</p>
+
+        <div class="formula-box">
+          Xc  = 1 / (2π·f·C)              ← reactance (frequency-dependent resistance)<br>
+          |Z| = √(R² + Xc²)               ← Pythagorean theorem<br>
+          φ   = arctan(Xc / R)            ← phase angle (trig)<br>
+          V_R = Vs · cos(φ)               ← resistor voltage<br>
+          V_C = Vs · sin(φ)               ← capacitor voltage  (lags 90°)<br><br>
+          Check: V_R² + V_C² = Vs²        ← Pythagorean identity confirms the math
+        </div>
+
+        <h4>Applied to the 1kHz Rail Ripple (from FFT Analysis)</h4>
+        <p>Using the same 1kHz ripple frequency identified by the FFT in
+        <a href="analysis_eet.html">analysis_eet.html</a> Plot 3 — this shows the phasor
+        relationship between the rail impedance components and how the phase angle is
+        measured on a two-channel oscilloscope as the time offset between V and I waveforms.</p>
+
+        <img class="plot-img" src="analysis_output/math_03_phasor_trig.png"
+             alt="AC Phasor Analysis — RC Circuit Trigonometry"
+             onerror="this.style.display='none';this.nextElementSibling.style.display='block'">
+        <div class="alert alert-info" style="display:none;">
+          Run <code>python3 simulate_math_applied_01.py</code> to generate this plot.
+        </div>
+
+        <div class="knums">
+          <div class="kn"><div class="kn-val">7.23 Ω</div><div class="kn-lbl">Xc at 1kHz</div></div>
+          <div class="kn"><div class="kn-val">50.52 Ω</div><div class="kn-lbl">|Z| = √(R²+Xc²)</div></div>
+          <div class="kn"><div class="kn-val">8.23°</div><div class="kn-lbl">φ = arctan(Xc/R)</div></div>
+          <div class="kn"><div class="kn-val">1.000</div><div class="kn-lbl">V_R²+V_C² check ✓</div></div>
+        </div>
+
+        <div class="tp">
+          <div class="tp-lbl">Interview Talking Point</div>
+          "The phase angle between voltage and current on a power rail tells you something about
+          the reactive load on that net. I measure it on the oscilloscope by putting voltage on
+          one channel and current on the other and reading the time offset between their zero
+          crossings — then φ equals arctan of that time offset divided by the period times 2π.
+          That's applied trig. And once I have the phase angle I can calculate the power factor,
+          which tells me how efficiently the rail is delivering real power versus reactive power."
+        </div>
+      </div>
+    </div>
+
+
+    <!-- ── Section 4: Trace Geometry ───────────────────────────────────── -->
+    <div class="section" id="s4">
+      <div class="sec-hdr">
+        <h2>4 — PCB Trace Geometry</h2>
+        <span class="sec-tag">Plane Geometry · Distance Formula · 45° Routing</span>
+      </div>
+
+      <div class="card">
+        <h3>The Concept</h3>
+        <p>PCB traces route at 0° and 45° angles between component pads. The exact length
+        of each segment comes from the distance formula — plane geometry. That length then
+        drives two engineering parameters: trace inductance (1nH per mm rule) and signal
+        propagation time (trace length divided by the speed of light in FR4).</p>
+
+        <div class="formula-box">
+          Segment length:   L = √(Δx² + Δy²)         ← distance formula<br>
+          45° segment:      L_45 = |Δx| · √2          ← when Δx = Δy<br>
+          Trace inductance: L_nH ≈ L_mm × 1 nH/mm     ← 1nH/mm rule<br>
+          Travel time:      t = L / v_prop             ← v_prop = 0.6c in FR4<br><br>
+          Total length = Σ all segment lengths          ← sum of geometry
+        </div>
+
+        <h4>Applied to ADDR_BUS[4] — The Boundary-Scan Fault Net</h4>
+        <p>This is the same net flagged as OPEN in the daily workflow boundary-scan fault report
+        (U4.PIN22 → U6.PIN3). The geometry calculation gives us the trace inductance that feeds
+        directly into the RLC Bode plot in <a href="analysis_eet.html">analysis_eet.html</a>
+        Plot 2 — closing the loop between physical layout and electrical behavior.</p>
+
+        <img class="plot-img" src="analysis_output/math_04_trace_geometry.png"
+             alt="PCB Trace Geometry — ADDR_BUS[4] Route Calculation"
+             onerror="this.style.display='none';this.nextElementSibling.style.display='block'">
+        <div class="alert alert-info" style="display:none;">
+          Run <code>python3 simulate_math_applied_01.py</code> to generate this plot.
+        </div>
+
+        <div class="knums">
+          <div class="kn"><div class="kn-val">16.66 mm</div><div class="kn-lbl">Total trace length</div></div>
+          <div class="kn"><div class="kn-val">5.66 mm</div><div class="kn-lbl">45° segment (√(4²+4²))</div></div>
+          <div class="kn"><div class="kn-val">16.66 nH</div><div class="kn-lbl">Trace inductance</div></div>
+          <div class="kn"><div class="kn-val">92.5 ps</div><div class="kn-lbl">Signal travel time</div></div>
+        </div>
+
+        <div class="tp">
+          <div class="tp-lbl">Interview Talking Point</div>
+          "Geometry is in the job every time you touch Altium. Trace length from the distance
+          formula directly gives you inductance — 1 nanohenry per millimeter is the rule of thumb
+          for microstrip — and that inductance is what shifts the resonant frequency of the
+          decoupling network. A trace that's 5mm longer than it needed to be has 5 extra nanohenries
+          of inductance, which drops the impedance minimum by a calculable amount. That's the
+          connection between routing geometry and signal performance."
+        </div>
+      </div>
+    </div>
+
+
+    <!-- ── CAD Notes ────────────────────────────────────────────────────── -->
+    <div class="section" id="cad">
+      <div class="sec-hdr">
+        <h2>CAD Notes</h2>
+        <span class="sec-tag">Altium Designer · OrCAD · Eagle · IPC-2221</span>
+      </div>
+      <div class="cad-grid">
+        <div class="cad-card">
+          <h4>Altium — Trace Length Measurement</h4>
+          <ul>
+            <li>Select a trace → <strong>Inspect → Measure</strong> gives exact segment lengths</li>
+            <li><strong>PCB Inspector</strong> → Net length field for the complete routed length</li>
+            <li>Use measured length as input to the inductance and travel-time calculations above</li>
+            <li>Verify 45° segments: Δx must equal Δy — Altium enforces this in Interactive Router</li>
+          </ul>
+        </div>
+        <div class="cad-card">
+          <h4>IPC-2221 — Width + Length Together</h4>
+          <ul>
+            <li>IPC-2221 width formula sets the minimum width for current capacity</li>
+            <li>Geometry model sets the maximum length for acceptable inductance</li>
+            <li>Both constraints must be satisfied simultaneously on power nets</li>
+            <li>Document both calculations in the design review — width from IPC-2221, length from √(Δx²+Δy²)</li>
+          </ul>
+        </div>
+        <div class="cad-card">
+          <h4>Cpk in a Manufacturing Context</h4>
+          <ul>
+            <li>Cpk results feed directly into incoming inspection decisions</li>
+            <li>Apriso / Camstar MES systems often capture component lot data — tie Cpk to lot number</li>
+            <li>NCR process: if a board fails ESR, pull the component lot Cpk — if Cpk &lt; 1.33, the lot is suspect, not just that one unit</li>
+            <li>OrCAD BOM + lot traceability = complete statistical inference chain</li>
+          </ul>
+        </div>
+        <div class="cad-card">
+          <h4>Phase Angle — Scope Measurement</h4>
+          <ul>
+            <li>Two-channel scope: Ch1 = voltage, Ch2 = current (via current probe or sense resistor)</li>
+            <li>Measure time offset Δt between zero crossings → φ = (Δt / T) × 360°</li>
+            <li>This is arctan math made visible on the oscilloscope display</li>
+            <li>Power factor = cos(φ) — relevant for any AC power measurement on the board</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+</body>
+</html>

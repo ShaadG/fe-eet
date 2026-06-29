@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FE Exam — Topic 7: Linear Systems Practice</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: "Times New Roman", Times, serif;
+      background: #f0f0f0;
+      color: #111;
+      min-height: 100vh;
+    }
+
+    /* ── header ── */
+    .exam-header {
+      background: #002147;
+      color: #fff;
+      padding: 14px 32px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .exam-header h1 { font-size: 1.05rem; font-weight: bold; letter-spacing: 0.03em; }
+    .exam-header .topic-tag {
+      background: #e8a000;
+      color: #002147;
+      font-size: 0.78rem;
+      font-weight: bold;
+      padding: 3px 10px;
+      border-radius: 3px;
+    }
+
+    /* ── sub-header ── */
+    .sub-header {
+      background: #e8e8e8;
+      border-bottom: 2px solid #002147;
+      padding: 8px 32px;
+      font-size: 0.82rem;
+      color: #444;
+      display: flex;
+      gap: 24px;
+    }
+    .sub-header span { font-weight: bold; color: #002147; }
+
+    /* ── main layout ── */
+    .exam-body {
+      max-width: 860px;
+      margin: 28px auto;
+      padding: 0 16px 48px;
+    }
+
+    /* ── score bar ── */
+    .score-bar {
+      background: #fff;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      padding: 10px 20px;
+      margin-bottom: 24px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      font-size: 0.88rem;
+    }
+    .score-bar .score-label { color: #555; }
+    .score-bar .score-val { font-size: 1.15rem; font-weight: bold; color: #002147; }
+    .score-bar .progress-track {
+      flex: 1;
+      height: 8px;
+      background: #ddd;
+      border-radius: 4px;
+      overflow: hidden;
+    }
+    .score-bar .progress-fill {
+      height: 100%;
+      background: #2E7D32;
+      border-radius: 4px;
+      transition: width 0.4s ease;
+      width: 0%;
+    }
+
+    /* ── question card ── */
+    .q-card {
+      background: #fff;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      margin-bottom: 28px;
+      overflow: hidden;
+    }
+    .q-card .q-header {
+      background: #002147;
+      color: #fff;
+      padding: 8px 20px;
+      font-size: 0.8rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .q-card .q-header .q-num { font-weight: bold; font-size: 0.88rem; }
+    .q-card .q-header .q-tag {
+      font-size: 0.72rem;
+      background: rgba(255,255,255,0.18);
+      padding: 2px 8px;
+      border-radius: 2px;
+    }
+
+    .q-body { padding: 20px 24px 0; }
+
+    .stem {
+      font-size: 0.95rem;
+      line-height: 1.65;
+      margin-bottom: 12px;
+    }
+
+    .given-box {
+      background: #f7f7f7;
+      border-left: 3px solid #002147;
+      padding: 10px 14px;
+      margin: 12px 0 16px;
+      font-size: 0.88rem;
+      line-height: 1.7;
+      font-family: "Courier New", monospace;
+    }
+
+    /* ── options ── */
+    .options { list-style: none; padding: 0; margin-bottom: 16px; }
+    .options li {
+      margin: 7px 0;
+    }
+    .options label {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 12px;
+      border: 1px solid #ddd;
+      border-radius: 3px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      transition: background 0.15s;
+    }
+    .options label:hover { background: #f0f4ff; }
+    .options input[type="radio"] { accent-color: #002147; }
+
+    /* ── answer states ── */
+    .options label.correct  { background: #e8f5e9; border-color: #2E7D32; }
+    .options label.incorrect { background: #fbe9e7; border-color: #C62828; }
+    .options label.correct::after  { content: " ✓"; color: #2E7D32; font-weight: bold; margin-left: auto; }
+    .options label.incorrect::after { content: " ✗"; color: #C62828; font-weight: bold; margin-left: auto; }
+
+    /* ── check button ── */
+    .btn-row { padding: 0 24px 16px; display: flex; gap: 12px; align-items: center; }
+    .btn-check {
+      background: #002147;
+      color: #fff;
+      border: none;
+      padding: 9px 24px;
+      font-size: 0.88rem;
+      font-family: inherit;
+      cursor: pointer;
+      border-radius: 3px;
+      transition: background 0.15s;
+    }
+    .btn-check:hover { background: #003a73; }
+    .btn-check:disabled { background: #aaa; cursor: default; }
+    .result-badge {
+      font-size: 0.88rem;
+      font-weight: bold;
+      display: none;
+    }
+    .result-badge.correct  { color: #2E7D32; }
+    .result-badge.incorrect { color: #C62828; }
+
+    /* ── solution panel ── */
+    .solution {
+      display: none;
+      border-top: 1px solid #e0e0e0;
+      padding: 18px 24px 20px;
+      background: #fcfcfc;
+    }
+    .solution h3 {
+      font-size: 0.88rem;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      color: #002147;
+      margin-bottom: 10px;
+      border-bottom: 1px solid #ddd;
+      padding-bottom: 6px;
+    }
+    .solution .sol-steps {
+      font-size: 0.88rem;
+      line-height: 1.8;
+    }
+    .solution .formula {
+      background: #eef2ff;
+      border: 1px solid #c5cae9;
+      border-radius: 3px;
+      padding: 8px 14px;
+      font-family: "Courier New", monospace;
+      font-size: 0.87rem;
+      margin: 8px 0;
+      display: inline-block;
+    }
+    .solution .answer-line {
+      font-weight: bold;
+      color: #2E7D32;
+      font-size: 0.92rem;
+      margin-top: 8px;
+    }
+    .solution .handbook-ref {
+      margin-top: 10px;
+      font-size: 0.78rem;
+      color: #777;
+      font-style: italic;
+    }
+    .solution img {
+      display: block;
+      max-width: 100%;
+      margin: 14px auto 0;
+      border: 1px solid #ccc;
+      border-radius: 3px;
+    }
+
+    /* ── footer ── */
+    .exam-footer {
+      background: #002147;
+      color: #aaa;
+      text-align: center;
+      padding: 10px;
+      font-size: 0.75rem;
+      position: fixed;
+      bottom: 0;
+      width: 100%;
+    }
+  </style>
+</head>
+<body>
+
+<div class="exam-header">
+  <h1>FE Electrical &amp; Computer Engineering — Practice Exam</h1>
+  <span class="topic-tag">Topic 7: Linear Systems</span>
+</div>
+
+<div class="sub-header">
+  <div>Questions: <span>4</span></div>
+  <div>Topic Weight: <span>5–8 questions</span> on the real exam</div>
+  <div>Subtopics: <span>7A · 7B · 7C · 7D</span></div>
+  <div>Reference: <span>FE Handbook p. 363</span></div>
+</div>
+
+<div class="exam-body">
+
+  <!-- Score Bar -->
+  <div class="score-bar">
+    <div class="score-label">Score</div>
+    <div class="score-val" id="score-display">0 / 0</div>
+    <div class="progress-track"><div class="progress-fill" id="progress-fill"></div></div>
+    <div class="score-label" id="pct-display">—</div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════════
+       Q1 — 7A: Frequency / Transient Response
+  ═══════════════════════════════════════════════════════════════ -->
+  <div class="q-card" id="qcard-1">
+    <div class="q-header">
+      <span class="q-num">Question 1 of 4</span>
+      <span class="q-tag">7A — Frequency / Transient Response</span>
+    </div>
+    <div class="q-body">
+      <p class="stem">
+        A series RC circuit is connected to a 10 V DC step source at t = 0.
+        The capacitor is initially uncharged. At what voltage will the capacitor
+        be charged to at t = 2 ms?
+      </p>
+      <div class="given-box">
+        R = 2 kΩ = 2,000 Ω
+        C = 0.5 µF = 0.5 × 10⁻⁶ F
+        V_source = 10 V (step at t = 0)
+        v_C(0) = 0 V
+      </div>
+      <ul class="options" id="opts-1">
+        <li><label><input type="radio" name="q1" value="A"> (A) &nbsp; 3.68 V</label></li>
+        <li><label><input type="radio" name="q1" value="B"> (B) &nbsp; 6.32 V</label></li>
+        <li><label><input type="radio" name="q1" value="C"> (C) &nbsp; 8.65 V</label></li>
+        <li><label><input type="radio" name="q1" value="D"> (D) &nbsp; 9.50 V</label></li>
+      </ul>
+    </div>
+    <div class="btn-row">
+      <button class="btn-check" onclick="checkAnswer(1,'C')">Check Answer</button>
+      <span class="result-badge" id="badge-1"></span>
+    </div>
+    <div class="solution" id="sol-1">
+      <h3>Solution — 7A: RC Transient Response</h3>
+      <div class="sol-steps">
+        <p><strong>Formula</strong> (FE Handbook p. 363 — RC and RL Transients):</p>
+        <div class="formula">v_C(t) = v_C(0)·e^(−t/RC) + V·(1 − e^(−t/RC))</div>
+        <p>With v_C(0) = 0 and τ = RC:</p>
+        <div class="formula">v_C(t) = V · (1 − e^(−t/τ))</div>
+        <p><strong>Step 1 — Find τ:</strong></p>
+        <div class="formula">τ = RC = 2,000 × 0.5×10⁻⁶ = 1×10⁻³ s = 1 ms</div>
+        <p><strong>Step 2 — Evaluate at t = 2 ms = 2τ:</strong></p>
+        <div class="formula">v_C(2ms) = 10 · (1 − e^(−2ms/1ms))
+                    = 10 · (1 − e^(−2))
+                    = 10 · (1 − 0.1353)
+                    = 10 × 0.8647
+                    = 8.647 V</div>
+        <p class="answer-line">Answer: (C) 8.65 V</p>
+        <p style="font-size:0.85rem;color:#555;margin-top:6px;">
+          Note: (B) 6.32 V = V·(1−e⁻¹) is the voltage at t = 1τ, a common distractor.
+        </p>
+        <div class="handbook-ref">FE Handbook ref: "RC and RL Transients" — v_C(t) = v_C(0)e^(−t/RC) + V(1−e^(−t/RC))</div>
+      </div>
+      <img src="plots/q1_rc_transient.png" alt="RC Transient Response Plot">
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════════
+       Q2 — 7B: Resonance
+  ═══════════════════════════════════════════════════════════════ -->
+  <div class="q-card" id="qcard-2">
+    <div class="q-header">
+      <span class="q-num">Question 2 of 4</span>
+      <span class="q-tag">7B — Resonance</span>
+    </div>
+    <div class="q-body">
+      <p class="stem">
+        For the series RLC circuit below, what is the quality factor Q at resonance?
+      </p>
+      <div class="given-box">
+        R = 5 Ω
+        L = 50 mH = 0.05 H
+        C = 20 µF = 20 × 10⁻⁶ F
+      </div>
+      <ul class="options" id="opts-2">
+        <li><label><input type="radio" name="q2" value="A"> (A) &nbsp; Q = 2</label></li>
+        <li><label><input type="radio" name="q2" value="B"> (B) &nbsp; Q = 5</label></li>
+        <li><label><input type="radio" name="q2" value="C"> (C) &nbsp; Q = 7.07</label></li>
+        <li><label><input type="radio" name="q2" value="D"> (D) &nbsp; Q = 10</label></li>
+      </ul>
+    </div>
+    <div class="btn-row">
+      <button class="btn-check" onclick="checkAnswer(2,'D')">Check Answer</button>
+      <span class="result-badge" id="badge-2"></span>
+    </div>
+    <div class="solution" id="sol-2">
+      <h3>Solution — 7B: Series Resonance</h3>
+      <div class="sol-steps">
+        <p><strong>Formula</strong> (FE Handbook p. 363 — Resonance):</p>
+        <div class="formula">ω₀ = 1 / √(LC)  rad/s     (resonant frequency)
+Q   = ω₀L / R              (series resonance Q)
+BW  = ω₀ / Q  rad/s       (bandwidth)</div>
+        <p><strong>Step 1 — Find ω₀:</strong></p>
+        <div class="formula">ω₀ = 1 / √(0.05 × 20×10⁻⁶)
+   = 1 / √(1×10⁻⁶)
+   = 1 / 10⁻³
+   = 1,000 rad/s</div>
+        <p><strong>Step 2 — Find Q:</strong></p>
+        <div class="formula">Q = ω₀L / R = (1,000 × 0.05) / 5
+  = 50 / 5
+  = 10</div>
+        <p><strong>Step 3 — Verify using alternate form:</strong></p>
+        <div class="formula">Q = 1 / (ω₀CR) = 1 / (1000 × 20×10⁻⁶ × 5)
+  = 1 / 0.1 = 10  ✓</div>
+        <p class="answer-line">Answer: (D) Q = 10</p>
+        <p style="font-size:0.85rem;color:#555;margin-top:6px;">
+          Bandwidth = ω₀/Q = 1000/10 = 100 rad/s. Higher Q → narrower bandwidth → more selective filter.
+        </p>
+        <div class="handbook-ref">FE Handbook ref: Series Resonance — Q = ω₀L/R = 1/(ω₀CR),  BW = ω₀/Q</div>
+      </div>
+      <img src="plots/q2_rlc_resonance.png" alt="RLC Resonance Impedance Plot">
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════════
+       Q3 — 7C: Laplace Transforms
+  ═══════════════════════════════════════════════════════════════ -->
+  <div class="q-card" id="qcard-3">
+    <div class="q-header">
+      <span class="q-num">Question 3 of 4</span>
+      <span class="q-tag">7C — Laplace Transforms</span>
+    </div>
+    <div class="q-body">
+      <p class="stem">
+        What is the one-sided (unilateral) Laplace transform F(s) of the signal
+        f(t) = 3 sin(2t) u(t), where u(t) is the unit step function?
+      </p>
+      <div class="given-box">
+        f(t) = 3 sin(2t) · u(t)
+        Recall: ℒ{sin(ωt) u(t)} = ω / (s² + ω²)
+      </div>
+      <ul class="options" id="opts-3">
+        <li><label><input type="radio" name="q3" value="A"> (A) &nbsp; F(s) = 3 / (s² + 4)</label></li>
+        <li><label><input type="radio" name="q3" value="B"> (B) &nbsp; F(s) = 6 / (s² + 4)</label></li>
+        <li><label><input type="radio" name="q3" value="C"> (C) &nbsp; F(s) = 6 / (s² + 2)</label></li>
+        <li><label><input type="radio" name="q3" value="D"> (D) &nbsp; F(s) = 3s / (s² + 4)</label></li>
+      </ul>
+    </div>
+    <div class="btn-row">
+      <button class="btn-check" onclick="checkAnswer(3,'B')">Check Answer</button>
+      <span class="result-badge" id="badge-3"></span>
+    </div>
+    <div class="solution" id="sol-3">
+      <h3>Solution — 7C: Laplace Transform</h3>
+      <div class="sol-steps">
+        <p><strong>Standard pair</strong> (from Laplace transform table):</p>
+        <div class="formula">ℒ{sin(ωt) u(t)} = ω / (s² + ω²)</div>
+        <p><strong>Step 1 — Identify ω:</strong></p>
+        <div class="formula">f(t) = 3 sin(2t)  →  amplitude = 3,  ω = 2</div>
+        <p><strong>Step 2 — Apply linearity:</strong></p>
+        <div class="formula">F(s) = 3 · ℒ{sin(2t)}
+     = 3 · [2 / (s² + 2²)]
+     = 3 · [2 / (s² + 4)]
+     = 6 / (s² + 4)</div>
+        <p class="answer-line">Answer: (B)  F(s) = 6 / (s² + 4)</p>
+        <p style="font-size:0.85rem;color:#555;margin-top:6px;">
+          (A) is wrong because ω = 2 was not placed in the numerator.<br>
+          (C) has the wrong denominator constant (should be ω² = 4, not 2).<br>
+          (D) is the cosine transform — ℒ{cos(ωt)} = s/(s²+ω²).
+        </p>
+        <div class="handbook-ref">Laplace table: ℒ{sin(ωt)} = ω/(s²+ω²),  ℒ{cos(ωt)} = s/(s²+ω²)</div>
+      </div>
+      <img src="plots/q3_laplace.png" alt="Laplace Transform Pair Plot">
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════════
+       Q4 — 7D: Transfer Functions
+  ═══════════════════════════════════════════════════════════════ -->
+  <div class="q-card" id="qcard-4">
+    <div class="q-header">
+      <span class="q-num">Question 4 of 4</span>
+      <span class="q-tag">7D — Transfer Functions</span>
+    </div>
+    <div class="q-body">
+      <p class="stem">
+        A second-order LTI system has the transfer function shown below.
+        What are the poles of H(s)?
+      </p>
+      <div class="given-box">
+        H(s) = 50 / (s² + 7s + 50)
+      </div>
+      <ul class="options" id="opts-4">
+        <li><label><input type="radio" name="q4" value="A"> (A) &nbsp; s = −7 ± j50</label></li>
+        <li><label><input type="radio" name="q4" value="B"> (B) &nbsp; s = −3.5 ± j6.14</label></li>
+        <li><label><input type="radio" name="q4" value="C"> (C) &nbsp; s = −5 ± j5</label></li>
+        <li><label><input type="radio" name="q4" value="D"> (D) &nbsp; s = −3.5 ± j7.07</label></li>
+      </ul>
+    </div>
+    <div class="btn-row">
+      <button class="btn-check" onclick="checkAnswer(4,'B')">Check Answer</button>
+      <span class="result-badge" id="badge-4"></span>
+    </div>
+    <div class="solution" id="sol-4">
+      <h3>Solution — 7D: Transfer Function Poles</h3>
+      <div class="sol-steps">
+        <p><strong>Method:</strong> Set denominator = 0 and apply quadratic formula.</p>
+        <div class="formula">Denominator: s² + 7s + 50 = 0
+Quadratic formula: s = [−b ± √(b²−4ac)] / 2a
+  a=1, b=7, c=50</div>
+        <p><strong>Step 1 — Discriminant:</strong></p>
+        <div class="formula">Δ = b² − 4ac = 49 − 4(1)(50) = 49 − 200 = −151</div>
+        <p><strong>Step 2 — Poles:</strong></p>
+        <div class="formula">s = (−7 ± √(−151)) / 2
+  = (−7 ± j√151) / 2
+  = −3.5 ± j · (12.288/2)
+  = −3.5 ± j · 6.144</div>
+        <p class="answer-line">Answer: (B)  s = −3.5 ± j6.14</p>
+        <p style="font-size:0.85rem;color:#555;margin-top:8px;">
+          <strong>Damping check:</strong>  Standard 2nd-order form:  s² + 2ζωₙs + ωₙ²<br>
+          ωₙ = √50 ≈ 7.07 rad/s,  2ζωₙ = 7  →  ζ = 7/(2×7.07) ≈ 0.495<br>
+          Since 0 &lt; ζ &lt; 1, the system is <strong>underdamped</strong>. Poles are complex conjugates
+          in the left-half plane (Re &lt; 0), so the system is <strong>stable</strong>.
+        </p>
+        <p style="font-size:0.85rem;color:#555;margin-top:6px;">
+          (D) is wrong — it uses ωₙ = √50 ≈ 7.07 for the imaginary part instead of the actual
+          imaginary component √(ωₙ² − σ²) = √(50 − 12.25) = √37.75 ≈ 6.14.
+        </p>
+        <div class="handbook-ref">2nd-order form: s² + 2ζωₙs + ωₙ²  →  poles at  s = −ζωₙ ± jωₙ√(1−ζ²)</div>
+      </div>
+      <img src="plots/q4_transfer_fn.png" alt="Pole-Zero Map">
+    </div>
+  </div>
+
+</div><!-- end exam-body -->
+
+<div class="exam-footer">
+  NCEES FE Electrical &amp; Computer Engineering Practice &nbsp;|&nbsp;
+  Topic 7: Linear Systems (7A–7D) &nbsp;|&nbsp;
+  Reference: FE Reference Handbook, E&amp;C section p. 356–385
+</div>
+
+<script>
+  var answered = {};
+  var correct_count = 0;
+  var total_answered = 0;
+
+  function checkAnswer(qNum, correctKey) {
+    if (answered[qNum]) return;
+
+    var radios = document.getElementsByName('q' + qNum);
+    var selected = null;
+    for (var i = 0; i < radios.length; i++) {
+      if (radios[i].checked) { selected = radios[i].value; break; }
+    }
+    if (!selected) {
+      alert('Please select an answer before checking.');
+      return;
+    }
+
+    answered[qNum] = true;
+    total_answered++;
+
+    var labels = document.querySelectorAll('#opts-' + qNum + ' label');
+    labels.forEach(function(lbl) {
+      var radio = lbl.querySelector('input');
+      lbl.style.cursor = 'default';
+      radio.disabled = true;
+      if (radio.value === correctKey) {
+        lbl.classList.add('correct');
+      } else if (radio.checked) {
+        lbl.classList.add('incorrect');
+      }
+    });
+
+    var badge = document.getElementById('badge-' + qNum);
+    badge.style.display = 'inline';
+    if (selected === correctKey) {
+      correct_count++;
+      badge.textContent = 'Correct!';
+      badge.className = 'result-badge correct';
+    } else {
+      badge.textContent = 'Incorrect — see solution below.';
+      badge.className = 'result-badge incorrect';
+    }
+
+    var btn = document.querySelector('#qcard-' + qNum + ' .btn-check');
+    btn.disabled = true;
+
+    document.getElementById('sol-' + qNum).style.display = 'block';
+    updateScore();
+  }
+
+  function updateScore() {
+    document.getElementById('score-display').textContent =
+      correct_count + ' / ' + total_answered;
+    var pct = total_answered > 0 ? Math.round(100 * correct_count / total_answered) : 0;
+    document.getElementById('pct-display').textContent = pct + '%';
+    document.getElementById('progress-fill').style.width = pct + '%';
+  }
+</script>
+</body>
+</html>
