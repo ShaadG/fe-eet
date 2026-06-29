@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FE EET — Engineering Portfolio</title>
+<style>
+:root {
+  --bg:        #0d1117;
+  --surface:   #161b22;
+  --card:      #1c2128;
+  --border:    #30363d;
+  --accent:    #58a6ff;
+  --green:     #3fb950;
+  --orange:    #ff7b72;
+  --yellow:    #e3b341;
+  --purple:    #bc8cff;
+  --teal:      #00bcd4;
+  --txt:       #c9d1d9;
+  --txt-dim:   #8b949e;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background: var(--bg);
+  color: var(--txt);
+  font-size: 15px;
+  line-height: 1.6;
+  min-height: 100vh;
+}
+
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+/* ── Header ── */
+header {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 32px 40px 28px;
+}
+
+.header-inner {
+  max-width: 960px;
+  margin: 0 auto;
+}
+
+.badge-row {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 14px;
+  flex-wrap: wrap;
+}
+
+.badge {
+  font-size: 11px;
+  font-family: 'Consolas', monospace;
+  padding: 3px 10px;
+  border-radius: 20px;
+  border: 1px solid;
+  letter-spacing: 0.04em;
+}
+
+.badge-ee  { color: var(--teal);   border-color: var(--teal);   background: rgba(0,188,212,0.08); }
+.badge-eet { color: var(--green);  border-color: var(--green);  background: rgba(63,185,80,0.08); }
+.badge-fe  { color: var(--yellow); border-color: var(--yellow); background: rgba(227,179,65,0.08); }
+
+h1 {
+  font-size: 26px;
+  font-weight: 700;
+  color: #e6edf3;
+  margin-bottom: 8px;
+}
+
+.subtitle {
+  color: var(--txt-dim);
+  font-size: 14px;
+  max-width: 620px;
+}
+
+.subtitle strong { color: var(--txt); }
+
+/* ── Main layout ── */
+main {
+  max-width: 960px;
+  margin: 40px auto;
+  padding: 0 40px 60px;
+}
+
+/* ── Section headers ── */
+.section-label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 16px;
+  margin-top: 40px;
+}
+
+.section-label h2 {
+  font-size: 13px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--txt-dim);
+}
+
+.section-label::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+/* ── Card grid ── */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 14px;
+}
+
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 18px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  transition: border-color 0.15s, background 0.15s;
+  cursor: pointer;
+  text-decoration: none;
+  color: inherit;
+}
+
+.card:hover {
+  border-color: var(--accent);
+  background: #1f2937;
+  text-decoration: none;
+}
+
+.card-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.card-icon {
+  font-size: 18px;
+  line-height: 1;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.card-tag {
+  font-size: 10px;
+  font-family: 'Consolas', monospace;
+  padding: 2px 7px;
+  border-radius: 4px;
+  border: 1px solid var(--border);
+  color: var(--txt-dim);
+  flex-shrink: 0;
+}
+
+.card h3 {
+  font-size: 14px;
+  font-weight: 600;
+  color: #e6edf3;
+  line-height: 1.4;
+}
+
+.card p {
+  font-size: 12.5px;
+  color: var(--txt-dim);
+  line-height: 1.5;
+}
+
+.card-skills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-top: 4px;
+}
+
+.skill-pill {
+  font-size: 10.5px;
+  padding: 2px 8px;
+  border-radius: 12px;
+  background: rgba(88,166,255,0.1);
+  color: var(--accent);
+  border: 1px solid rgba(88,166,255,0.2);
+}
+
+.skill-pill.green  { background: rgba(63,185,80,0.1);  color: var(--green);  border-color: rgba(63,185,80,0.2); }
+.skill-pill.yellow { background: rgba(227,179,65,0.1); color: var(--yellow); border-color: rgba(227,179,65,0.2); }
+.skill-pill.purple { background: rgba(188,140,255,0.1);color: var(--purple); border-color: rgba(188,140,255,0.2); }
+.skill-pill.teal   { background: rgba(0,188,212,0.1);  color: var(--teal);   border-color: rgba(0,188,212,0.2); }
+.skill-pill.orange { background: rgba(255,123,114,0.1);color: var(--orange); border-color: rgba(255,123,114,0.2); }
+
+/* ── Footer ── */
+footer {
+  border-top: 1px solid var(--border);
+  padding: 24px 40px;
+  text-align: center;
+  font-size: 12px;
+  color: var(--txt-dim);
+}
+
+footer a { color: var(--txt-dim); }
+footer a:hover { color: var(--accent); }
+
+@media (max-width: 600px) {
+  header  { padding: 24px 20px 20px; }
+  main    { padding: 0 20px 40px; }
+  footer  { padding: 20px; }
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <div class="badge-row">
+      <span class="badge badge-ee">Electrical Engineer</span>
+      <span class="badge badge-eet">EET — PCB &amp; Test</span>
+      <span class="badge badge-fe">FE Exam Prep</span>
+    </div>
+    <h1>FE EET — Engineering Portfolio</h1>
+    <p class="subtitle">
+      Applied study workspace covering <strong>circuit analysis</strong>, <strong>signal processing</strong>,
+      <strong>PCB troubleshooting</strong>, and <strong>test instrumentation</strong> —
+      built with Python + HTML for real bench and manufacturing contexts.
+    </p>
+  </div>
+</header>
+
+<main>
+
+  <!-- ── EET Scenarios ── -->
+  <div class="section-label"><h2>EET — PCB Troubleshooting Scenarios</h2></div>
+  <div class="grid">
+
+    <a class="card" href="Electrical_Electronic_Technician/scenario_power_rail_01/scenario_power_rail_01.html">
+      <div class="card-top">
+        <span class="card-icon">⚡</span>
+        <span class="card-tag">SCENARIO 01</span>
+      </div>
+      <h3>3.3V Power Rail Brownout</h3>
+      <p>Scope-driven diagnosis of a voltage sag event. Simulated waveforms at three test points — clean rail, noisy rail, and brownout capture.</p>
+      <div class="card-skills">
+        <span class="skill-pill teal">Oscilloscope</span>
+        <span class="skill-pill green">Power Systems</span>
+        <span class="skill-pill yellow">Circuit Analysis</span>
+      </div>
+    </a>
+
+    <a class="card" href="Electrical_Electronic_Technician/scenario_fe_math_02.html">
+      <div class="card-top">
+        <span class="card-icon">📊</span>
+        <span class="card-tag">SCENARIO 02</span>
+      </div>
+      <h3>Applied Statistics — Manufacturing Floor</h3>
+      <p>Binomial ICT pass/fail rates, normal distribution screening, process capability (Cpk), and phasor trig — all in a production context.</p>
+      <div class="card-skills">
+        <span class="skill-pill purple">Probability &amp; Stats</span>
+        <span class="skill-pill yellow">Trig / Phasors</span>
+        <span class="skill-pill green">ICT / Test</span>
+      </div>
+    </a>
+
+    <a class="card" href="Electrical_Electronic_Technician/scenario_math_applied_01.html">
+      <div class="card-top">
+        <span class="card-icon">📐</span>
+        <span class="card-tag">SCENARIO 03</span>
+      </div>
+      <h3>Applied Math — Bench Measurement</h3>
+      <p>Measurement uncertainty, geometry, and trigonometry applied to real instrument readings and PCB trace analysis.</p>
+      <div class="card-skills">
+        <span class="skill-pill yellow">Measurement Math</span>
+        <span class="skill-pill purple">Geometry</span>
+        <span class="skill-pill teal">Instrumentation</span>
+      </div>
+    </a>
+
+  </div>
+
+  <!-- ── EET Reference Tools ── -->
+  <div class="section-label"><h2>EET — Reference &amp; Workflow Tools</h2></div>
+  <div class="grid">
+
+    <a class="card" href="Electrical_Electronic_Technician/analysis_eet.html">
+      <div class="card-top">
+        <span class="card-icon">🔬</span>
+        <span class="card-tag">ANALYSIS</span>
+      </div>
+      <h3>EET Signal Analysis</h3>
+      <p>ESR comparison, RLC Bode plots, FFT noise floor, step response, and triangle wave harmonics — generated from Python, embedded as reference charts.</p>
+      <div class="card-skills">
+        <span class="skill-pill teal">Bode / FFT</span>
+        <span class="skill-pill green">Signal Processing</span>
+        <span class="skill-pill yellow">Python / matplotlib</span>
+      </div>
+    </a>
+
+    <a class="card" href="Electrical_Electronic_Technician/waveform_visualization.html">
+      <div class="card-top">
+        <span class="card-icon">〰️</span>
+        <span class="card-tag">TOOL</span>
+      </div>
+      <h3>Waveform Visualization</h3>
+      <p>Interactive oscilloscope-style waveform reference. Time-domain display with annotated measurement markers.</p>
+      <div class="card-skills">
+        <span class="skill-pill teal">Oscilloscope</span>
+        <span class="skill-pill green">Signal Integrity</span>
+      </div>
+    </a>
+
+    <a class="card" href="Electrical_Electronic_Technician/interview_prep_test_equipment.html">
+      <div class="card-top">
+        <span class="card-icon">🧰</span>
+        <span class="card-tag">PREP</span>
+      </div>
+      <h3>Test Equipment Interview Prep</h3>
+      <p>Structured Q&amp;A and reference guide covering oscilloscope, multimeter, and spectrum analyzer operation for technical interviews.</p>
+      <div class="card-skills">
+        <span class="skill-pill teal">Instrumentation</span>
+        <span class="skill-pill green">Measurement</span>
+      </div>
+    </a>
+
+    <a class="card" href="Electrical_Electronic_Technician/daily_workflow_simulation.html">
+      <div class="card-top">
+        <span class="card-icon">🗓️</span>
+        <span class="card-tag">WORKFLOW</span>
+      </div>
+      <h3>Daily Workflow Simulation</h3>
+      <p>Simulated technician daily workflow — test station bring-up, yield tracking, defect logging — modeled on a Jabil-style manufacturing environment.</p>
+      <div class="card-skills">
+        <span class="skill-pill orange">Jabil / MFG</span>
+        <span class="skill-pill green">ICT / Flying Probe</span>
+      </div>
+    </a>
+
+    <a class="card" href="Electrical_Electronic_Technician/fe_theory_to_bench_practice.html">
+      <div class="card-top">
+        <span class="card-icon">🔗</span>
+        <span class="card-tag">REFERENCE</span>
+      </div>
+      <h3>FE Theory → Bench Practice</h3>
+      <p>Bridges FE exam concepts to real bench procedures — what a formula means when you're holding a probe, not a pencil.</p>
+      <div class="card-skills">
+        <span class="skill-pill yellow">FE Exam</span>
+        <span class="skill-pill teal">Bench Application</span>
+      </div>
+    </a>
+
+  </div>
+
+  <!-- ── Electrical Engineer ── -->
+  <div class="section-label"><h2>Electrical Engineer — Design &amp; Reference</h2></div>
+  <div class="grid">
+
+    <a class="card" href="Electrical_Engineer/interview_ee1_star.html">
+      <div class="card-top">
+        <span class="card-icon">🎯</span>
+        <span class="card-tag">INTERVIEW</span>
+      </div>
+      <h3>EE I — STAR Method Interview Prep</h3>
+      <p>Structured STAR-format talking points mapping engineering skills to job requirements. Used as a live interview reference.</p>
+      <div class="card-skills">
+        <span class="skill-pill purple">Interview Prep</span>
+        <span class="skill-pill green">EE I Role</span>
+      </div>
+    </a>
+
+    <a class="card" href="Electrical_Engineer/oscilloscope_guide.html">
+      <div class="card-top">
+        <span class="card-icon">📡</span>
+        <span class="card-tag">GUIDE</span>
+      </div>
+      <h3>Oscilloscope Operation Guide</h3>
+      <p>Comprehensive oscilloscope reference — triggering, probe compensation, measurement modes, and signal integrity interpretation.</p>
+      <div class="card-skills">
+        <span class="skill-pill teal">Oscilloscope</span>
+        <span class="skill-pill green">Signal Integrity</span>
+      </div>
+    </a>
+
+    <a class="card" href="Electrical_Engineer/pcb_calculators.html">
+      <div class="card-top">
+        <span class="card-icon">🔢</span>
+        <span class="card-tag">CALCULATOR</span>
+      </div>
+      <h3>PCB Design Calculators</h3>
+      <p>Interactive calculators for trace width (IPC-2221), impedance, via current capacity, and power dissipation.</p>
+      <div class="card-skills">
+        <span class="skill-pill yellow">IPC-2221</span>
+        <span class="skill-pill teal">Trace / Impedance</span>
+        <span class="skill-pill green">PCB Design</span>
+      </div>
+    </a>
+
+    <a class="card" href="Electrical_Engineer/ipc610_workmanship.html">
+      <div class="card-top">
+        <span class="card-icon">🏭</span>
+        <span class="card-tag">STANDARD</span>
+      </div>
+      <h3>IPC-610 Workmanship Reference</h3>
+      <p>Acceptance criteria for PCB assembly — solder joint quality, component placement, and inspection standards used in manufacturing.</p>
+      <div class="card-skills">
+        <span class="skill-pill orange">IPC-610</span>
+        <span class="skill-pill green">Assembly / Inspection</span>
+      </div>
+    </a>
+
+    <a class="card" href="Electrical_Engineer/waveform_boundary_scan.html">
+      <div class="card-top">
+        <span class="card-icon">🔍</span>
+        <span class="card-tag">BOUNDARY SCAN</span>
+      </div>
+      <h3>Boundary Scan / JTAG Waveforms</h3>
+      <p>JTAG TAP controller state machine, TDI/TDO timing diagrams, and boundary scan use for in-circuit testing.</p>
+      <div class="card-skills">
+        <span class="skill-pill purple">JTAG / JTAG</span>
+        <span class="skill-pill teal">Boundary Scan</span>
+        <span class="skill-pill green">ICT</span>
+      </div>
+    </a>
+
+  </div>
+
+  <!-- ── FE Exam ── -->
+  <div class="section-label"><h2>FE Exam — Linear Systems</h2></div>
+  <div class="grid">
+
+    <a class="card" href="FE_exam/linear_systems/practice.html">
+      <div class="card-top">
+        <span class="card-icon">📈</span>
+        <span class="card-tag">PRACTICE</span>
+      </div>
+      <h3>Linear Systems Practice</h3>
+      <p>Interactive FE-style practice problems: RC transient response, RLC resonance, Laplace transforms, and transfer functions — with Python-generated plots.</p>
+      <div class="card-skills">
+        <span class="skill-pill yellow">FE Exam</span>
+        <span class="skill-pill green">Laplace / Transfer Fn</span>
+        <span class="skill-pill teal">RC / RLC Circuits</span>
+      </div>
+    </a>
+
+  </div>
+
+</main>
+
+<footer>
+  <a href="https://github.com/ShaadG/fe-eet" target="_blank">github.com/ShaadG/fe-eet</a>
+  &nbsp;·&nbsp; Python + HTML/CSS/JS &nbsp;·&nbsp; NCEES FE ECE · IPC-2221 · IPC-610
+</footer>
+
+</body>
+</html>
