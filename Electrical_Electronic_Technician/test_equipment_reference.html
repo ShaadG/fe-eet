@@ -233,7 +233,7 @@
         "Walk me through exactly how you would use a multimeter to verify that a 3.3V power rail on a PCB is within spec. What mode do you select, where do you place your probes, and what would cause you to flag the result as a failure?"
       </p>
       <div class="tip-box">
-        <strong>What they're listening for:</strong> Correct mode selection (DC voltage), probe discipline (black to GND first), knowledge of tolerance (typically ±5%), and that you know a DC multimeter can miss transient sags — which leads naturally into why an oscilloscope is also needed.
+        <strong>Key points to demonstrate:</strong> Correct mode selection (DC voltage), probe discipline (black to GND first), knowledge of tolerance (typically ±5%), and that you know a DC multimeter can miss transient sags — which leads naturally into why an oscilloscope is also needed.
       </div>
       <textarea class="answer-area" placeholder="Type your answer here before revealing the model response..."></textarea>
     </div>
@@ -288,7 +288,7 @@
         "You're looking at a 3.3V power rail on an oscilloscope and the waveform appears noisy — there are rapid, irregular fluctuations riding on top of the DC level. How do you interpret what you're seeing, and what are your next diagnostic steps?"
       </p>
       <div class="tip-box">
-        <strong>What they're listening for:</strong> That you understand the difference between DC offset (multimeter territory) and AC ripple/noise (oscilloscope territory). They want to hear you switch to AC coupling to isolate the noise, estimate its frequency and amplitude, and connect it to a likely cause — bad decoupling cap, switching regulator noise, or crosstalk.
+        <strong>Key points to demonstrate:</strong> That you understand the difference between DC offset (multimeter territory) and AC ripple/noise (oscilloscope territory). Show that you switch to AC coupling to isolate the noise, estimate its frequency and amplitude, and connect it to a likely cause — bad decoupling cap, switching regulator noise, or crosstalk.
       </div>
       <textarea class="answer-area" placeholder="Type your answer here before revealing the model response..."></textarea>
     </div>
@@ -343,7 +343,7 @@
         "Describe how you would use a multimeter to test three common components: a resistor, a capacitor, and a diode. What mode do you use for each, what does a passing result look like, and what tells you a component has failed?"
       </p>
       <div class="tip-box">
-        <strong>What they're listening for:</strong> Correct mode for each (Ω, capacitance/Ω, diode test). Critically — they want to hear that you know to <strong>remove the component from the circuit or power down the board</strong> before measuring resistance. Getting this detail right signals real hands-on awareness, not just textbook knowledge.
+        <strong>Key points to demonstrate:</strong> Correct mode for each (Ω, capacitance/Ω, diode test). Critically — demonstrate that you know to <strong>remove the component from the circuit or power down the board</strong> before measuring resistance. Getting this detail right signals real hands-on awareness, not just textbook knowledge.
       </div>
       <textarea class="answer-area" placeholder="Type your answer here before revealing the model response..."></textarea>
     </div>
@@ -401,7 +401,7 @@
         "What safety precautions do you take before and during probing a live PCB with a multimeter or oscilloscope? What are the risks you're protecting against, and how does your approach change between a low-voltage 3.3V logic board and a board that includes an AC mains section?"
       </p>
       <div class="tip-box">
-        <strong>What they're listening for:</strong> ESD strap (protects the board), insulated probes (protects you), correct probe input jack selection, ground clip placement, and the critical distinction that low-voltage DC boards are mostly ESD and short risks — while AC mains boards carry lethal shock risk requiring different protocol entirely.
+        <strong>Key points to demonstrate:</strong> ESD strap (protects the board), insulated probes (protects you), correct probe input jack selection, ground clip placement, and the critical distinction that low-voltage DC boards are mostly ESD and short risks — while AC mains boards carry lethal shock risk requiring different protocol entirely.
       </div>
       <textarea class="answer-area" placeholder="Type your answer here before revealing the model response..."></textarea>
     </div>
@@ -456,7 +456,7 @@
         "I'm going to describe an oscilloscope display and I want you to tell me the frequency, period, and amplitude of the signal. The scope is set to 1 µs/div horizontal and 2 V/div vertical. The waveform completes one full cycle across 4 horizontal divisions, and its peak-to-peak height spans 3 vertical divisions. Walk me through your calculation."
       </p>
       <div class="tip-box">
-        <strong>What they're listening for:</strong> That you know Period = divisions × time-per-div, Frequency = 1/Period, and Amplitude = divisions × volts-per-div. They want to see you work through it methodically — this is a straight calculation question and the only wrong answer is skipping the work and guessing.
+        <strong>Key points to demonstrate:</strong> That you know Period = divisions × time-per-div, Frequency = 1/Period, and Amplitude = divisions × volts-per-div. Show that you work through it methodically — this is a straight calculation question and the only wrong answer is skipping the work and guessing.
         <br><br>
         <strong>Expected answers:</strong> Period = 4 µs · Frequency = 250 kHz · Amplitude = 6 V peak-to-peak.
       </div>
