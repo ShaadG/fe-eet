@@ -1,0 +1,955 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EE I Value Positioning (STAR Method)</title>
+<style>
+  :root {
+    --bg:         #0d1117;
+    --surface:    #161b22;
+    --card:       #1c2128;
+    --border:     #30363d;
+    --accent:     #58a6ff;
+    --green:      #3fb950;
+    --orange:     #ff7b72;
+    --yellow:     #e3b341;
+    --purple:     #bc8cff;
+    --cyan:       #39d353;
+    --txt:        #c9d1d9;
+    --txt-dim:    #8b949e;
+    --altium-top: #1f2937;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: var(--bg);
+    color: var(--txt);
+    font-size: 15px;
+    line-height: 1.7;
+  }
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  code {
+    background: #2d333b;
+    color: var(--cyan);
+    padding: 1px 6px;
+    border-radius: 4px;
+    font-size: 0.88em;
+    font-family: 'Courier New', monospace;
+  }
+
+  /* ── Altium header ─────────────────────────────────────── */
+  .header {
+    background: var(--altium-top);
+    border-bottom: 2px solid #2563eb;
+    padding: 0 28px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    flex-wrap: wrap;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    min-height: 54px;
+  }
+  .header-title {
+    font-size: 1.0em;
+    font-weight: 700;
+    color: #e2e8f0;
+    padding: 14px 0;
+    letter-spacing: 0.02em;
+  }
+  .badge {
+    font-size: 0.72em;
+    font-weight: 700;
+    padding: 3px 10px;
+    border-radius: 3px;
+    letter-spacing: 0.05em;
+  }
+  .b-cad  { background: #1d4ed8; color: #e2e8f0; }
+  .b-ee1  { background: #065f46; color: #a7f3d0; }
+  .b-star { background: #7c3aed; color: #ede9fe; }
+
+  /* ── Layout ───────────────────────────────────────────── */
+  .layout { display: flex; min-height: calc(100vh - 54px); }
+  .sidebar {
+    width: 230px;
+    min-width: 190px;
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    padding: 22px 0;
+    position: sticky;
+    top: 54px;
+    height: calc(100vh - 54px);
+    overflow-y: auto;
+  }
+  .sb-label {
+    font-size: 0.70em;
+    color: var(--txt-dim);
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    padding: 4px 18px 6px;
+  }
+  .sidebar a {
+    display: block;
+    padding: 7px 18px;
+    color: var(--txt-dim);
+    font-size: 0.87em;
+    border-left: 3px solid transparent;
+    transition: all .15s;
+  }
+  .sidebar a:hover {
+    background: rgba(88,166,255,.08);
+    color: var(--accent);
+    border-left-color: var(--accent);
+    text-decoration: none;
+  }
+  .sb-section { margin-top: 20px; }
+  .main { flex: 1; padding: 32px 36px 80px; max-width: 980px; }
+
+  /* ── Value banner ─────────────────────────────────────── */
+  .value-banner {
+    background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
+    border: 1px solid #3730a3;
+    border-radius: 10px;
+    padding: 24px 28px;
+    margin-bottom: 36px;
+  }
+  .value-banner h2 { font-size: 1.1em; color: #a5b4fc; margin-bottom: 10px; }
+  .value-banner p  { font-size: 0.92em; color: #c7d2fe; line-height: 1.75; }
+  .distinction-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-top: 18px;
+  }
+  @media (max-width: 680px) { .distinction-row { grid-template-columns: 1fr; } }
+  .d-col h3 {
+    font-size: 0.78em;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+  .d-col.eet h3 { color: #fb923c; }
+  .d-col.ee1 h3 { color: #34d399; }
+  .d-col li {
+    font-size: 0.89em;
+    color: var(--txt-dim);
+    padding: 5px 0 5px 16px;
+    border-bottom: 1px solid rgba(255,255,255,.04);
+    position: relative;
+    list-style: none;
+  }
+  .d-col.eet li::before { content: '•'; position: absolute; left: 0; color: #fb923c; }
+  .d-col.ee1 li::before { content: '▸'; position: absolute; left: 0; color: #34d399; }
+
+  /* ── Conversation block ───────────────────────────────── */
+  .convo-block {
+    margin-bottom: 50px;
+    scroll-margin-top: 68px;
+  }
+  .convo-header {
+    background: #1f2937;
+    border: 1px solid var(--border);
+    border-bottom: none;
+    border-radius: 8px 8px 0 0;
+    padding: 15px 22px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .q-num {
+    background: #2563eb;
+    color: #fff;
+    font-size: 0.78em;
+    font-weight: 800;
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .q-text {
+    font-size: 1.02em;
+    color: #e2e8f0;
+    font-weight: 600;
+    font-style: italic;
+  }
+
+  /* ── STAR turns ───────────────────────────────────────── */
+  .convo-body {
+    border: 1px solid var(--border);
+    border-radius: 0 0 8px 8px;
+    overflow: hidden;
+  }
+  .turn {
+    display: grid;
+    grid-template-columns: 120px 1fr;
+    border-bottom: 1px solid var(--border);
+  }
+  .turn:last-child { border-bottom: none; }
+  .turn-label {
+    padding: 18px 14px 18px 18px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: flex-start;
+    padding-top: 22px;
+    border-right: 1px solid var(--border);
+    gap: 3px;
+  }
+  .turn-who {
+    font-size: 0.70em;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  .turn-star {
+    font-size: 0.68em;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--txt-dim);
+    margin-top: 3px;
+  }
+  .turn-star span {
+    display: inline-block;
+    padding: 1px 5px;
+    border-radius: 3px;
+    font-weight: 700;
+  }
+
+  /* STAR label colors */
+  .lbl-s span { background: rgba(29,78,216,.18); color: #93c5fd; }
+  .lbl-t span { background: rgba(6,95,70,.18); color: #6ee7b7; }
+  .lbl-a span { background: rgba(124,58,237,.18); color: #c084fc; }
+  .lbl-r span { background: rgba(146,64,14,.18); color: #fbbf24; }
+
+  /* Row background tints */
+  .turn.s-S { background: rgba(29,78,216,.03); }
+  .turn.s-T { background: rgba(6,95,70,.03); }
+  .turn.s-A { background: rgba(124,58,237,.03); }
+  .turn.s-R { background: rgba(146,64,14,.03); }
+  .turn.s-I { background: rgba(88,166,255,.02); }
+
+  .hiring-manager .turn-who { color: #94a3b8; }
+  .you         .turn-who { color: #34d399; }
+
+  .turn-body {
+    padding: 18px 24px;
+    font-size: 0.95em;
+    line-height: 1.8;
+    color: var(--txt);
+  }
+  .turn-body p { margin-bottom: 10px; }
+  .turn-body p:last-child { margin-bottom: 0; }
+
+  /* ── EE I lift box ────────────────────────────────────── */
+  .ee1-lift {
+    background: #071f1f;
+    border: 1px solid #134e4a;
+    border-left: 4px solid #2dd4bf;
+    border-radius: 0 6px 6px 0;
+    padding: 12px 16px;
+    margin-top: 14px;
+    font-size: 0.87em;
+  }
+  .ee1-lift-lbl {
+    font-size: 0.70em;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #2dd4bf;
+    font-weight: 700;
+    margin-bottom: 5px;
+  }
+  .ee1-lift p { color: #a5f3fc; line-height: 1.65; }
+
+  /* ── Keyword chips ────────────────────────────────────── */
+  .chips { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 14px; }
+  .chip {
+    font-size: 0.73em;
+    font-weight: 600;
+    padding: 3px 10px;
+    border-radius: 10px;
+    border: 1px solid;
+  }
+  .c-blue   { background: rgba(59,130,246,.12); color: #93c5fd; border-color: rgba(59,130,246,.3); }
+  .c-green  { background: rgba(52,211,153,.10); color: #6ee7b7; border-color: rgba(52,211,153,.3); }
+  .c-purple { background: rgba(192,132,252,.10); color: #d8b4fe; border-color: rgba(192,132,252,.3); }
+  .c-yellow { background: rgba(251,191,36,.10); color: #fde68a; border-color: rgba(251,191,36,.3); }
+  .c-red    { background: rgba(248,113,113,.10); color: #fca5a5; border-color: rgba(248,113,113,.3); }
+
+  /* ── Section headers ──────────────────────────────────── */
+  .sec-hdr {
+    margin: 40px 0 20px;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 10px;
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+  }
+  .sec-hdr h2 { font-size: 1.1em; color: #e2e8f0; font-weight: 600; }
+  .sec-tag {
+    font-size: 0.72em;
+    background: rgba(88,166,255,.12);
+    color: var(--accent);
+    border: 1px solid rgba(88,166,255,.3);
+    padding: 2px 8px;
+    border-radius: 3px;
+  }
+
+  /* ── CAD notes ────────────────────────────────────────── */
+  .cad-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  @media (max-width: 680px) { .cad-grid { grid-template-columns: 1fr; } }
+  .cad-card {
+    background: #111827;
+    border: 1px solid #374151;
+    border-radius: 6px;
+    padding: 14px 16px;
+  }
+  .cad-card h4 { color: #60a5fa; font-size: 0.88em; margin-bottom: 8px; }
+  .cad-card p, .cad-card li { font-size: 0.86em; color: var(--txt-dim); line-height: 1.65; }
+  .cad-card ul { padding-left: 16px; }
+  .cad-card li { margin-bottom: 4px; }
+</style>
+</head>
+<body>
+
+<!-- ── Altium header ─────────────────────────────────────────────────────── -->
+<header class="header">
+  <span class="header-title">EE I Value Positioning (STAR Method)</span>
+  <span class="badge b-cad">Altium Designer / OrCAD / Eagle view</span>
+  <span class="badge b-ee1">EE I Targeting</span>
+  <span class="badge b-star">STAR Method</span>
+</header>
+
+<div class="layout">
+
+  <!-- Sidebar -->
+  <nav class="sidebar">
+    <div class="sb-label">Conversations</div>
+    <a href="#q1">Q1 — Root Cause Analysis</a>
+    <a href="#q2">Q2 — What Sets You Apart</a>
+    <a href="#q3">Q3 — Signal Processing</a>
+    <a href="#q4">Q4 — HW + SW Together</a>
+    <a href="#q5">Q5 — Component Selection</a>
+
+    <div class="sb-section">
+      <div class="sb-label">Source Files</div>
+      <a href="waveform_boundary_scan.html">Waveform + Boundary-Scan</a>
+      <a href="../Electrical_Electronic_Technician/analysis_eet.html">Python Analysis (EET)</a>
+      <a href="../Electrical_Electronic_Technician/daily_workflow_simulation.html">Daily Workflow</a>
+      <a href="../Electrical_Electronic_Technician/fe_theory_to_bench_practice.html">FE → Bench Practice</a>
+      <a href="../Electrical_Electronic_Technician/scenario_power_rail_01/scenario_power_rail_01.html">Scenario 01</a>
+    </div>
+
+    <div class="sb-section">
+      <div class="sb-label">CAD Notes</div>
+      <a href="#cad">Altium / IPC Reference</a>
+    </div>
+  </nav>
+
+  <!-- Main content -->
+  <main class="main">
+
+    <!-- Value distinction banner -->
+    <div class="value-banner">
+      <h2>The Core Distinction to Land in Every Answer</h2>
+      <p>An EET uses instruments. An EE I builds the systems those instruments run on — models
+      failure mathematically before touching the board, automates the measurement sequence with
+      SCPI, and produces engineering documentation with quantified findings. Every conversation
+      below drives that distinction home using work you actually built.</p>
+      <div class="distinction-row">
+        <div class="d-col eet">
+          <h3>Electronic Engineering Technician</h3>
+          <ul>
+            <li>Measures rail voltages at test points</li>
+            <li>Reads waveforms on an oscilloscope</li>
+            <li>Identifies that a component is bad</li>
+            <li>Follows a documented test procedure</li>
+            <li>Replaces the component and re-tests</li>
+            <li>Logs pass/fail in MES</li>
+          </ul>
+        </div>
+        <div class="d-col ee1">
+          <h3>Electrical Engineer I — Your Position</h3>
+          <ul>
+            <li>Calculates expected rail behavior before probing</li>
+            <li>Writes SCPI automation that runs the test sequence</li>
+            <li>Derives root cause from transfer function math</li>
+            <li>Designs the test procedure from engineering analysis</li>
+            <li>Selects the replacement component analytically</li>
+            <li>Generates an engineering report with quantified findings</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- ═══════════════════════════════════════════════════════════════
+         Q1 — Root cause analysis
+    ═══════════════════════════════════════════════════════════════════ -->
+    <div class="convo-block" id="q1">
+      <div class="convo-header">
+        <div class="q-num">1</div>
+        <div class="q-text">"Tell me about a time you diagnosed a hardware problem using engineering analysis rather than just trial and error."</div>
+      </div>
+      <div class="convo-body">
+
+        <div class="turn s-I hiring-manager">
+          <div class="turn-label">
+            <span class="turn-who">Hiring Manager</span>
+          </div>
+          <div class="turn-body">
+            <p>"So walk me through what you've been doing to prepare for this role."</p>
+          </div>
+        </div>
+
+        <div class="turn s-S you">
+          <div class="turn-label">
+            <span class="turn-who">You</span>
+            <span class="turn-star lbl-s"><span>Situation</span></span>
+          </div>
+          <div class="turn-body">
+            <p>"Sure. I built out a full engineering study workspace — not just reading notes, but
+            actually building tools. I have three connected folders: FE exam theory, electrical
+            engineering design, and a technician-level folder with real PCB troubleshooting scenarios.
+            The thing I want to walk you through is a power rail failure scenario I built, because
+            it shows exactly how I approach problems."</p>
+            <p>"The board had intermittent resets. The 3.3 volt rail was sagging below the MCU's
+            brownout threshold. A technician looks at that and swaps the bypass capacitor. What I
+            did instead was model it first."</p>
+          </div>
+        </div>
+
+        <div class="turn s-T you">
+          <div class="turn-label">
+            <span class="turn-who">You</span>
+            <span class="turn-star lbl-t"><span>Task</span></span>
+          </div>
+          <div class="turn-body">
+            <p>"My goal was to derive the root cause from the math before touching anything — calculate
+            what the scope should show based on the component parameters, then confirm it with actual
+            measurements. That loop — model first, measure second — is the difference between a
+            technician replacing parts until something works and an engineer closing the loop between
+            the physics and the data."</p>
+          </div>
+        </div>
+
+        <div class="turn s-A you">
+          <div class="turn-label">
+            <span class="turn-who">You</span>
+            <span class="turn-star lbl-a"><span>Action</span></span>
+          </div>
+          <div class="turn-body">
+            <p>"I started with the RC transient formula — tau equals ESR times C. A healthy 22
+            microfarad bypass cap with 0.05 ohm ESR gives you a 1 microsecond time constant, meaning
+            the rail recovers almost instantly after a load step. But if that ESR degrades to 2 ohms,
+            tau jumps to 44 microseconds, and the instantaneous voltage drop is I times ESR — at 150
+            milliamps that's 300 millivolts. That crosses the 2.97 volt brownout threshold. So I knew
+            the root cause from the math before I even picked up a probe."</p>
+            <p>"Then I wrote a Python script using scipy and matplotlib that plotted both cases side
+            by side so I could visualize the sag depth and recovery time. And then I wrote a pyvisa
+            automation script that sent real SCPI commands to a bench power supply, a DMM, and an
+            oscilloscope — measured the ESR at 2.0 ohms, the rail minimum at 2.88 volts, the ripple
+            at 1 kilohertz — exactly what the model predicted."</p>
+          </div>
+        </div>
+
+        <div class="turn s-I hiring-manager">
+          <div class="turn-label">
+            <span class="turn-who">Hiring Manager</span>
+          </div>
+          <div class="turn-body">
+            <p>"What did the documentation look like at the end of that?"</p>
+          </div>
+        </div>
+
+        <div class="turn s-R you">
+          <div class="turn-label">
+            <span class="turn-who">You</span>
+            <span class="turn-star lbl-r"><span>Result</span></span>
+          </div>
+          <div class="turn-body">
+            <p>"The NCR came out with engineering justification — not just 'replaced C2 and it worked,'
+            but a calculated failure mode with a quantified ESR threshold, a time constant comparison
+            between the good and bad cap, and scope data showing the rail sag crossing the brownout
+            line. That's something an engineer produces, not a technician. And because it's a model,
+            not a one-time fix — if that same failure shows up on a different board with a different
+            cap value, I recalculate tau for the new C and the answer scales."</p>
+
+            <div class="ee1-lift">
+              <div class="ee1-lift-lbl">EE I Lift</div>
+              <p>You're not just fixing the symptom. You're building a failure model that applies
+              across the product line. That's the engineering judgment that makes you worth more
+              than someone replacing parts until the board passes.</p>
+            </div>
+          </div>
+        </div>
+
+      </div>
+      <div class="chips">
+        <span class="chip c-blue">RC transient · τ = ESR × C</span>
+        <span class="chip c-purple">pyvisa · SCPI automation</span>
+        <span class="chip c-purple">scipy · matplotlib</span>
+        <span class="chip c-green">NCR documentation</span>
+        <span class="chip c-yellow">IPC-7711 rework</span>
+      </div>
+    </div>
+
+
+    <!-- ═══════════════════════════════════════════════════════════════
+         Q2 — What sets you apart
+    ═══════════════════════════════════════════════════════════════════ -->
+    <div class="convo-block" id="q2">
+      <div class="convo-header">
+        <div class="q-num">2</div>
+        <div class="q-text">"What sets you apart from other candidates applying for this EE I role?"</div>
+      </div>
+      <div class="convo-body">
+
+        <div class="turn s-I hiring-manager">
+          <div class="turn-label"><span class="turn-who">Hiring Manager</span></div>
+          <div class="turn-body">
+            <p>"You mentioned you're coming from a non-traditional background. Why should we consider
+            you over someone with a more direct EE work history?"</p>
+          </div>
+        </div>
+
+        <div class="turn s-S you">
+          <div class="turn-label">
+            <span class="turn-who">You</span>
+            <span class="turn-star lbl-s"><span>Situation</span></span>
+          </div>
+          <div class="turn-body">
+            <p>"I'll be honest about it — my work history is in IT and systems administration. I took
+            that seriously and decided the right response wasn't to downplay it, but to show that I've
+            been building real engineering depth on my own, at the level this role actually requires.
+            Not textbook reading — actual tools I built and can demo."</p>
+          </div>
+        </div>
+
+        <div class="turn s-T you">
+          <div class="turn-label">
+            <span class="turn-who">You</span>
+            <span class="turn-star lbl-t"><span>Task</span></span>
+          </div>
+          <div class="turn-body">
+            <p>"I set out to demonstrate I can operate across the full EE I stack: theoretical
+            modeling, Python-based test automation, instrument control over SCPI, and connecting
+            all of that to IPC standards and PCB CAD workflows — not just read waveforms off a scope."</p>
+          </div>
+        </div>
+
+        <div class="turn s-A you">
+          <div class="turn-label">
+            <span class="turn-who">You</span>
+            <span class="turn-star lbl-a"><span>Action</span></span>
+          </div>
+          <div class="turn-body">
+            <p>"On the automation side, I wrote a Python script using pyvisa that sends real SCPI
+            command sequences to a bench power supply, DMM, and oscilloscope — the same bring-up
+            procedure you'd run in a production test environment. It applies voltage with a current
+            limit, sweeps all test points, checks ESR, configures the scope with the right timebase
+            and trigger settings, reads Vpp and Vmin, compares everything against spec limits, and
+            generates a matplotlib test report with pass/fail status and NCR guidance."</p>
+            <p>"On the analysis side I built five scipy-based tools: an ESR transient model, an RLC
+            Bode plot for decoupling network design, an FFT pipeline that pulls raw waveform data
+            off the scope and identifies dominant noise frequencies, a transfer function step response
+            comparison across three damping ratios, and a Fourier series harmonic spectrum showing
+            why triangle-wave PWM carriers generate less EMI than square waves. Every one of those
+            ties back to a specific FE exam topic and to a real measurement you'd make on the bench."</p>
+          </div>
+        </div>
+
+        <div class="turn s-I hiring-manager">
+          <div class="turn-label"><span class="turn-who">Hiring Manager</span></div>
+          <div class="turn-body">
+            <p>"That sounds more like test automation than technician work."</p>
+          </div>
+        </div>
+
+        <div class="turn s-R you">
+          <div class="turn-label">
+            <span class="turn-who">You</span>
+            <span class="turn-star lbl-r"><span>Result</span></span>
+          </div>
+          <div class="turn-body">
+            <p>"Exactly — and that's the point. A technician runs the test. I wrote the test. The
+            SCPI commands I'm using — things like <code>:WAVeform:DATA?</code> to pull raw ADC
+            samples, or <code>:TIMebase:SCALe</code> to configure the scope programmatically —
+            those are what ATE systems use under the hood, whether it's LabVIEW or a Python-based
+            fixture. I understand the command layer, not just the GUI."</p>
+            <p>"And the work is my portfolio — it's not something I'm describing from a past job,
+            it's something I can show you right now. The scripts run, the plots generate, the SCPI
+            sequences are documented with the reasoning behind each command."</p>
+
+            <div class="ee1-lift">
+              <div class="ee1-lift-lbl">EE I Lift</div>
+              <p>You come in with a software-hardware integration skillset that most early-career
+              EEs don't have. You can write test automation, not just execute it. In manufacturing
+              and test environments that's extremely valuable — it means you improve the process,
+              not just run it.</p>
+            </div>
+          </div>
+        </div>
+
+      </div>
+      <div class="chips">
+        <span class="chip c-purple">pyvisa · SCPI command layer</span>
+        <span class="chip c-purple">scipy · numpy · matplotlib</span>
+        <span class="chip c-blue">ATE / test automation mindset</span>
+        <span class="chip c-green">FE theory → bench application</span>
+        <span class="chip c-yellow">IPC standards awareness</span>
+      </div>
+    </div>
+
+
+    <!-- ═══════════════════════════════════════════════════════════════
+         Q3 — Signal processing
+    ═══════════════════════════════════════════════════════════════════ -->
+    <div class="convo-block" id="q3">
+      <div class="convo-header">
+        <div class="q-num">3</div>
+        <div class="q-text">"How do you apply signal processing knowledge to actual hardware work?"</div>
+      </div>
+      <div class="convo-body">
+
+        <div class="turn s-S you">
+          <div class="turn-label">
+            <span class="turn-who">You</span>
+            <span class="turn-star lbl-s"><span>Situation</span></span>
+          </div>
+          <div class="turn-body">
+            <p>"There's a problem that comes up constantly on power rails — you can see on the
+            oscilloscope that the signal is noisy, but the time-domain waveform doesn't tell you
+            where the noise is coming from. Switching regulator, a clock harmonic, external coupling
+            — they all look like ripple on the screen. Without frequency-domain analysis you're
+            guessing at the source."</p>
+          </div>
+        </div>
+
+        <div class="turn s-T you">
+          <div class="turn-label">
+            <span class="turn-who">You</span>
+            <span class="turn-star lbl-t"><span>Task</span></span>
+          </div>
+          <div class="turn-body">
+            <p>"I wanted a workflow that moves from a time-domain oscilloscope capture to a
+            frequency-domain signature automatically — so the noise source is identified by the
+            data, not by instinct."</p>
+          </div>
+        </div>
+
+        <div class="turn s-A you">
+          <div class="turn-label">
+            <span class="turn-who">You</span>
+            <span class="turn-star lbl-a"><span>Action</span></span>
+          </div>
+          <div class="turn-body">
+            <p>"I wrote a Python pipeline that uses the scope's SCPI interface — specifically
+            <code>:WAVeform:DATA?</code> and <code>:WAVeform:PREamble?</code> — to pull raw ADC
+            samples directly into numpy. From there <code>np.fft.rfft()</code> converts the capture
+            to the frequency domain. I plot both views side by side: time domain on top, FFT spectrum
+            on the bottom, annotated peaks."</p>
+            <p>"When I ran this on the noisy 3.3 volt rail, the FFT immediately showed three peaks —
+            1 kilohertz fundamental from the switching regulator, a 3 kilohertz third harmonic from
+            nonlinear switching behavior, and a 50 kilohertz transient artifact. None of those were
+            distinct in the time-domain view. And in terms of theory, each peak corresponds to a pair
+            of imaginary poles in the system — the same concept as a Laplace sinusoidal response from
+            FE exam Linear Systems, just applied to a real power rail measurement."</p>
+          </div>
+        </div>
+
+        <div class="turn s-I hiring-manager">
+          <div class="turn-label"><span class="turn-who">Hiring Manager</span></div>
+          <div class="turn-body">
+            <p>"How does knowing the frequency actually change what you do on the bench?"</p>
+          </div>
+        </div>
+
+        <div class="turn s-R you">
+          <div class="turn-label">
+            <span class="turn-who">You</span>
+            <span class="turn-star lbl-r"><span>Result</span></span>
+          </div>
+          <div class="turn-body">
+            <p>"It completely changes where you look. A 1 kilohertz peak points at the switching
+            regulator — check the output filter or layout. A harmonic series points at nonlinear
+            behavior — check the switcher's feedback loop or output impedance. A broadband noise
+            floor points at EMI pickup — check shielding and grounding. Once you know the frequency
+            you're not guessing anymore, you're following the data to the source. And that output
+            belongs in the engineering report alongside the scope screenshot — it's evidence,
+            not opinion."</p>
+
+            <div class="ee1-lift">
+              <div class="ee1-lift-lbl">EE I Lift</div>
+              <p>You're connecting the FE exam Linear Systems topic — Laplace transforms, imaginary
+              poles, frequency response — to a real diagnostic workflow. The technician reads the
+              scope. The engineer models the system and explains what the scope is showing.</p>
+            </div>
+          </div>
+        </div>
+
+      </div>
+      <div class="chips">
+        <span class="chip c-purple">FFT · np.fft.rfft()</span>
+        <span class="chip c-purple">SCPI :WAVeform:DATA?</span>
+        <span class="chip c-blue">Laplace poles → frequency peaks</span>
+        <span class="chip c-blue">Frequency-domain root cause</span>
+        <span class="chip c-green">Scope FFT mode · spectrum analysis</span>
+      </div>
+    </div>
+
+
+    <!-- ═══════════════════════════════════════════════════════════════
+         Q4 — Hardware + software together
+    ═══════════════════════════════════════════════════════════════════ -->
+    <div class="convo-block" id="q4">
+      <div class="convo-header">
+        <div class="q-num">4</div>
+        <div class="q-text">"Give me an example of a project where you had to work across both hardware and software."</div>
+      </div>
+      <div class="convo-body">
+
+        <div class="turn s-S you">
+          <div class="turn-label">
+            <span class="turn-who">You</span>
+            <span class="turn-star lbl-s"><span>Situation</span></span>
+          </div>
+          <div class="turn-body">
+            <p>"I was looking at ringing on a digital clock edge — the underdamped oscillation you
+            see when a driver is fighting trace inductance and load capacitance. It's a common signal
+            integrity issue, and the question is always: is this benign, or is the overshoot large
+            enough to cause logic errors or stress the component?"</p>
+          </div>
+        </div>
+
+        <div class="turn s-T you">
+          <div class="turn-label">
+            <span class="turn-who">You</span>
+            <span class="turn-star lbl-t"><span>Task</span></span>
+          </div>
+          <div class="turn-body">
+            <p>"I needed to go from the oscilloscope measurement — specifically the overshoot
+            percentage — to a quantified damping ratio, and from that to a specific component
+            recommendation. Not just 'add a series termination resistor,' but tell me exactly
+            what value gets me to critical damping."</p>
+          </div>
+        </div>
+
+        <div class="turn s-A you">
+          <div class="turn-label">
+            <span class="turn-who">You</span>
+            <span class="turn-star lbl-a"><span>Action</span></span>
+          </div>
+          <div class="turn-body">
+            <p>"I used scipy's TransferFunction and step response to model the second-order system —
+            H of s equals omega-n squared over s squared plus 2 zeta omega-n s plus omega-n squared.
+            I ran it across three damping ratios: heavy ringing at 0.15, moderate at 0.495 which is
+            the exact system from FE exam Q4, and critically damped at 1.0. The overshoot formula
+            lets you work backwards — you measure the overshoot on the scope, solve for zeta, then
+            calculate what resistance you need to bring zeta to 1.0."</p>
+            <p>"I also plotted the pole-zero map for each case, all poles in the left half-plane,
+            confirming stability. That directly connects what you see on the scope — the ringing
+            and the decay rate — to the mathematical structure: the imaginary part of the pole is
+            the ringing frequency, the real part is how fast it dies out."</p>
+          </div>
+        </div>
+
+        <div class="turn s-I hiring-manager">
+          <div class="turn-label"><span class="turn-who">Hiring Manager</span></div>
+          <div class="turn-body">
+            <p>"So you can get from a scope measurement to a BOM change?"</p>
+          </div>
+        </div>
+
+        <div class="turn s-R you">
+          <div class="turn-label">
+            <span class="turn-who">You</span>
+            <span class="turn-star lbl-r"><span>Result</span></span>
+          </div>
+          <div class="turn-body">
+            <p>"Exactly. When I see 17 percent overshoot on a clock edge I can calculate that the
+            damping ratio is about 0.5. To get to critical damping I need to roughly double the real
+            part of the poles — which means adding a series resistor equal to the characteristic
+            impedance of the trace. That's the math telling me what goes on the BOM. And the Python
+            model is reusable — change omega-n and zeta, rerun, get a new answer for any second-order
+            system. It also creates an audit trail: you attach the model output to the design review
+            and show exactly why that resistor value was chosen."</p>
+
+            <div class="ee1-lift">
+              <div class="ee1-lift-lbl">EE I Lift</div>
+              <p>This is the hardware-software loop that defines EE I work: measure → model →
+              quantify → specify. You're not just fixing the board in front of you — you're
+              building the analytical tool that handles every board with that failure mode.</p>
+            </div>
+          </div>
+        </div>
+
+      </div>
+      <div class="chips">
+        <span class="chip c-purple">scipy.signal.TransferFunction</span>
+        <span class="chip c-purple">scipy.signal.step()</span>
+        <span class="chip c-blue">Damping ratio · overshoot formula</span>
+        <span class="chip c-blue">Pole-zero map · stability</span>
+        <span class="chip c-green">Series termination design</span>
+        <span class="chip c-yellow">Signal integrity · clock edges</span>
+      </div>
+    </div>
+
+
+    <!-- ═══════════════════════════════════════════════════════════════
+         Q5 — Component selection
+    ═══════════════════════════════════════════════════════════════════ -->
+    <div class="convo-block" id="q5">
+      <div class="convo-header">
+        <div class="q-num">5</div>
+        <div class="q-text">"How do you approach component selection, and how do you validate the choice?"</div>
+      </div>
+      <div class="convo-body">
+
+        <div class="turn s-S you">
+          <div class="turn-label">
+            <span class="turn-who">You</span>
+            <span class="turn-star lbl-s"><span>Situation</span></span>
+          </div>
+          <div class="turn-body">
+            <p>"Decoupling cap selection is something most engineers do by rule of thumb — put a
+            100 nanofarad and a 10 microfarad near every power pin. That rule works most of the time.
+            But when it doesn't work, you need to know why — and if you don't understand the physics
+            behind it, you can't adapt it when the constraints change."</p>
+          </div>
+        </div>
+
+        <div class="turn s-T you">
+          <div class="turn-label">
+            <span class="turn-who">You</span>
+            <span class="turn-star lbl-t"><span>Task</span></span>
+          </div>
+          <div class="turn-body">
+            <p>"I wanted to be able to justify the cap selection analytically — explain why those
+            specific values, and what changes if the trace geometry or switching frequency is different."</p>
+          </div>
+        </div>
+
+        <div class="turn s-A you">
+          <div class="turn-label">
+            <span class="turn-who">You</span>
+            <span class="turn-star lbl-a"><span>Action</span></span>
+          </div>
+          <div class="turn-body">
+            <p>"I built an RLC Bode plot in Python that models the decoupling network as a series
+            RLC — trace inductance from the PCB layout, cap value from the BOM, ESR from the
+            datasheet. The impedance minimum occurs at omega-naught equals one over root LC. That's
+            the frequency where the cap most effectively absorbs switching energy. I swept four cap
+            values from 100 nanofarads to 100 microfarads and plotted impedance magnitude and phase
+            from 1 kilohertz to 1 gigahertz on a log scale."</p>
+            <p>"The result makes the design decision visual: a 100 nanofarad cap on a 10 millimeter
+            trace has its minimum at 5 megahertz — great for a 5 megahertz switcher, useless at 300
+            kilohertz. A 10 microfarad cap moves that minimum down to 500 kilohertz. To cover both
+            frequencies you use both in parallel — and now I know the reason for the rule, so I can
+            adapt it when the switching frequency changes or the trace has to be longer. For
+            validation I run the scope in FFT mode after assembly and confirm the attenuation at the
+            switching frequency matches the model. If it doesn't, I check the trace length in Altium's
+            PCB Inspector — a longer trace means more inductance, which shifts the resonance lower
+            than predicted."</p>
+          </div>
+        </div>
+
+        <div class="turn s-I hiring-manager">
+          <div class="turn-label"><span class="turn-who">Hiring Manager</span></div>
+          <div class="turn-body">
+            <p>"How does that tie into the CAD side of the role?"</p>
+          </div>
+        </div>
+
+        <div class="turn s-R you">
+          <div class="turn-label">
+            <span class="turn-who">You</span>
+            <span class="turn-star lbl-r"><span>Result</span></span>
+          </div>
+          <div class="turn-body">
+            <p>"They feed into each other directly. IPC-2221 gives me the trace width for current
+            capacity on that net. My inductance model gives me the trace length limit for noise
+            performance. Together they define the complete design constraint — you can't just make
+            the trace shorter for better noise without checking that it's still wide enough to carry
+            the current. That's a tradeoff an EE I owns. And after any rework I run DRC in Altium
+            to confirm no clearance violations were introduced, and if the board has JTAG I run
+            boundary-scan to confirm net connectivity before powering back up. The Python analysis
+            and the CAD verification aren't separate workflows — they're the same engineering
+            decision seen from two different angles."</p>
+
+            <div class="ee1-lift">
+              <div class="ee1-lift-lbl">EE I Lift</div>
+              <p>You understand the physics behind the design rule, not just the rule itself. That's
+              what lets you handle edge cases — non-standard layouts, unusual switching frequencies,
+              cost-constrained BOM changes — without escalating to a senior engineer every time
+              something deviates from the standard.</p>
+            </div>
+          </div>
+        </div>
+
+      </div>
+      <div class="chips">
+        <span class="chip c-blue">RLC Bode plot · ω₀ = 1/√(LC)</span>
+        <span class="chip c-blue">Decoupling network design</span>
+        <span class="chip c-purple">scipy · matplotlib</span>
+        <span class="chip c-green">Altium PCB Inspector · trace length</span>
+        <span class="chip c-yellow">IPC-2221 trace width</span>
+        <span class="chip c-red">Scope FFT validation · DRC</span>
+      </div>
+    </div>
+
+
+    <!-- ═══════════════════════════════════════════════════════════════
+         CAD Notes
+    ═══════════════════════════════════════════════════════════════════ -->
+    <div id="cad" style="scroll-margin-top:68px;">
+      <div class="sec-hdr">
+        <h2>CAD Notes</h2>
+        <span class="sec-tag">Altium Designer · OrCAD · Eagle · IPC-2221</span>
+      </div>
+      <div class="cad-grid">
+        <div class="cad-card">
+          <h4>Altium — Drop These Terms</h4>
+          <ul>
+            <li>Reference <strong>PCB Inspector</strong> when discussing trace length and impedance — shows you know the tool, not just the concept</li>
+            <li>Mention <strong>DRC</strong> as the automated check after every layout change</li>
+            <li><strong>Net Inspector</strong> for connectivity verification after rework</li>
+            <li><strong>Layer Stack Manager → impedance calculation</strong> is an EE I task, not EET</li>
+          </ul>
+        </div>
+        <div class="cad-card">
+          <h4>IPC-2221 — Tie to Q5</h4>
+          <ul>
+            <li>Formula: Area(mil²) = [I / (k × ΔT<sup>0.44</sup>)]<sup>1/0.725</sup></li>
+            <li>k = 0.048 external layer, k = 0.024 internal layer</li>
+            <li>Pair with trace inductance model: length drives both current capacity (width) and noise performance (L)</li>
+            <li>This pairing is the complete design constraint for a power net — mention it in Q5</li>
+          </ul>
+        </div>
+        <div class="cad-card">
+          <h4>OrCAD / PSpice — Position Your Python Work</h4>
+          <ul>
+            <li>scipy models mirror what PSpice does — frame your Python work as a scripting-layer equivalent</li>
+            <li>OrCAD schematic → BOM extraction → Python ESR/Bode model is a complete analytical workflow</li>
+            <li>If they use OrCAD, mention PSpice by name — shows cross-tool awareness</li>
+          </ul>
+        </div>
+        <div class="cad-card">
+          <h4>SCPI in ATE Context</h4>
+          <ul>
+            <li>ATE systems — LabVIEW, Python fixtures — all use SCPI under the hood; pyvisa is the Python binding</li>
+            <li>Position your knowledge as: "I understand the command layer, not just the GUI"</li>
+            <li>Name specific commands: <code>*IDN?</code>, <code>:WAVeform:DATA?</code>, <code>MEASure:VOLTage:DC?</code> — specifics show depth</li>
+            <li>IVI-COM / VISA driver architecture is the standard — pyvisa implements it</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+</body>
+</html>

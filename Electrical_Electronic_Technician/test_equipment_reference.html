@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EET Technical Reference — Oscilloscope & Multimeter</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: "Segoe UI", Arial, sans-serif;
+      background: #f0f2f5;
+      color: #222;
+      min-height: 100vh;
+    }
+
+    /* ── header ── */
+    header {
+      background: #004d40;
+      color: #fff;
+      padding: 16px 32px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    header h1 { font-size: 1.05rem; letter-spacing: 0.02em; }
+    .badge { background: #80cbc4; color: #004d40; font-size: 0.72rem; font-weight: bold; padding: 3px 10px; border-radius: 12px; }
+
+    .sub {
+      background: #e0f2f1;
+      border-bottom: 2px solid #004d40;
+      padding: 8px 32px;
+      font-size: 0.82rem;
+      color: #444;
+      display: flex;
+      gap: 24px;
+    }
+    .sub span { font-weight: bold; color: #004d40; }
+
+    /* ── layout ── */
+    .page { max-width: 860px; margin: 28px auto; padding: 0 16px 80px; }
+
+    /* ── score bar ── */
+    .score-row {
+      background: #fff;
+      border: 1px solid #b2dfdb;
+      border-radius: 5px;
+      padding: 10px 18px;
+      margin-bottom: 22px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      font-size: 0.85rem;
+    }
+    .score-row .lbl { color: #555; }
+    .score-row .val { font-size: 1.1rem; font-weight: bold; color: #004d40; min-width: 60px; }
+    .track { flex: 1; height: 8px; background: #ddd; border-radius: 4px; overflow: hidden; }
+    .fill  { height: 100%; background: #00897b; border-radius: 4px; width: 0%; transition: width 0.4s; }
+
+    /* ── question card ── */
+    .q-card {
+      background: #fff;
+      border: 1px solid #b2dfdb;
+      border-radius: 5px;
+      margin-bottom: 26px;
+      overflow: hidden;
+    }
+    .q-head {
+      background: #004d40;
+      color: #fff;
+      padding: 9px 18px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .q-head .q-num { font-weight: bold; font-size: 0.9rem; }
+    .q-head .q-topic { font-size: 0.72rem; background: rgba(255,255,255,0.18); padding: 2px 8px; border-radius: 3px; }
+
+    .q-body { padding: 18px 20px 0; }
+
+    .question-text {
+      font-size: 1rem;
+      line-height: 1.65;
+      color: #111;
+      margin-bottom: 14px;
+      font-weight: 500;
+    }
+
+    /* ── tips ── */
+    .tip-box {
+      background: #e8f5e9;
+      border-left: 3px solid #388e3c;
+      padding: 9px 13px;
+      font-size: 0.82rem;
+      color: #444;
+      line-height: 1.65;
+      margin-bottom: 14px;
+    }
+    .tip-box strong { color: #2e7d32; }
+
+    /* ── answer textarea ── */
+    .answer-area {
+      width: 100%;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      padding: 10px 12px;
+      font-family: inherit;
+      font-size: 0.88rem;
+      resize: vertical;
+      min-height: 100px;
+      line-height: 1.6;
+      color: #222;
+    }
+    .answer-area:focus { outline: 2px solid #004d40; border-color: #004d40; }
+
+    /* ── buttons ── */
+    .btn-row { padding: 12px 20px 16px; display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+    .btn { padding: 8px 20px; border: none; border-radius: 4px; font-family: inherit; font-size: 0.85rem; cursor: pointer; transition: background 0.15s; }
+    .btn-reveal { background: #004d40; color: #fff; }
+    .btn-reveal:hover { background: #00695c; }
+    .btn-reveal:disabled { background: #aaa; cursor: default; }
+    .btn-followup { background: #fff; color: #004d40; border: 1px solid #004d40; }
+    .btn-followup:hover { background: #e0f2f1; }
+
+    /* ── model answer panel ── */
+    .model-answer {
+      display: none;
+      border-top: 1px solid #e0f2f1;
+      padding: 16px 20px;
+      background: #f9fdfd;
+    }
+    .model-answer h4 {
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      color: #004d40;
+      margin-bottom: 10px;
+      padding-bottom: 5px;
+      border-bottom: 1px solid #b2dfdb;
+    }
+    .star-block { margin-bottom: 14px; font-size: 0.87rem; line-height: 1.75; }
+    .star-label {
+      display: inline-block;
+      background: #004d40;
+      color: #fff;
+      font-size: 0.7rem;
+      font-weight: bold;
+      padding: 2px 8px;
+      border-radius: 3px;
+      margin-bottom: 4px;
+    }
+    .model-text { font-size: 0.87rem; line-height: 1.75; color: #333; }
+    .model-text p { margin-bottom: 8px; }
+
+    /* ── follow-up ── */
+    .followup-panel {
+      display: none;
+      border-top: 1px dashed #b2dfdb;
+      padding: 14px 20px 18px;
+      background: #fffde7;
+    }
+    .followup-panel .fu-q {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: #333;
+      margin-bottom: 10px;
+      line-height: 1.6;
+    }
+    .followup-panel .fu-hint {
+      font-size: 0.81rem;
+      color: #666;
+      background: #fff8e1;
+      border-left: 3px solid #f9a825;
+      padding: 8px 12px;
+      margin-bottom: 10px;
+      line-height: 1.65;
+    }
+    .followup-panel textarea {
+      width: 100%;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      padding: 8px 10px;
+      font-family: inherit;
+      font-size: 0.86rem;
+      resize: vertical;
+      min-height: 80px;
+      line-height: 1.6;
+    }
+
+    footer {
+      background: #004d40;
+      color: #80cbc4;
+      text-align: center;
+      padding: 10px;
+      font-size: 0.75rem;
+      position: fixed;
+      bottom: 0;
+      width: 100%;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>EET Technical Reference — Oscilloscope & Multimeter</h1>
+  <span class="badge">5 Questions + Follow-ups</span>
+</header>
+<div class="sub">
+  <div>Role: <span>Electronic Engineering Technician</span></div>
+  <div>Focus: <span>Test Equipment · Component Testing · Waveform Interpretation</span></div>
+  <div>Method: <span>STAR answers · Experience bridge</span></div>
+</div>
+
+<div class="page">
+
+  <div class="score-row">
+    <span class="lbl">Progress</span>
+    <span class="val" id="score-val">0 / 5</span>
+    <div class="track"><div class="fill" id="prog-fill"></div></div>
+    <span class="lbl" id="score-pct">—</span>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════════
+       Q1 — Voltage Measurement / Multimeter Basics
+  ══════════════════════════════════════════════════════════════ -->
+  <div class="q-card">
+    <div class="q-head">
+      <span class="q-num">Question 1 of 5</span>
+      <span class="q-topic">Voltage Measurement · Multimeter</span>
+    </div>
+    <div class="q-body">
+      <p class="question-text">
+        "Walk me through exactly how you would use a multimeter to verify that a 3.3V power rail on a PCB is within spec. What mode do you select, where do you place your probes, and what would cause you to flag the result as a failure?"
+      </p>
+      <div class="tip-box">
+        <strong>What they're listening for:</strong> Correct mode selection (DC voltage), probe discipline (black to GND first), knowledge of tolerance (typically ±5%), and that you know a DC multimeter can miss transient sags — which leads naturally into why an oscilloscope is also needed.
+      </div>
+      <textarea class="answer-area" placeholder="Type your answer here before revealing the model response..."></textarea>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-reveal" onclick="reveal(1)">Reveal Model Answer</button>
+      <button class="btn btn-followup" onclick="showFollowup(1)">Show Follow-Up Question</button>
+    </div>
+    <div class="model-answer" id="ma-1">
+      <h4>Model Answer — STAR Format</h4>
+      <div class="star-block">
+        <span class="star-label">SITUATION</span>
+        <div class="model-text"><p>"Suppose I have a board that just came off the line and I need to verify the 3.3V supply rail before functional testing begins."</p></div>
+      </div>
+      <div class="star-block">
+        <span class="star-label">TASK</span>
+        <div class="model-text"><p>"My job is to confirm the rail is within ±5% of nominal — so between 3.135V and 3.465V — and document the result."</p></div>
+      </div>
+      <div class="star-block">
+        <span class="star-label">ACTION</span>
+        <div class="model-text">
+          <p>1. Set the multimeter to <strong>DC Voltage mode (V⎓)</strong> — not AC, because this is a regulated DC rail.</p>
+          <p>2. Connect the <strong>black probe to a board ground test point first</strong> — this establishes a safe reference and prevents accidental shorts.</p>
+          <p>3. Touch the red probe to the 3.3V test point and read the display. Record the value with the board serial number in the test log.</p>
+          <p>4. If the reading is outside ±5% (below 3.135V or above 3.465V), I flag it as a failure, note the measured value, and escalate to the senior engineer before proceeding.</p>
+          <p>5. I also note that the multimeter shows a DC average — it will not catch transient voltage sags. For that, I would follow up with an oscilloscope probe on the same test point.</p>
+        </div>
+      </div>
+      <div class="star-block">
+        <span class="star-label">RESULT</span>
+        <div class="model-text"><p>"This two-step approach — multimeter for DC level, oscilloscope for dynamic behavior — catches both steady-state faults and transient issues that a meter alone would miss."</p></div>
+      </div>
+    </div>
+    <div class="followup-panel" id="fu-1">
+      <p class="fu-q">Follow-Up: "You mentioned verifying that something is within spec before relying on it. Can you describe a time in a previous role — even outside of electronics — where you had to verify that a system or tool was functioning correctly before using it for something critical?"</p>
+      <div class="fu-hint">
+        <strong>Bridge hint:</strong> Think about your IT Analyst role — verifying DoD computer systems were operational before patient care documentation relied on them. Or as a Measure Technician — confirming your CAD measurements were within tolerance before submitting a drawing. Both are the same discipline: verify before you commit.
+      </div>
+      <textarea placeholder="Practice your answer here using the STAR method..."></textarea>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════════
+       Q2 — Waveform Interpretation / Oscilloscope
+  ══════════════════════════════════════════════════════════════ -->
+  <div class="q-card">
+    <div class="q-head">
+      <span class="q-num">Question 2 of 5</span>
+      <span class="q-topic">Waveform Interpretation · Oscilloscope</span>
+    </div>
+    <div class="q-body">
+      <p class="question-text">
+        "You're looking at a 3.3V power rail on an oscilloscope and the waveform appears noisy — there are rapid, irregular fluctuations riding on top of the DC level. How do you interpret what you're seeing, and what are your next diagnostic steps?"
+      </p>
+      <div class="tip-box">
+        <strong>What they're listening for:</strong> That you understand the difference between DC offset (multimeter territory) and AC ripple/noise (oscilloscope territory). They want to hear you switch to AC coupling to isolate the noise, estimate its frequency and amplitude, and connect it to a likely cause — bad decoupling cap, switching regulator noise, or crosstalk.
+      </div>
+      <textarea class="answer-area" placeholder="Type your answer here before revealing the model response..."></textarea>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-reveal" onclick="reveal(2)">Reveal Model Answer</button>
+      <button class="btn btn-followup" onclick="showFollowup(2)">Show Follow-Up Question</button>
+    </div>
+    <div class="model-answer" id="ma-2">
+      <h4>Model Answer — STAR Format</h4>
+      <div class="star-block">
+        <span class="star-label">SITUATION</span>
+        <div class="model-text"><p>"I have an oscilloscope probed to the 3.3V rail and I can see the DC level looks approximately correct, but there's a noisy, irregular waveform riding on top of it."</p></div>
+      </div>
+      <div class="star-block">
+        <span class="star-label">TASK</span>
+        <div class="model-text"><p>"I need to characterize the noise — its amplitude, frequency, and whether it's periodic or random — to determine the root cause."</p></div>
+      </div>
+      <div class="star-block">
+        <span class="star-label">ACTION</span>
+        <div class="model-text">
+          <p>1. <strong>Switch the scope to AC coupling</strong> — this blocks the DC offset and lets me see only the noise component on a zoomed vertical scale.</p>
+          <p>2. <strong>Adjust Volts/Div down</strong> to 20–50 mV/div so the noise fills the screen and I can measure its amplitude accurately.</p>
+          <p>3. <strong>Read the frequency</strong> using the time base — if it's periodic at a known switching frequency (e.g., 300 kHz), it's likely regulator ripple. If it's random, it may be crosstalk or EMI.</p>
+          <p>4. <strong>Compare to the datasheet spec</strong> — most MCU datasheets specify maximum allowable supply ripple, typically 50–100 mV p-p.</p>
+          <p>5. Probe nearby ground and bypass capacitor test points to see if the noise is localized to one area, then report findings to the engineer with amplitude, frequency, and waveform screenshot noted in the test log.</p>
+        </div>
+      </div>
+      <div class="star-block">
+        <span class="star-label">RESULT</span>
+        <div class="model-text"><p>"Characterizing the noise this way — instead of just flagging it as 'looks bad' — gives the senior engineer actionable information about root cause and the correct fix."</p></div>
+      </div>
+    </div>
+    <div class="followup-panel" id="fu-2">
+      <p class="fu-q">Follow-Up: "You mentioned that intermittent or inconsistent behavior can be a sign of an underlying problem. Can you describe a time in a previous role where a system was performing inconsistently, and how you isolated the cause?"</p>
+      <div class="fu-hint">
+        <strong>Bridge hint:</strong> Your Army IT Analyst role is perfect here — intermittent failures on DoD systems in a field hospital, diagnosing whether it was hardware, software, or configuration. The isolation process is identical: observe the symptom, narrow down the domain, test one variable at a time, document what you find.
+      </div>
+      <textarea placeholder="Practice your answer here using the STAR method..."></textarea>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════════
+       Q3 — Component Testing (Resistor, Capacitor, Diode)
+  ══════════════════════════════════════════════════════════════ -->
+  <div class="q-card">
+    <div class="q-head">
+      <span class="q-num">Question 3 of 5</span>
+      <span class="q-topic">Component Testing · Resistors · Capacitors · Diodes</span>
+    </div>
+    <div class="q-body">
+      <p class="question-text">
+        "Describe how you would use a multimeter to test three common components: a resistor, a capacitor, and a diode. What mode do you use for each, what does a passing result look like, and what tells you a component has failed?"
+      </p>
+      <div class="tip-box">
+        <strong>What they're listening for:</strong> Correct mode for each (Ω, capacitance/Ω, diode test). Critically — they want to hear that you know to <strong>remove the component from the circuit or power down the board</strong> before measuring resistance. Getting this detail right signals real hands-on awareness, not just textbook knowledge.
+      </div>
+      <textarea class="answer-area" placeholder="Type your answer here before revealing the model response..."></textarea>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-reveal" onclick="reveal(3)">Reveal Model Answer</button>
+      <button class="btn btn-followup" onclick="showFollowup(3)">Show Follow-Up Question</button>
+    </div>
+    <div class="model-answer" id="ma-3">
+      <h4>Model Answer — Component by Component</h4>
+      <div class="star-block">
+        <span class="star-label">RESISTOR</span>
+        <div class="model-text">
+          <p><strong>Power off first</strong> — or remove the resistor from the circuit. Parallel paths in a live circuit will give false readings.</p>
+          <p>Set multimeter to <strong>Resistance mode (Ω)</strong>. Probe across both leads. A good resistor reads within ±tolerance of the marked value (e.g., a 10kΩ ±5% reads 9.5kΩ–10.5kΩ). An <strong>open resistor reads OL (overload/infinite)</strong>. A <strong>shorted resistor reads 0Ω</strong>.</p>
+        </div>
+      </div>
+      <div class="star-block">
+        <span class="star-label">CAPACITOR</span>
+        <div class="model-text">
+          <p><strong>Power off and discharge the capacitor first</strong> — briefly short its leads through a resistor. A charged cap can damage the meter or give a false reading.</p>
+          <p>If the meter has a <strong>Capacitance mode (⊣|)</strong>, probe across the leads and compare to the marked value (±20% is typical for electrolytics). A reading of <strong>0 µF indicates an open</strong>. A reading of <strong>near-zero resistance in Ω mode indicates a short</strong>. If using resistance mode only: a good cap briefly deflects toward low resistance then climbs to OL as it charges from the meter's internal voltage.</p>
+        </div>
+      </div>
+      <div class="star-block">
+        <span class="star-label">DIODE</span>
+        <div class="model-text">
+          <p>Set to <strong>Diode Test mode (→|)</strong>. Forward bias: red probe to anode, black to cathode. A good silicon diode reads <strong>0.5–0.7V</strong>. A Schottky reads <strong>0.2–0.4V</strong>. Reverse bias: swap probes — should read <strong>OL (no conduction)</strong>.</p>
+          <p><strong>Fail conditions:</strong> 0V forward = shorted. OL both directions = open. Conduction in both directions = shorted junction.</p>
+        </div>
+      </div>
+      <div class="star-block">
+        <span class="star-label">KEY POINT TO EMPHASIZE</span>
+        <div class="model-text"><p>"In every case I power down or isolate the component first. Measuring resistance on a powered circuit is one of the most common beginner mistakes — the circuit voltage interferes with the meter's internal reference and gives completely wrong readings. I'd rather take the time to do it right than misdiagnose a perfectly good component."</p></div>
+      </div>
+    </div>
+    <div class="followup-panel" id="fu-3">
+      <p class="fu-q">Follow-Up: "You mentioned checking whether a component is within spec before relying on it. Tell me about a time in a previous role where you had to verify the condition or accuracy of a tool, piece of equipment, or data source before using it to make a decision."</p>
+      <div class="fu-hint">
+        <strong>Bridge hint:</strong> As a Measure Technician, you verified measurements against specifications before committing them to a technical drawing. As an IT Analyst, you verified system status before certifying equipment as operational for patient care. Both are the same professional discipline — verify the input before you trust the output.
+      </div>
+      <textarea placeholder="Practice your answer here using the STAR method..."></textarea>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════════
+       Q4 — Safety & Live Circuit Precautions
+  ══════════════════════════════════════════════════════════════ -->
+  <div class="q-card">
+    <div class="q-head">
+      <span class="q-num">Question 4 of 5</span>
+      <span class="q-topic">Safety Precautions · Live Circuit Work</span>
+    </div>
+    <div class="q-body">
+      <p class="question-text">
+        "What safety precautions do you take before and during probing a live PCB with a multimeter or oscilloscope? What are the risks you're protecting against, and how does your approach change between a low-voltage 3.3V logic board and a board that includes an AC mains section?"
+      </p>
+      <div class="tip-box">
+        <strong>What they're listening for:</strong> ESD strap (protects the board), insulated probes (protects you), correct probe input jack selection, ground clip placement, and the critical distinction that low-voltage DC boards are mostly ESD and short risks — while AC mains boards carry lethal shock risk requiring different protocol entirely.
+      </div>
+      <textarea class="answer-area" placeholder="Type your answer here before revealing the model response..."></textarea>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-reveal" onclick="reveal(4)">Reveal Model Answer</button>
+      <button class="btn btn-followup" onclick="showFollowup(4)">Show Follow-Up Question</button>
+    </div>
+    <div class="model-answer" id="ma-4">
+      <h4>Model Answer — Two-Level Safety Framework</h4>
+      <div class="star-block">
+        <span class="star-label">ALL LIVE BOARDS — BASELINE</span>
+        <div class="model-text">
+          <p>1. <strong>ESD wrist strap connected and continuity verified</strong> — I'm protecting the board from me, not the other way around at low voltages. One ESD event can destroy an IC that looks fine and only fails months later.</p>
+          <p>2. <strong>Confirm probe input jacks</strong> before touching anything — probes in the V/Ω jacks for voltage/resistance, A jack only for current measurement. Putting probes in the current jack and measuring voltage will blow the meter's internal fuse and potentially damage the circuit.</p>
+          <p>3. <strong>Connect ground clip first</strong>, then touch the probe tip. Never bridge two signal nets accidentally with the ground clip by placing it on the wrong point.</p>
+          <p>4. <strong>Use insulated probes with finger guards</strong> — keeps fingers behind the probe tip barrier to prevent accidental shorts from a slipped hand.</p>
+        </div>
+      </div>
+      <div class="star-block">
+        <span class="star-label">AC MAINS BOARDS — ELEVATED PROTOCOL</span>
+        <div class="model-text">
+          <p>1. <strong>Never probe AC mains sections without explicit authorization and training</strong> — mains voltage (120V AC in the US) is lethal. I would not attempt this without a qualified engineer present and a CAT-rated meter for that voltage level.</p>
+          <p>2. Verify the <strong>meter's CAT rating</strong> matches the voltage level — CAT II for residential mains, CAT III for distribution panels.</p>
+          <p>3. Use <strong>one-hand technique</strong> — keep one hand behind your back or in your pocket to prevent current from passing across your chest if you accidentally contact a live conductor.</p>
+          <p>4. Treat every conductor as live until proven otherwise — verify with the meter before touching anything.</p>
+        </div>
+      </div>
+      <div class="star-block">
+        <span class="star-label">CLOSING LINE</span>
+        <div class="model-text"><p>"Safety protocol isn't a slowdown — it's what keeps you in the lab tomorrow. I'd rather take 30 extra seconds to do the setup right than spend time explaining to a supervisor why I blew a fuse or damaged a prototype."</p></div>
+      </div>
+    </div>
+    <div class="followup-panel" id="fu-4">
+      <p class="fu-q">Follow-Up: "You described a situation where the stakes change based on the voltage level involved. Can you give me an example from a previous role where the consequences of a mistake were significant, and how following proper procedures protected the outcome?"</p>
+      <div class="fu-hint">
+        <strong>Bridge hint:</strong> Your Army field hospital IT role is directly relevant — incorrect handling of DoD systems carrying patient data had HIPAA, operational, and mission-critical consequences. The discipline of following exact procedures under pressure, even when it felt slower, is the same mindset. You can also reference the VA Healthcare EHR system where data integrity errors had direct patient safety implications.
+      </div>
+      <textarea placeholder="Practice your answer here using the STAR method..."></textarea>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════════
+       Q5 — Frequency, Period, Amplitude — Reading a Scope Display
+  ══════════════════════════════════════════════════════════════ -->
+  <div class="q-card">
+    <div class="q-head">
+      <span class="q-num">Question 5 of 5</span>
+      <span class="q-topic">Frequency · Period · Amplitude · Scope Reading</span>
+    </div>
+    <div class="q-body">
+      <p class="question-text">
+        "I'm going to describe an oscilloscope display and I want you to tell me the frequency, period, and amplitude of the signal. The scope is set to 1 µs/div horizontal and 2 V/div vertical. The waveform completes one full cycle across 4 horizontal divisions, and its peak-to-peak height spans 3 vertical divisions. Walk me through your calculation."
+      </p>
+      <div class="tip-box">
+        <strong>What they're listening for:</strong> That you know Period = divisions × time-per-div, Frequency = 1/Period, and Amplitude = divisions × volts-per-div. They want to see you work through it methodically — this is a straight calculation question and the only wrong answer is skipping the work and guessing.
+        <br><br>
+        <strong>Expected answers:</strong> Period = 4 µs · Frequency = 250 kHz · Amplitude = 6 V peak-to-peak.
+      </div>
+      <textarea class="answer-area" placeholder="Work through the calculation step by step before revealing the model answer..."></textarea>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-reveal" onclick="reveal(5)">Reveal Model Answer</button>
+      <button class="btn btn-followup" onclick="showFollowup(5)">Show Follow-Up Question</button>
+    </div>
+    <div class="model-answer" id="ma-5">
+      <h4>Model Answer — Step-by-Step Calculation</h4>
+      <div class="star-block">
+        <span class="star-label">PERIOD</span>
+        <div class="model-text">
+          <p>"The waveform completes one full cycle in 4 horizontal divisions. The scope is set to 1 µs/div."</p>
+          <p><strong>T = divisions × time-per-div = 4 × 1 µs = 4 µs</strong></p>
+        </div>
+      </div>
+      <div class="star-block">
+        <span class="star-label">FREQUENCY</span>
+        <div class="model-text">
+          <p>"Frequency is the reciprocal of period."</p>
+          <p><strong>f = 1/T = 1 / 4×10⁻⁶ = 250,000 Hz = 250 kHz</strong></p>
+        </div>
+      </div>
+      <div class="star-block">
+        <span class="star-label">AMPLITUDE</span>
+        <div class="model-text">
+          <p>"The peak-to-peak height spans 3 vertical divisions. The scope is set to 2 V/div."</p>
+          <p><strong>V_pp = divisions × volts-per-div = 3 × 2 V = 6 V peak-to-peak</strong></p>
+          <p>"If asked for amplitude (zero to peak): V_pk = V_pp / 2 = 3 V"</p>
+          <p>"If asked for RMS value of a sine wave: V_rms = V_pk / √2 ≈ 2.12 V"</p>
+        </div>
+      </div>
+      <div class="star-block">
+        <span class="star-label">CLOSE WITH CONTEXT</span>
+        <div class="model-text">
+          <p>"In practice I would also use the scope's built-in measurement functions to confirm my manual calculation — most scopes can display frequency, period, and Vpp automatically. But I always verify the automatic readout against a manual check, because if the trigger isn't set correctly the automatic measurement can be wrong."</p>
+        </div>
+      </div>
+    </div>
+    <div class="followup-panel" id="fu-5">
+      <p class="fu-q">Follow-Up: "You walked through that systematically — stating what you know, applying the formula, and checking your work. Can you describe a time in a previous role where you had to interpret data from a system readout or report and use it to make a judgment call or take an action?"</p>
+      <div class="fu-hint">
+        <strong>Bridge hint:</strong> As an IT Analyst you read system diagnostic output and made decisions about hardware vs. software failures. As an AMSA at VA Healthcare you read EHR data to verify patient records and flag discrepancies. Both are data interpretation → decision-making chains — the same cognitive process you just demonstrated with the scope calculation.
+      </div>
+      <textarea placeholder="Practice your answer here using the STAR method..."></textarea>
+    </div>
+  </div>
+
+  <!-- waveform link -->
+  <div style="background:#fff;border:1px solid #b2dfdb;border-radius:5px;padding:14px 18px;margin-bottom:20px;font-size:0.87rem;">
+    <strong style="color:#004d40;">Practice Companion:</strong>
+    Open <a href="waveform_visualization.html" style="color:#004d40;font-weight:bold;">waveform_visualization.html</a> alongside this file to practice reading amplitude, frequency, and period directly from visual waveforms — reinforces Q2 and Q5.
+  </div>
+
+</div>
+
+<footer>EET Technical Reference · Oscilloscope & Multimeter · STAR Method · Electronic Engineering Technician Role</footer>
+
+<script>
+  var revealed = 0;
+
+  function reveal(n) {
+    var panel = document.getElementById('ma-' + n);
+    if (panel.style.display === 'block') return;
+    panel.style.display = 'block';
+    revealed++;
+    var btn = panel.previousElementSibling.querySelector('.btn-reveal');
+    if (btn) btn.disabled = true;
+    updateScore();
+  }
+
+  function showFollowup(n) {
+    var fu = document.getElementById('fu-' + n);
+    fu.style.display = fu.style.display === 'block' ? 'none' : 'block';
+  }
+
+  function updateScore() {
+    document.getElementById('score-val').textContent = revealed + ' / 5';
+    var pct = Math.round(revealed / 5 * 100);
+    document.getElementById('score-pct').textContent = pct + '% reviewed';
+    document.getElementById('prog-fill').style.width = pct + '%';
+  }
+</script>
+</body>
+</html>
