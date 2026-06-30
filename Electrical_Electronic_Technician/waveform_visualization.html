@@ -215,14 +215,69 @@
         <li><strong>Vrms:</strong> Vpeak / √2 = 3 / 1.414 ≈ <strong>2.12 V</strong></li>
       </ul>
       <div class="look-for">
-        </p>
+        <strong>Key points to observe:</strong>
+        <ul>
+          <li><strong>How to isolate noise:</strong> Switch the scope to <strong>AC coupling</strong> — this blocks the DC component and lets you zoom in on the noise layer alone.</li>
+          <li><strong>Likely causes of noise:</strong> Faulty bypass cap (high ESR), switching regulator interference, crosstalk from adjacent PCB trace.</li>
+          <li><strong>Next step:</strong> Reduce V/div to 100–200 mV range in AC coupling mode to measure noise amplitude precisely, then cross-reference with the component's datasheet noise tolerance spec.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════
+       WAVEFORM 2 — Noisy / Distorted Sine Wave
+  ══════════════════════════════════════════════ -->
+  <div class="wave-card">
+    <div class="card-head">
+      <span class="title">Waveform 2 — Noisy / Distorted Sine Wave (Fault Condition)</span>
+      <span class="tag">2 V/div · 0.5 ms/div</span>
+    </div>
+    <div class="canvas-wrap" style="position:relative;">
+      <canvas id="canvas-noisy" width="860" height="260"></canvas>
+      <div class="scope-meta">
+        CH1 — 2 V/div<br>
+        0.5 ms/div<br>
+        DC coupling<br>
+        f = 1 kHz (noisy)
+      </div>
+    </div>
+    <div class="measurements">
+      <div class="meas-item">
+        <div class="meas-label">Frequency</div>
+        <div class="meas-val">1.000 kHz</div>
+      </div>
+      <div class="meas-item">
+        <div class="meas-label">Vpp (nominal)</div>
+        <div class="meas-val">6.00 V</div>
+      </div>
+      <div class="meas-item">
+        <div class="meas-label">Noise amplitude</div>
+        <div class="meas-val">~400 mVpp</div>
+      </div>
+      <div class="meas-item">
+        <div class="meas-label">SNR (estimated)</div>
+        <div class="meas-val">~23 dB</div>
+      </div>
+      <div class="meas-item">
+        <div class="meas-label">Status</div>
+        <div class="meas-val" style="color:#ff7043;">FAULT</div>
+      </div>
+    </div>
+    <div class="card-info">
+      <h4>What this represents</h4>
+      <p>The same 1 kHz sine wave as Waveform 1, but with high-frequency noise riding on top — a common fault condition on PCBs. The orange trace is the measured signal; the faint cyan ghost shows where the clean signal should be. This is what you see when a bypass cap has failed (high ESR), a switching regulator is injecting noise, or an adjacent trace is coupling interference.</p>
       <ul>
-        <li><strong>How to isolate the noise:</strong> Switch the scope to <strong>AC coupling</strong> — this blocks the DC/low-frequency component and lets you zoom in on the noise layer alone.</li>
-        <li><strong>Likely causes:</strong> Faulty bypass cap (high ESR), switching regulator interference, crosstalk from adjacent PCB trace.</li>
-        <li><strong>Next step:</strong> Reduce V/div to 100–200 mV range in AC coupling mode to measure noise amplitude precisely, then cross-reference with the component's datasheet noise tolerance spec.</li>
+        <li><strong>Noise amplitude:</strong> ~200 mV peak — exceeds a typical ±50 mV noise budget for analog signal conditioning circuits</li>
+        <li><strong>SNR:</strong> 20·log(3000 mV / 200 mV) ≈ 23 dB — borderline for analog signal integrity</li>
+        <li><strong>Identifying noise frequency:</strong> Use the scope's FFT mode and compare the noise peak to the switching regulator switching frequency</li>
       </ul>
       <div class="look-for">
-        </div>
+        <strong>Troubleshooting this fault:</strong>
+        <br>• Switch to <strong>AC coupling</strong> at 100 mV/div to measure the noise amplitude precisely
+        <br>• <em>Likely cause:</em> Failed bypass cap (high ESR), switching regulator interference, or PCB trace crosstalk
+        <br>• <em>Fix:</em> Replace the decoupling cap, add a ferrite bead on the supply line, or re-route the offending trace away from sensitive analog signals
+      </div>
     </div>
   </div>
 

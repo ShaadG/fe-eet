@@ -290,27 +290,58 @@
             <tr><td><strong>Q2 — RLC Resonance</strong></td><td>|Z(jω)| vs ω, ω₀=1/√(LC), Q=ω₀L/R</td><td>The noise frequency that dominates a power rail; why one bypass cap value attenuates switching noise better than another</td></tr>
             <tr><td><strong>Q3 — Laplace / Sine</strong></td><td>ℒ{sin(ωt)} = ω/(s²+ω²), poles at ±jω</td><td>AC ripple waveform on the oscilloscope; purely imaginary poles = sustained, non-decaying sinusoidal oscillation</td></tr>
             <tr><td><strong>Q4 — Transfer Function</strong></td><td>H(s)=50/(s²+7s+50), ζ=0.495, underdamped</td><td>Ringing on digital clock or data bus edges; complex left-half-plane poles = stable but oscillatory transient</td></tr>
-            <tr><td><strong>Triangle Wave (new)</strong></td><td>v(t) piecewise linear, harmonic series ∝ 1/n²</td><td>PWM controller carrier signal; output of an RC integrator driven by a square wave; slew-rate measurement</td></tr>
+            <tr><td><strong>Triangle Wave</strong></td><td>v(t) piecewise linear, harmonic series ∝ 1/n²</td><td>PWM controller carrier signal; output of an RC integrator driven by a square wave; slew-rate measurement</td></tr>
           </tbody>
         </table>
-        <div class="callout co-teal" style="margin-top:10px;">
-          
+      </div>
+    </div>
+
+    <!-- ══ Q1 — RC TRANSIENT ════════════════════════════════════════ -->
+    <div class="section-card" id="s-q1">
+      <div class="card-head head-blue">
+        <div class="ch-left">
+          <span class="ch-num">FE Exam · Topic 7A · Linear Systems</span>
+          <span class="ch-title">Q1 — RC Transient Response</span>
+          <span class="ch-tag">v(t) = V(1−e<sup>−t/τ</sup>) · τ = ESR × C · Power Rail Recovery</span>
+        </div>
+      </div>
+
+      <div class="tp-grid">
+        <div class="tp-col">
+          <div class="tp-label lbl-theory">FE Exam — Theory Plot</div>
+          <img class="fe-img" src="../FE_exam/linear_systems/plots/q1_rc_transient.png"
+               alt="Q1 RC Transient — FE Exam analysis.py output">
+          <div class="img-caption">v<sub>C</sub>(t) = 10(1−e<sup>−t/τ</sup>) · τ = 1ms · V = 10V step input</div>
+        </div>
+        <div class="tp-col">
+          <div class="tp-label lbl-practice">Oscilloscope — 3.3V Rail Recovery After Load Transient</div>
+          <div class="scope-wrap" style="position:relative;">
+            <canvas id="cv-rc" width="440" height="220"></canvas>
+            <div class="scope-meta-top">CH1 — 500mV/div<br>0.2ms/div<br>DC coupling<br>3.3V rail</div>
+          </div>
+          <div class="scope-strip">
+            <span>Rail: 3.3V nom</span>
+            <span>Sag → 2.88V</span>
+            <span>τ ≈ 44µs (bad ESR)</span>
+            <span>Brownout: 2.97V</span>
+          </div>
+          <p style="font-size:0.78rem;color:#546e6a;margin-top:6px;line-height:1.6;">
+            High ESR in the decoupling cap slows rail recovery. τ = ESR × C = 2.0Ω × 22µF = 44µs — long enough to drop below the MCU brownout threshold.
+          </p>
         </div>
       </div>
 
       <div class="card-body">
         <h4>How Q1 Appears on the Bench</h4>
-        <p>The FE exam gives you a clean step input and asks you to calculate v<sub>C</sub> at a specific time. On the bench, you're doing the inverse: you see the waveform on the oscilloscope and need to infer τ from the shape.</p>
+        <p>The FE exam gives you a clean step input and asks you to calculate v<sub>C</sub> at a specific time. On the bench, you do the inverse: you see the recovery waveform and infer τ from its shape.</p>
         <div class="formula">
-          v<sub>C</sub>(t) = V(1 − e<sup>−t/τ</sup>)  &nbsp;→&nbsp;  τ = RC<br>
-          <span class="f-label">On bench: R = ESR of bypass cap, C = capacitance · High ESR → large τ → slow recovery → brownout</span><br>
-          <span class="f-result">τ = 2.0Ω × 22µF = 44µs &nbsp;(degraded C2) &nbsp;vs.&nbsp; τ = 0.05Ω × 22µF = 1.1µs (good MLCC)</span>
+          v<sub>C</sub>(t) = V(1 − e<sup>−t/τ</sup>)  &nbsp;→&nbsp;  τ = ESR × C<br>
+          <span class="f-label">High ESR → large τ → slow recovery → rail sags below brownout threshold</span><br>
+          <span class="f-result">τ = 2.0Ω × 22µF = 44µs (degraded C2) &nbsp;vs.&nbsp; τ = 0.05Ω × 22µF = 1.1µs (good MLCC)</span>
         </div>
         <div class="step-row"><div class="step-n">1</div><div><strong>Recognizing τ on the scope:</strong> Zoom to the recovery edge after a sag. The voltage rises from the sag floor to 63.2% of its total recovery in exactly one τ. Measure that time division → τ.</div></div>
-        <div class="step-row"><div class="step-n">2</div><div><strong>Calculating ESR from τ:</strong> τ = ESR × C. Rearrange: ESR = τ / C. If you measure τ = 44µs and C = 22µF → ESR = 2.0Ω. Compare to the component's datasheet maximum ESR (typically &lt; 0.05Ω for a good MLCC at this value).</div></div>
+        <div class="step-row"><div class="step-n">2</div><div><strong>Calculating ESR from τ:</strong> ESR = τ / C. If you measure τ = 44µs and C = 22µF → ESR = 2.0Ω. Compare to the datasheet maximum ESR (typically &lt;0.05Ω for a good MLCC).</div></div>
         <div class="step-row"><div class="step-n">3</div><div><strong>Why V = 10V in the FE plot vs. 3.3V on the bench:</strong> The math is identical — only the supply voltage and τ values change. The exponential shape is universal. This is why FE exam math transfers directly to bench work.</div></div>
-          "I studied the RC transient formula for the FE exam — v<sub>C</sub>(t) = V(1−e<sup>−t/τ</sup>). When I built the power rail simulation in my study folder, I realized that's the exact same equation that describes a bypass cap charging during an MCU load transient. The time constant τ = ESR × C tells you how fast the voltage recovers. A degraded cap with ESR of 2Ω has τ = 44µs — long enough that the voltage sags past the MCU's 2.97V brownout threshold. <strong>That's where the FE exam math directly explains a real failure mode.</strong>"
-        </div>
       </div>
     </div>
 
@@ -361,8 +392,6 @@
         <div class="step-row"><div class="step-n">1</div><div><strong>Measuring noise frequency on the scope:</strong> AC couple the probe on the power rail. Measure the dominant frequency of the ripple using time/div. If ripple period = 6.3µs → f = 159kHz → compare to regulator switching frequency and LC resonant frequency.</div></div>
         <div class="step-row"><div class="step-n">2</div><div><strong>Decoupling cap selection:</strong> To move ω₀ away from the regulator frequency, change C. Lower C → higher ω₀; higher C → lower ω₀. The FE exam Q formula (Q = ω₀L/R) tells you how sharp the resonance is — high Q = narrow band but severe amplification at exactly ω₀.</div></div>
         <div class="step-row"><div class="step-n">3</div><div><strong>Multiple caps in parallel:</strong> A 100nF + 10µF combination provides low impedance across a wider frequency range — the 100nF handles high-frequency noise (MHz), the 10µF handles lower-frequency load transients (kHz).</div></div>
-          "The RLC resonance question from the FE exam is directly relevant to why PCBs use multiple decoupling capacitor values in parallel. ω₀ = 1/√(LC) tells you the frequency at which a particular cap-trace combination has minimum impedance — and therefore maximum noise suppression. If the switching regulator runs near that frequency, the decoupling works well. If it doesn't, you choose a different cap value to tune ω₀ to where you need it."
-        </div>
       </div>
     </div>
 
@@ -413,8 +442,6 @@
         <div class="step-row"><div class="step-n">1</div><div><strong>Reading frequency from the scope:</strong> The scope displays exactly f(t) = A·sin(2πf·t). Count divisions per cycle in time: if one cycle spans 5 horizontal divisions at 0.2ms/div → T = 5 × 0.2ms = 1ms → f = 1kHz → ω = 2π×1000 = 6283 rad/s.</div></div>
         <div class="step-row"><div class="step-n">2</div><div><strong>Pole location tells you signal character:</strong> The FE pole map for Q3 shows poles at exactly ±j2. For a 1kHz ripple waveform, the poles are at ±j6283 — the same structure, different scale. Purely imaginary = sustained sine. No real component = no decay, no growth.</div></div>
         <div class="step-row"><div class="step-n">3</div><div><strong>AC coupling reveals only the sinusoidal component:</strong> DC coupling shows the full rail (3.3V DC + ripple). AC coupling blocks the DC component, showing only the oscillatory part — exactly the f(t) = A·sin(ωt) that maps to the Laplace transform in Q3.</div></div>
-          "The Q3 Laplace transform has poles at ±j2 — purely imaginary, zero real part. That tells you the signal is a sustained sinusoid that neither grows nor decays. When I see AC ripple on a power rail that maintains a consistent amplitude cycle after cycle, those are the same pole conditions. The Laplace framework tells you what kind of signal you're looking at just from the pole locations — which is exactly what an oscilloscope's AC coupling mode is isolating."
-        </div>
       </div>
     </div>
 
@@ -468,8 +495,6 @@
         <div class="step-row"><div class="step-n">3</div><div><strong>Reducing ringing on a PCB:</strong> Add a series termination resistor (33Ω) at the output pin. This increases the real part of the system's effective damping, moving ζ toward 1 (critically damped) and eliminating overshoot. IPC-2221 trace length and impedance matching also affect the ringing amplitude.</div></div>
         <div class="callout co-blue">
           <strong>Scope measurement tip:</strong> Overshoot % = (V_peak − V_final) / V_final × 100%. For Q4's ζ = 0.495: theoretical overshoot ≈ e<sup>−πζ/√(1−ζ²)</sup> × 100% ≈ 16.5%. On the scope, measure the first peak above the settled voltage and compare to the settled level. This gives you an experimental estimate of ζ without knowing L or C.
-        </div>
-          "The FE exam Q4 transfer function has poles at −3.5 ± j6.14. That means ζ = 0.495 — underdamped. When I see ringing on a digital clock edge on the oscilloscope, I know I'm looking at a second-order underdamped system: trace inductance + load capacitance forming H(s). The ringing decays because the poles are in the left half-plane — the system is stable. If I needed to fix it, I'd add a series termination resistor to increase damping."
         </div>
       </div>
     </div>
@@ -555,8 +580,6 @@
             </tbody>
           </table>
         </div>
-          "A triangle wave shows up in two places on a PCB: as the carrier signal inside a PWM switching regulator, and as the output of an RC integrator driven by a square wave. The Fourier series for a triangle wave has only odd harmonics, but they fall off as 1/n² instead of 1/n for a square wave — so a triangle wave generates far less EMI. On the scope, I'd verify a triangle wave by measuring the slew rate (slope = 2A/T) and checking that rise time equals fall time — asymmetry indicates a circuit problem."
-        </div>
       </div>
     </div>
 
@@ -609,6 +632,7 @@
         </table>
 
         <h4 style="margin-top:14px;">The Differentiating Statement</h4>
+        <div class="callout co-teal">
           <strong>"Most of my study for the FE exam has been directly applicable to this role. Take the Linear Systems topic — I worked through RC transients, RLC resonance, and transfer functions. But instead of just solving the equations, I built an oscilloscope reference that shows what each of those looks like on an actual scope trace. The RC transient formula is why a high-ESR bypass cap causes brownout resets. The underdamped poles in a transfer function are why you see ringing on a clock edge. I added a triangle wave section because I know PWM switching regulators use triangle wave carriers internally — and if the carrier frequency drifts, you'd see it on a test pin. That's the kind of connection between math and measurement that I've been building deliberately so that I can hit the ground running when I'm at the bench."</strong>
         </div>
       </div>
