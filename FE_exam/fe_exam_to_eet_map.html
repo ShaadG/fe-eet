@@ -1,0 +1,840 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FE ECE Exam → EET / EE I Job Value Map</title>
+<style>
+:root {
+  --bg:        #0d1117;
+  --surface:   #161b22;
+  --card:      #1c2128;
+  --border:    #30363d;
+  --accent:    #58a6ff;
+  --green:     #3fb950;
+  --orange:    #ff7b72;
+  --yellow:    #e3b341;
+  --purple:    #bc8cff;
+  --teal:      #00bcd4;
+  --txt:       #c9d1d9;
+  --dim:       #8b949e;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background: var(--bg);
+  color: var(--txt);
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+/* ── Header ── */
+header {
+  background: var(--surface);
+  border-bottom: 2px solid var(--accent);
+  padding: 28px 40px 24px;
+}
+
+.header-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.header-label {
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--accent);
+  font-family: 'Consolas', monospace;
+  margin-bottom: 8px;
+}
+
+h1 {
+  font-size: 22px;
+  font-weight: 700;
+  color: #e6edf3;
+  margin-bottom: 6px;
+}
+
+.header-sub {
+  font-size: 13px;
+  color: var(--dim);
+  max-width: 600px;
+  line-height: 1.6;
+}
+
+.header-sub strong { color: var(--txt); }
+
+.stat-row {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+  margin-top: 4px;
+}
+
+.stat {
+  text-align: center;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 10px 18px;
+}
+
+.stat-num { font-size: 22px; font-weight: 700; color: var(--accent); }
+.stat-lbl { font-size: 10px; color: var(--dim); text-transform: uppercase; letter-spacing: 0.06em; }
+
+/* ── Legend ── */
+.legend {
+  max-width: 1100px;
+  margin: 20px auto 0;
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+  padding: 0 40px;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 12px;
+  color: var(--dim);
+}
+
+.dot {
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+/* ── Main ── */
+main {
+  max-width: 1100px;
+  margin: 32px auto 60px;
+  padding: 0 40px;
+}
+
+/* ── Section label ── */
+.section-hdr {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 32px 0 14px;
+}
+
+.section-hdr h2 {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--dim);
+  white-space: nowrap;
+}
+
+.section-hdr::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+/* ── Topic cards ── */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 14px;
+}
+
+.topic-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 18px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  border-left: 3px solid var(--border);
+  transition: border-color 0.15s;
+}
+
+.topic-card.tier-1 { border-left-color: var(--green); }
+.topic-card.tier-2 { border-left-color: var(--yellow); }
+.topic-card.tier-3 { border-left-color: var(--dim); }
+
+.card-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.topic-num {
+  font-size: 10px;
+  font-family: 'Consolas', monospace;
+  color: var(--dim);
+  background: #0d1117;
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  padding: 2px 7px;
+  flex-shrink: 0;
+}
+
+.exam-weight {
+  font-size: 10px;
+  font-family: 'Consolas', monospace;
+  color: var(--yellow);
+  background: rgba(227,179,65,0.08);
+  border: 1px solid rgba(227,179,65,0.2);
+  border-radius: 3px;
+  padding: 2px 7px;
+  flex-shrink: 0;
+}
+
+.topic-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: #e6edf3;
+  line-height: 1.4;
+}
+
+.job-line {
+  font-size: 12.5px;
+  color: var(--dim);
+  line-height: 1.5;
+}
+
+.job-line strong { color: var(--txt); }
+
+/* ── Sub-topics ── */
+.subtopics {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+.sub-pill {
+  font-size: 10.5px;
+  padding: 2px 8px;
+  border-radius: 10px;
+  background: rgba(88,166,255,0.07);
+  color: var(--accent);
+  border: 1px solid rgba(88,166,255,0.15);
+}
+
+.sub-pill.green  { background: rgba(63,185,80,0.07);   color: var(--green);  border-color: rgba(63,185,80,0.15); }
+.sub-pill.yellow { background: rgba(227,179,65,0.07);  color: var(--yellow); border-color: rgba(227,179,65,0.15); }
+.sub-pill.purple { background: rgba(188,140,255,0.07); color: var(--purple); border-color: rgba(188,140,255,0.15); }
+.sub-pill.teal   { background: rgba(0,188,212,0.07);   color: var(--teal);   border-color: rgba(0,188,212,0.15); }
+.sub-pill.orange { background: rgba(255,123,114,0.07); color: var(--orange); border-color: rgba(255,123,114,0.15); }
+
+/* ── Portfolio links ── */
+.portfolio-links {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  border-top: 1px solid var(--border);
+  padding-top: 10px;
+  margin-top: 2px;
+}
+
+.portfolio-lbl {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--dim);
+  margin-bottom: 2px;
+}
+
+.portfolio-link {
+  font-size: 11.5px;
+  color: var(--accent);
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.portfolio-link::before {
+  content: '→';
+  color: var(--dim);
+  font-size: 10px;
+}
+
+.built-badge {
+  font-size: 9px;
+  background: rgba(63,185,80,0.1);
+  color: var(--green);
+  border: 1px solid rgba(63,185,80,0.2);
+  border-radius: 3px;
+  padding: 1px 5px;
+  margin-left: 4px;
+}
+
+.planned-badge {
+  font-size: 9px;
+  background: rgba(227,179,65,0.08);
+  color: var(--yellow);
+  border: 1px solid rgba(227,179,65,0.15);
+  border-radius: 3px;
+  padding: 1px 5px;
+  margin-left: 4px;
+}
+
+/* ── Footer ── */
+footer {
+  border-top: 1px solid var(--border);
+  padding: 20px 40px;
+  text-align: center;
+  font-size: 12px;
+  color: var(--dim);
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+@media (max-width: 600px) {
+  header { padding: 20px; }
+  main   { padding: 0 16px 40px; }
+  .legend { padding: 0 16px; }
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-top">
+    <div>
+      <div class="header-label">FE Electrical &amp; Computer Exam Specification → EET / EE I Job Alignment</div>
+      <h1>What the FE Exam Covers — and Why It Matters at the Bench</h1>
+      <p class="header-sub">
+        The NCEES FE ECE exam tests <strong>17 knowledge areas</strong> across 110 questions.
+        This page maps each area to what an <strong>Electrical Electronic Technician</strong> or
+        <strong>EE I</strong> actually does on the job — and links to the portfolio artifacts
+        already built to demonstrate that knowledge.
+      </p>
+    </div>
+    <div class="stat-row">
+      <div class="stat">
+        <div class="stat-num">17</div>
+        <div class="stat-lbl">Exam Topics</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num">110</div>
+        <div class="stat-lbl">Questions</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num">13</div>
+        <div class="stat-lbl">Job-Relevant Topics</div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<div class="legend">
+  <div class="legend-item"><div class="dot" style="background:var(--green)"></div> Direct bench application — used daily in EET/EE I work</div>
+  <div class="legend-item"><div class="dot" style="background:var(--yellow)"></div> Supporting knowledge — applies to test floor decisions</div>
+  <div class="legend-item"><div class="dot" style="background:var(--dim)"></div> Exam foundation — less direct in this role</div>
+</div>
+
+<main>
+
+  <!-- ── TIER 1 ── -->
+  <div class="section-hdr"><h2>Direct Bench Application</h2></div>
+  <div class="grid">
+
+    <div class="topic-card tier-1">
+      <div class="card-top">
+        <span class="topic-num">Topic 6</span>
+        <span class="exam-weight">5–8 Questions</span>
+      </div>
+      <div class="topic-name">Circuit Analysis — DC &amp; AC Steady State</div>
+      <div class="job-line">
+        <strong>On the job:</strong> The first three tools at any failing PCB — KVL/KCL to trace current paths,
+        Thevenin equivalent to isolate a subsystem, impedance to understand why a rail is loaded differently than expected.
+        No bench troubleshooting starts without this.
+      </div>
+      <div class="subtopics">
+        <span class="sub-pill green">KVL / KCL</span>
+        <span class="sub-pill green">Thevenin / Norton</span>
+        <span class="sub-pill green">Phasors</span>
+        <span class="sub-pill green">Impedance</span>
+        <span class="sub-pill">RMS / Phase / Frequency</span>
+      </div>
+      <div class="portfolio-links">
+        <div class="portfolio-lbl">Portfolio Artifacts</div>
+        <a class="portfolio-link" href="../Electrical_Electronic_Technician/scenario_power_rail_01/scenario_power_rail_01.html">
+          3.3V Power Rail Brownout — KVL/impedance applied to scope waveforms <span class="built-badge">built</span>
+        </a>
+        <a class="portfolio-link" href="../Electrical_Engineer/pcb_calculators.html">
+          PCB Design Calculators — trace impedance, voltage drop <span class="built-badge">built</span>
+        </a>
+      </div>
+    </div>
+
+    <div class="topic-card tier-1">
+      <div class="card-top">
+        <span class="topic-num">Topic 7</span>
+        <span class="exam-weight">5–8 Questions</span>
+      </div>
+      <div class="topic-name">Linear Systems</div>
+      <div class="job-line">
+        <strong>On the job:</strong> Filter behavior, transient response, and transfer functions determine
+        what the oscilloscope waveform looks like and why. Recognizing a first-order RC decay vs. an
+        underdamped RLC ring is how you identify a bad decoupling cap without a schematic.
+      </div>
+      <div class="subtopics">
+        <span class="sub-pill green">Frequency Response</span>
+        <span class="sub-pill green">Laplace Transforms</span>
+        <span class="sub-pill green">Transfer Functions</span>
+        <span class="sub-pill">Resonance</span>
+        <span class="sub-pill">Transient Response</span>
+      </div>
+      <div class="portfolio-links">
+        <div class="portfolio-lbl">Portfolio Artifacts</div>
+        <a class="portfolio-link" href="linear_systems/practice.html">
+          Linear Systems Practice — RC transient, RLC resonance, Laplace <span class="built-badge">built</span>
+        </a>
+        <a class="portfolio-link" href="../Electrical_Electronic_Technician/analysis_eet.html">
+          EET Signal Analysis — RLC Bode plot, step response <span class="built-badge">built</span>
+        </a>
+      </div>
+    </div>
+
+    <div class="topic-card tier-1">
+      <div class="card-top">
+        <span class="topic-num">Topic 8</span>
+        <span class="exam-weight">5–8 Questions</span>
+      </div>
+      <div class="topic-name">Signal Processing</div>
+      <div class="job-line">
+        <strong>On the job:</strong> Every oscilloscope FFT is applied signal processing. Identifying
+        switching noise by its frequency signature, understanding aliasing when a scope's sample rate is
+        too low, recognizing a poorly designed analog filter on a power supply — all signal processing.
+      </div>
+      <div class="subtopics">
+        <span class="sub-pill green">FFT / Fourier</span>
+        <span class="sub-pill green">Analog Filters</span>
+        <span class="sub-pill green">Nyquist / Aliasing</span>
+        <span class="sub-pill">Digital Filters</span>
+        <span class="sub-pill">Sampling</span>
+      </div>
+      <div class="portfolio-links">
+        <div class="portfolio-lbl">Portfolio Artifacts</div>
+        <a class="portfolio-link" href="../Electrical_Electronic_Technician/analysis_eet.html">
+          EET Analysis — FFT noise floor, triangle wave harmonics <span class="built-badge">built</span>
+        </a>
+        <a class="portfolio-link" href="../Electrical_Electronic_Technician/signal_analysis_deep.py">
+          signal_analysis_deep.py — Python: FFT, ESR, filter analysis <span class="built-badge">built</span>
+        </a>
+      </div>
+    </div>
+
+    <div class="topic-card tier-1">
+      <div class="card-top">
+        <span class="topic-num">Topic 9</span>
+        <span class="exam-weight">7–11 Questions</span>
+      </div>
+      <div class="topic-name">Electronics — Analog &amp; Instrumentation</div>
+      <div class="job-line">
+        <strong>On the job:</strong> Understanding op-amp behavior explains why a sensor output rail
+        is saturated. Reading a diode or transistor in a datasheet and knowing its operating region
+        tells you whether a component failure is plausible before you replace it.
+        The instrumentation sub-topic maps directly to every DMM and scope setup decision.
+      </div>
+      <div class="subtopics">
+        <span class="sub-pill green">Op-Amps</span>
+        <span class="sub-pill green">Instrumentation</span>
+        <span class="sub-pill green">Diodes / Transistors</span>
+        <span class="sub-pill">Amplifiers</span>
+        <span class="sub-pill">Power Electronics</span>
+      </div>
+      <div class="portfolio-links">
+        <div class="portfolio-lbl">Portfolio Artifacts</div>
+        <a class="portfolio-link" href="../Electrical_Electronic_Technician/test_equipment_reference.html">
+          Test Equipment Reference — DMM and scope operation, measurement setup <span class="built-badge">built</span>
+        </a>
+        <a class="portfolio-link" href="../Electrical_Electronic_Technician/analysis_eet.html">
+          EET Analysis — ESR comparison, component characterization <span class="built-badge">built</span>
+        </a>
+      </div>
+    </div>
+
+    <div class="topic-card tier-1">
+      <div class="card-top">
+        <span class="topic-num">Topic 15</span>
+        <span class="exam-weight">8–12 Questions</span>
+      </div>
+      <div class="topic-name">Digital Systems</div>
+      <div class="job-line">
+        <strong>On the job:</strong> Logic gates, timing diagrams, and state machines are what you see
+        on a scope when debugging a digital interface. Race conditions appear as glitches on the scope.
+        Flip-flop timing explains setup and hold violations. Boundary scan (JTAG) is digital systems
+        theory applied directly to in-circuit testing.
+      </div>
+      <div class="subtopics">
+        <span class="sub-pill green">Logic Gates</span>
+        <span class="sub-pill green">Timing Diagrams</span>
+        <span class="sub-pill green">Flip-Flops</span>
+        <span class="sub-pill teal">Boundary Scan / JTAG</span>
+        <span class="sub-pill">Boolean Logic</span>
+        <span class="sub-pill">State Machines</span>
+      </div>
+      <div class="portfolio-links">
+        <div class="portfolio-lbl">Portfolio Artifacts</div>
+        <a class="portfolio-link" href="../Electrical_Engineer/waveform_boundary_scan.html">
+          Boundary Scan / JTAG Waveforms — TAP state machine, TDI/TDO timing <span class="built-badge">built</span>
+        </a>
+        <a class="portfolio-link" href="../Electrical_Electronic_Technician/waveform_visualization.html">
+          Waveform Visualization — oscilloscope-style digital signal display <span class="built-badge">built</span>
+        </a>
+      </div>
+    </div>
+
+    <div class="topic-card tier-1">
+      <div class="card-top">
+        <span class="topic-num">Topic 12</span>
+        <span class="exam-weight">6–9 Questions</span>
+      </div>
+      <div class="topic-name">Control Systems</div>
+      <div class="job-line">
+        <strong>On the job:</strong> Every switching power supply is a closed-loop control system.
+        Bode plots show whether the loop is stable — a power supply that rings or oscillates under
+        load has a phase margin problem. Understanding open vs. closed-loop response explains
+        why a regulator behaves differently under no-load vs. full-load conditions.
+      </div>
+      <div class="subtopics">
+        <span class="sub-pill green">Bode Plots</span>
+        <span class="sub-pill green">Closed-Loop Stability</span>
+        <span class="sub-pill">Block Diagrams</span>
+        <span class="sub-pill">Steady-State Error</span>
+        <span class="sub-pill">Settling Time</span>
+      </div>
+      <div class="portfolio-links">
+        <div class="portfolio-lbl">Portfolio Artifacts</div>
+        <a class="portfolio-link" href="../Electrical_Electronic_Technician/analysis_eet.html">
+          EET Analysis — RLC Bode plot, phase/gain vs. frequency <span class="built-badge">built</span>
+        </a>
+        <a class="portfolio-link" href="../Electrical_Engineer/oscilloscope_guide.html">
+          Oscilloscope Guide — measuring phase margin and transient load response <span class="built-badge">built</span>
+        </a>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ── TIER 2 ── -->
+  <div class="section-hdr"><h2>Supporting Knowledge — Test Floor Decisions</h2></div>
+  <div class="grid">
+
+    <div class="topic-card tier-2">
+      <div class="card-top">
+        <span class="topic-num">Topic 1</span>
+        <span class="exam-weight">11–17 Questions</span>
+      </div>
+      <div class="topic-name">Mathematics — Trig, Complex Numbers, Phasors</div>
+      <div class="job-line">
+        <strong>On the job:</strong> Phasors and complex impedance are the math behind every AC
+        measurement. Law of Sines applies to PCB geometry verification. Trig identities are what
+        the scope is showing you when you read amplitude, period, and phase shift off a waveform.
+      </div>
+      <div class="subtopics">
+        <span class="sub-pill yellow">Trig / Law of Sines</span>
+        <span class="sub-pill yellow">Complex Numbers</span>
+        <span class="sub-pill yellow">Phasors</span>
+        <span class="sub-pill">Linear Algebra</span>
+        <span class="sub-pill">Calculus</span>
+      </div>
+      <div class="portfolio-links">
+        <div class="portfolio-lbl">Portfolio Artifacts</div>
+        <a class="portfolio-link" href="../Electrical_Electronic_Technician/scenario_fe_math_02.html">
+          FE Math Scenario — Law of Sines, phasor trig, triangle geometry <span class="built-badge">built</span>
+        </a>
+        <a class="portfolio-link" href="../Electrical_Electronic_Technician/scenario_math_applied_01.html">
+          Applied Math Scenario — measurement uncertainty, trace geometry <span class="built-badge">built</span>
+        </a>
+      </div>
+    </div>
+
+    <div class="topic-card tier-2">
+      <div class="card-top">
+        <span class="topic-num">Topic 2</span>
+        <span class="exam-weight">4–6 Questions</span>
+      </div>
+      <div class="topic-name">Probability &amp; Statistics</div>
+      <div class="job-line">
+        <strong>On the job:</strong> ICT yield is a binomial distribution. DMM calibration drift
+        follows a normal distribution. Process capability (Cpk) is applied statistics. Every
+        yield report, SPC control chart, and calibration interval decision is built on this math.
+      </div>
+      <div class="subtopics">
+        <span class="sub-pill yellow">Normal Distribution</span>
+        <span class="sub-pill yellow">Binomial Probability</span>
+        <span class="sub-pill yellow">Cpk / SPC</span>
+        <span class="sub-pill">Mean / Median / Mode</span>
+        <span class="sub-pill">Expected Value</span>
+      </div>
+      <div class="portfolio-links">
+        <div class="portfolio-lbl">Portfolio Artifacts</div>
+        <a class="portfolio-link" href="../Electrical_Electronic_Technician/scenario_fe_math_02.html">
+          FE Math Scenario — DMM calibration (normal), ICT retest (binomial), rail QC (median) <span class="built-badge">built</span>
+        </a>
+      </div>
+    </div>
+
+    <div class="topic-card tier-2">
+      <div class="card-top">
+        <span class="topic-num">Topic 10</span>
+        <span class="exam-weight">8–12 Questions</span>
+      </div>
+      <div class="topic-name">Power Systems</div>
+      <div class="job-line">
+        <strong>On the job:</strong> Power factor affects how a supply behaves under load.
+        Voltage regulation determines whether a rail holds within spec when the board draws peak current.
+        Transformer theory explains isolation barriers on test equipment and the difference between
+        floating and earth-referenced measurements.
+      </div>
+      <div class="subtopics">
+        <span class="sub-pill yellow">Power Factor</span>
+        <span class="sub-pill yellow">Voltage Regulation</span>
+        <span class="sub-pill">Three-Phase</span>
+        <span class="sub-pill">Transformers</span>
+        <span class="sub-pill">Real / Reactive Power</span>
+      </div>
+      <div class="portfolio-links">
+        <div class="portfolio-lbl">Portfolio Artifacts</div>
+        <a class="portfolio-link" href="../Electrical_Electronic_Technician/scenario_power_rail_01/scenario_power_rail_01.html">
+          3.3V Power Rail Scenario — voltage sag under load, regulation failure <span class="built-badge">built</span>
+        </a>
+        <a class="portfolio-link" href="../Electrical_Engineer/pcb_calculators.html">
+          PCB Calculators — via current capacity, power dissipation <span class="built-badge">built</span>
+        </a>
+      </div>
+    </div>
+
+    <div class="topic-card tier-2">
+      <div class="card-top">
+        <span class="topic-num">Topic 11</span>
+        <span class="exam-weight">4–6 Questions</span>
+      </div>
+      <div class="topic-name">Electromagnetics</div>
+      <div class="job-line">
+        <strong>On the job:</strong> Controlled-impedance traces on RF PCBs require transmission line
+        theory to design and verify. Reflections from impedance mismatches show up as ringing on the
+        scope. IPC-2221 trace width rules and stackup impedance calculations are electromagnetic
+        theory made practical.
+      </div>
+      <div class="subtopics">
+        <span class="sub-pill yellow">Transmission Lines</span>
+        <span class="sub-pill yellow">Impedance Matching</span>
+        <span class="sub-pill">Maxwell Equations</span>
+        <span class="sub-pill">Wave Propagation</span>
+        <span class="sub-pill">Electrostatics</span>
+      </div>
+      <div class="portfolio-links">
+        <div class="portfolio-lbl">Portfolio Artifacts</div>
+        <a class="portfolio-link" href="../Electrical_Engineer/pcb_calculators.html">
+          PCB Calculators — trace impedance, IPC-2221 trace width (50Ω reference) <span class="built-badge">built</span>
+        </a>
+        <a class="portfolio-link" href="../Electrical_Electronic_Technician/scenario_math_applied_01.html">
+          Applied Math Scenario — PCB trace geometry, diagonal routing math <span class="built-badge">built</span>
+        </a>
+      </div>
+    </div>
+
+    <div class="topic-card tier-2">
+      <div class="card-top">
+        <span class="topic-num">Topic 13</span>
+        <span class="exam-weight">5–8 Questions</span>
+      </div>
+      <div class="topic-name">Communications</div>
+      <div class="job-line">
+        <strong>On the job:</strong> Fourier series decomposition is what the spectrum analyzer and
+        oscilloscope FFT show you. Understanding AM/FM modulation helps when debugging RF PCBs or
+        verifying a carrier signal. Multiplexing concepts underlie time-domain multiplexed bus
+        signals on digital PCBs.
+      </div>
+      <div class="subtopics">
+        <span class="sub-pill yellow">Fourier Series / FFT</span>
+        <span class="sub-pill yellow">AM / FM Concepts</span>
+        <span class="sub-pill">Multiplexing</span>
+        <span class="sub-pill">Digital Communications</span>
+        <span class="sub-pill">PCM</span>
+      </div>
+      <div class="portfolio-links">
+        <div class="portfolio-lbl">Portfolio Artifacts</div>
+        <a class="portfolio-link" href="../Electrical_Electronic_Technician/analysis_eet.html">
+          EET Analysis — FFT noise floor plot, triangle harmonics (Fourier decomposition) <span class="built-badge">built</span>
+        </a>
+        <a class="portfolio-link" href="../Electrical_Electronic_Technician/signal_analysis_deep.py">
+          signal_analysis_deep.py — Python FFT and frequency domain analysis <span class="built-badge">built</span>
+        </a>
+      </div>
+    </div>
+
+    <div class="topic-card tier-2">
+      <div class="card-top">
+        <span class="topic-num">Topic 16</span>
+        <span class="exam-weight">5–8 Questions</span>
+      </div>
+      <div class="topic-name">Computer Systems — Microprocessors &amp; Interfacing</div>
+      <div class="job-line">
+        <strong>On the job:</strong> Most modern PCBs have a microcontroller or processor.
+        SPI, I2C, and UART are the bus interfaces that show up on the scope during bring-up.
+        Memory addressing and bus timing diagrams are what you interpret when a board fails
+        its communication interface test at ICT or functional test.
+      </div>
+      <div class="subtopics">
+        <span class="sub-pill yellow">SPI / I2C / UART</span>
+        <span class="sub-pill yellow">Bus Timing</span>
+        <span class="sub-pill">Microprocessors</span>
+        <span class="sub-pill">Memory Systems</span>
+        <span class="sub-pill">Interfacing</span>
+      </div>
+      <div class="portfolio-links">
+        <div class="portfolio-lbl">Portfolio Artifacts</div>
+        <a class="portfolio-link" href="../Electrical_Engineer/waveform_boundary_scan.html">
+          Boundary Scan / JTAG — digital bus protocol waveforms and timing <span class="built-badge">built</span>
+        </a>
+        <a class="portfolio-link" href="../Electrical_Electronic_Technician/instrument_automation.py">
+          instrument_automation.py — Python SCPI/VISA instrument control scripting <span class="built-badge">built</span>
+        </a>
+      </div>
+    </div>
+
+    <div class="topic-card tier-2">
+      <div class="card-top">
+        <span class="topic-num">Topic 3</span>
+        <span class="exam-weight">4–6 Questions</span>
+      </div>
+      <div class="topic-name">Ethics &amp; Professional Practice — Safety</div>
+      <div class="job-line">
+        <strong>On the job:</strong> ESD precautions protect assemblies worth hundreds to thousands
+        of dollars. Grounding discipline on the bench prevents measurement errors and equipment damage.
+        PPE and lockout/tagout procedures are non-negotiable in any manufacturing environment.
+        The safety sub-section of this topic is directly applicable every day.
+      </div>
+      <div class="subtopics">
+        <span class="sub-pill yellow">ESD / Grounding</span>
+        <span class="sub-pill yellow">PPE</span>
+        <span class="sub-pill">Lockout / Tagout</span>
+        <span class="sub-pill">MSDS / Material Safety</span>
+        <span class="sub-pill">Codes of Ethics</span>
+      </div>
+      <div class="portfolio-links">
+        <div class="portfolio-lbl">Portfolio Artifacts</div>
+        <a class="portfolio-link" href="../Electrical_Electronic_Technician/test_equipment_reference.html">
+          Test Equipment Reference — ESD strap, probe safety, bench grounding protocol <span class="built-badge">built</span>
+        </a>
+        <a class="portfolio-link" href="../Electrical_Engineer/ipc610_workmanship.html">
+          IPC-610 Workmanship — inspection and handling standards <span class="built-badge">built</span>
+        </a>
+      </div>
+    </div>
+
+    <div class="topic-card tier-2">
+      <div class="card-top">
+        <span class="topic-num">Topic 4</span>
+        <span class="exam-weight">5–8 Questions</span>
+      </div>
+      <div class="topic-name">Engineering Economics</div>
+      <div class="job-line">
+        <strong>On the job:</strong> Every rework decision is a cost-benefit analysis — is it
+        cheaper to rework this board or scrap it? Yield cost per test step, cost of an escaped
+        defect vs. cost of increased test coverage, and equipment depreciation schedules are
+        all engineering economics applied to a test floor.
+      </div>
+      <div class="subtopics">
+        <span class="sub-pill yellow">Cost-Benefit Analysis</span>
+        <span class="sub-pill yellow">Break-Even</span>
+        <span class="sub-pill">Risk Identification</span>
+        <span class="sub-pill">Present / Future Value</span>
+        <span class="sub-pill">Trade-Off Analysis</span>
+      </div>
+      <div class="portfolio-links">
+        <div class="portfolio-lbl">Portfolio Artifacts</div>
+        <a class="portfolio-link" href="../Electrical_Engineer/ipc610_workmanship.html">
+          IPC-610 Workmanship — NCR decision flow, rework authorization criteria <span class="built-badge">built</span>
+        </a>
+        <a class="portfolio-link" href="../Electrical_Electronic_Technician/daily_workflow_simulation.html">
+          Daily Workflow Simulation — defect logging, escalation vs. rework decision <span class="built-badge">built</span>
+        </a>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ── TIER 3 ── -->
+  <div class="section-hdr"><h2>Exam Foundation — Less Direct in This Role</h2></div>
+  <div class="grid">
+
+    <div class="topic-card tier-3">
+      <div class="card-top">
+        <span class="topic-num">Topic 5</span>
+        <span class="exam-weight">Not specified</span>
+      </div>
+      <div class="topic-name">Properties of Electrical Materials</div>
+      <div class="job-line">Semiconductor physics, conductivity, and thermal expansion — foundational for understanding
+      why components behave as they do, but not a daily bench procedure for EET/EE I roles.</div>
+      <div class="subtopics">
+        <span class="sub-pill">Semiconductors</span>
+        <span class="sub-pill">Conductivity / Resistivity</span>
+        <span class="sub-pill">Thermal Properties</span>
+      </div>
+    </div>
+
+    <div class="topic-card tier-3">
+      <div class="card-top">
+        <span class="topic-num">Topic 14</span>
+        <span class="exam-weight">4–6 Questions</span>
+      </div>
+      <div class="topic-name">Computer Networks</div>
+      <div class="job-line">Routing, switching, OSI model, network security — applicable if the role involves
+      networked test systems or IT infrastructure, but not a primary EET/EE I bench skill.</div>
+      <div class="subtopics">
+        <span class="sub-pill">OSI / TCP-IP</span>
+        <span class="sub-pill">LAN / WAN</span>
+        <span class="sub-pill">Network Security</span>
+      </div>
+    </div>
+
+    <div class="topic-card tier-3">
+      <div class="card-top">
+        <span class="topic-num">Topic 17</span>
+        <span class="exam-weight">Not specified</span>
+      </div>
+      <div class="topic-name">Software Engineering</div>
+      <div class="job-line">Algorithms, data structures, and control flow — the Python scripting in this portfolio
+      already demonstrates practical software skills beyond what this topic requires for the role.</div>
+      <div class="subtopics">
+        <span class="sub-pill">Algorithms</span>
+        <span class="sub-pill">Data Structures</span>
+        <span class="sub-pill">Scripting / Testing</span>
+      </div>
+      <div class="portfolio-links">
+        <div class="portfolio-lbl">Already Demonstrated</div>
+        <a class="portfolio-link" href="../Electrical_Electronic_Technician/instrument_automation.py">
+          instrument_automation.py — sequential test automation scripting <span class="built-badge">built</span>
+        </a>
+      </div>
+    </div>
+
+  </div>
+
+</main>
+
+<footer>
+  <a href="../index.html">← Back to Portfolio</a>
+  &nbsp;·&nbsp; NCEES FE Electrical &amp; Computer Exam — 17 Topics · 110 Questions
+  &nbsp;·&nbsp; All portfolio artifacts built from original study and applied engineering work
+</footer>
+
+</body>
+</html>
