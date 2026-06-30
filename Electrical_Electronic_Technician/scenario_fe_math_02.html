@@ -197,8 +197,8 @@
 <div class="layer-bar">
   <div class="layer-tab active" onclick="switchTab('overview', this)">Overview</div>
   <div class="layer-tab" onclick="switchTab('q1-trig', this)">Q1 — Trigonometry</div>
-  <div class="layer-tab" onclick="switchTab('q13-normal', this)">Q13 — Normal Distribution</div>
-  <div class="layer-tab" onclick="switchTab('q14-binomial', this)">Q14 — Binomial Probability</div>
+  <div class="layer-tab" onclick="switchTab('q13-normal', this)">Q13 — DMM Calibration</div>
+  <div class="layer-tab" onclick="switchTab('q14-binomial', this)">Q14 — ICT Retest Modeling</div>
   <div class="layer-tab" onclick="switchTab('q12-median', this)">Q12 — Mean vs Median</div>
   <div class="layer-tab" onclick="switchTab('cad-notes', this)">CAD Notes</div>
 </div>
@@ -264,9 +264,9 @@
           <div class="kn-unit">dataset [11..14]</div>
         </div>
         <div class="kn-card">
-          <div class="kn-label">Q13 P(X &gt; 15.5)</div>
+          <div class="kn-label">Q13 P(DMM flagged)</div>
           <div class="kn-value">0.0013</div>
-          <div class="kn-unit">z = 3.0 → tail</div>
+          <div class="kn-unit">z = 3.0 → recalibrate</div>
         </div>
         <div class="kn-card">
           <div class="kn-label">Q14 P(X=4)</div>
@@ -369,16 +369,20 @@
     ════════════════════════════════════════════ -->
     <div id="tab-q13-normal" class="tab-panel">
       <div class="section-title">Q13 — Normal Distribution / Statistical Inference</div>
-      <div class="sub-title">Probability &amp; Statistics → ESR Component Acceptance Screening</div>
+      <div class="sub-title">Probability &amp; Statistics → DMM Calibration Drift &amp; Recalibration Threshold</div>
 
       <div class="problem-tag">FE Practice Exam — Question 13 — Probability &amp; Statistics</div>
 
       <div class="card">
-        <h3>FE Problem Statement</h3>
+        <h3>EET Bench Scenario</h3>
         <p style="line-height:1.7; margin-bottom:12px;">
-          Suppose the lengths of telephone calls form a normal distribution with a mean length of 8.0 min
-          and a standard deviation of 2.5 min. The probability that a telephone call selected at random will
-          last more than 15.5 min is most nearly:
+          A test floor maintains a fleet of digital multimeters (DMMs) used for DC voltage verification
+          at ICT stations. Each quarter, the DMMs are checked against a NIST-traceable voltage reference.
+          The measured DC reading error across the fleet follows a normal distribution with a mean drift of
+          <strong>8.0 µV</strong> and a standard deviation of <strong>2.5 µV</strong>.
+          Any DMM with a reading error exceeding <strong>15.5 µV</strong> from the reference is pulled
+          from service and sent for recalibration. The probability that a randomly selected DMM will be
+          flagged for recalibration is most nearly:
         </p>
         <div style="font-size:12px; color:var(--text-muted); margin-bottom:10px;">Choices: A. 0.0013 &nbsp; B. 0.0026 &nbsp; C. 0.2600 &nbsp; D. 0.9987</div>
         <div class="answer-highlight">Answer: A — 0.0013</div>
@@ -387,39 +391,43 @@
       <div class="card">
         <h3>Worked Solution — Z-Score &amp; Normal Table</h3>
         <div class="formula-box">
-          <div class="label">FE Reference Handbook — Engineering Probability and Statistics (p.67)</div>
+          <div class="label">Normal Distribution — Z-Score Method</div>
           Normal PDF:   f(x) = (1/σ√2π) × e^(-½((x-μ)/σ)²)<br><br>
           Standardize:  z = (x - μ) / σ<br>
-          z = (15.5 - 8.0) / 2.5<br>
+          z = (15.5 µV - 8.0 µV) / 2.5 µV<br>
           z = 7.5 / 2.5 = 3.0<br><br>
           From z-table:  F(3.0) = 0.9987   (area left of z=3)<br>
-          P(X &gt; 15.5) = 1 - F(3.0) = 1 - 0.9987<br>
-          <span class="answer">P(X &gt; 15.5) = 0.0013  →  Answer A</span>
+          P(drift &gt; 15.5 µV) = 1 - F(3.0) = 1 - 0.9987<br>
+          <span class="answer">P(DMM flagged for recalibration) = 0.0013  →  Answer A</span>
         </div>
         <div style="margin-top:10px; font-size:13px; line-height:1.7;">
           This is the <strong>3-sigma rule</strong>: only 0.13% of a normal distribution lies beyond
-          z = 3. In quality engineering, staying within ±3σ means 99.73% of parts are within spec.
+          z = 3. Setting the recalibration flag at 3σ above the fleet mean means only 1 in ~769 DMMs
+          gets pulled per calibration cycle — minimizing downtime while ensuring measurement integrity
+          at the test station.
         </div>
       </div>
 
       <div class="plot-container">
         <img src="analysis_output/math_02_normal_screening.png"
-             alt="Normal distribution FE Q13 and EET ESR screening"
+             alt="Normal distribution — DMM calibration drift threshold"
              onerror="this.style.background='#1a1a2e'; this.style.padding='20px';
                       this.alt='Run simulate_fe_math_02.py to generate this plot';">
         <div class="plot-caption">
-          Left: FE Q13 — tail probability P(X &gt; 15.5) = 0.0013 at z = 3.
-          Right: EET application — capacitor ESR acceptance screening, 3σ boundary = 95 mΩ, fail rate = 0.13%.
+          Left: Normal distribution — tail probability P(drift &gt; 15.5 µV) = 0.0013 at z = 3.
+          Right: EET application — DMM fleet calibration screening. 3σ recalibration threshold = 15.5 µV.
+          Only 0.13% of instruments exceed this drift limit under normal aging conditions.
         </div>
       </div>
 
       <div class="talking-pts">
         <h4>Key Concepts</h4>
         <ul>
-          <li>z = (x - μ) / σ converts any normal distribution to the standard table</li>
-          <li>z = 3 corresponds to 0.0013 tail probability — this is the 3-sigma rule used in SPC and Cpk</li>
-          <li>Cpk uses this same reasoning: Cpk = min((USL-μ)/3σ, (μ-LSL)/3σ) — a Cpk of 1.0 means 3σ = USL</li>
-          <li>MES systems can enforce statistical triggers automatically — the engineer sets the threshold</li>
+          <li>z = (x - μ) / σ works for any normally distributed measurement — DMM drift, voltage deviation, ESR spread, component tolerance</li>
+          <li>z = 3 → 0.0013 tail probability — the 3-sigma rule is the foundation of SPC, Cpk, and calibration interval engineering</li>
+          <li>Setting a recalibration threshold at 3σ means 99.87% of instruments are in-service at any given cycle — a balance between measurement integrity and maintenance cost</li>
+          <li>Cpk applies the same logic to production: Cpk = min((USL-μ)/3σ, (μ-LSL)/3σ). A Cpk of 1.0 means 3σ = spec limit</li>
+          <li>In practice: a DMM with known calibration history can have its drift distribution tracked over time — the mean and σ inform whether to shorten or extend the calibration interval</li>
         </ul>
       </div>
     </div>
@@ -429,15 +437,20 @@
     ════════════════════════════════════════════ -->
     <div id="tab-q14-binomial" class="tab-panel">
       <div class="section-title">Q14 — Binomial Distribution</div>
-      <div class="sub-title">Probability → ICT Defect Rate Modeling for Intermittent Solder Joint</div>
+      <div class="sub-title">Probability → Intermittent Solder Joint Detection During ICT Retest</div>
 
       <div class="problem-tag">FE Practice Exam — Question 14 — Probability &amp; Statistics</div>
 
       <div class="card">
-        <h3>FE Problem Statement</h3>
+        <h3>EET Bench Scenario</h3>
         <p style="line-height:1.7; margin-bottom:12px;">
-          You have a fair coin that you toss ten times. The probability of getting exactly four heads in ten
-          tosses is most nearly:
+          A PCB assembly has a suspected intermittent cold solder joint at a test node. Engineering
+          has determined from thermal cycling data that this joint makes reliable electrical contact
+          approximately <strong>50% of the time</strong> — it passes ICT on some runs and fails on others
+          depending on micro-expansion of the joint under test conditions. The board is submitted for
+          <strong>10 ICT retest cycles</strong> to characterize the intermittency.
+          The probability that the intermittent failure will be captured on <strong>exactly 4</strong>
+          of the 10 retest cycles is most nearly:
         </p>
         <div style="font-size:12px; color:var(--text-muted); margin-bottom:10px;">Choices: A. 0.1 &nbsp; B. 0.2 &nbsp; C. 0.4 &nbsp; D. 0.5</div>
         <div class="answer-highlight">Answer: B — 0.2 (0.2051)</div>
@@ -446,37 +459,45 @@
       <div class="card">
         <h3>Worked Solution — Binomial PMF</h3>
         <div class="formula-box">
-          <div class="label">FE Reference Handbook — Binomial Distribution (p.66)</div>
-          P(X=k) = C(n,k) × p^k × (1-p)^(n-k)<br><br>
-          n = 10 trials,  p = 0.5,  k = 4<br><br>
+          <div class="label">Binomial Distribution — P(X = k) = C(n,k) × p^k × (1-p)^(n-k)</div>
+          n = 10 retest cycles<br>
+          p = 0.5  (joint fails contact 50% of cycles)<br>
+          k = 4  (exactly 4 failures captured)<br><br>
           C(10,4) = 10! / (4! × 6!) = 210<br><br>
           P(X=4) = 210 × (0.5)^4 × (0.5)^6<br>
           P(X=4) = 210 × (0.5)^10<br>
           P(X=4) = 210 / 1024<br>
-          <span class="answer">P(X=4) = 0.2051  ≈  0.2  →  Answer B</span>
+          <span class="answer">P(exactly 4 failures detected) = 0.2051  ≈  0.2  →  Answer B</span>
+        </div>
+        <div style="margin-top:10px; font-size:13px; line-height:1.7;">
+          <strong>Why this matters on the job:</strong> A 50/50 intermittent joint with only 10 retest
+          cycles has just a 20% chance of showing exactly 4 failures. There is also a real probability
+          it passes all 10 cycles (≈ 0.1%) and escapes. This is why engineering escalation — not just
+          retesting — is the correct response to a suspected intermittent defect.
         </div>
       </div>
 
       <div class="plot-container">
         <img src="analysis_output/math_02_binomial_ict.png"
-             alt="Binomial distribution FE Q14 and EET ICT defect modeling"
+             alt="Binomial distribution — ICT retest intermittent solder joint"
              onerror="this.style.background='#1a1a2e'; this.style.padding='20px';
                       this.alt='Run simulate_fe_math_02.py to generate this plot';">
         <div class="plot-caption">
-          Left: FE Q14 — binomial PMF n=10, p=0.5, P(X=4) ≈ 0.2 (highlighted).
-          Right: EET application — ICT defect modeling for intermittent solder joint. Even with a
-          50/50 defect, only 20% chance of seeing exactly 4 failures in 10 boards.
+          Left: Binomial PMF n=10, p=0.5 — P(exactly 4 failures) ≈ 0.2 (highlighted).
+          Right: EET application — intermittent cold solder joint ICT retest distribution.
+          Most likely outcome is 5 failures, but 4 failures has a 20% chance. Zero failures
+          (escape) still has a non-zero probability — which is why retesting alone is insufficient.
         </div>
       </div>
 
       <div class="talking-pts">
         <h4>Key Concepts</h4>
         <ul>
-          <li>Binomial applies whenever: fixed n trials, each independent, binary outcome (pass/fail), constant p</li>
-          <li>ICT test nodes are exactly this model — each board either passes or fails the test point</li>
-          <li>C(n,k) = n! / (k!(n-k)!) — calculators have this as "nCr" button; FE handbook shows it too</li>
-          <li>For large n, the binomial approaches normal — at that scale you use z-scores instead</li>
-          <li>Defect rate p comes from historical ICT yield data or process FMEA — not a guess</li>
+          <li>Binomial applies when: fixed n trials, each independent, binary outcome (pass/fail), constant p — ICT retest is exactly this model</li>
+          <li>An intermittent joint with p = 0.5 has a non-trivial escape probability even after 10 retests — the math justifies engineering escalation over repeated retesting</li>
+          <li>C(n,k) = n! / (k!(n-k)!) — the "nCr" key on any scientific calculator; count the combinations, then weight by probabilities</li>
+          <li>For large n, binomial approaches normal — at production scale you shift to p-charts and SPC rather than computing individual PMF values</li>
+          <li>Defect rate p should come from process FMEA or historical ICT yield data — if p is unknown, escalate to engineering before committing to a retest count</li>
         </ul>
       </div>
     </div>
