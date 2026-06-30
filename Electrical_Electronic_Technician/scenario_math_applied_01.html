@@ -241,6 +241,7 @@
     <a href="#s2">2 — Process Capability (Cpk)</a>
     <a href="#s3">3 — Phasor & Trig</a>
     <a href="#s4">4 — Trace Geometry</a>
+    <a href="#s5">5 — ICT Retest (Binomial)</a>
     <a href="#cad">CAD Notes</a>
 
     <div class="sb-section">
@@ -516,6 +517,107 @@
 
 
     <!-- ── CAD Notes ────────────────────────────────────────────────────── -->
+    <!-- ── Section 5: ICT Retest Modeling (Binomial) ─────────────────────── -->
+    <div class="section" id="s5">
+      <div class="sec-hdr">
+        <h2>5 — ICT Retest Modeling (Binomial Distribution)</h2>
+        <span class="sec-tag">Probability · In-Circuit Test · Intermittent Solder Joint</span>
+      </div>
+
+      <div class="card">
+        <h3>The Concept</h3>
+        <p>An intermittent solder joint makes electrical contact only part of the time. If a joint passes contact
+        50% of the time, what is the probability it gets caught in n retest cycles? This is a binomial problem —
+        each retest cycle is an independent trial with probability p of detecting the fault.</p>
+        <p style="margin-top:10px;">The critical insight: there is a non-trivial probability the bad joint
+        <strong>passes every retest</strong> and ships. The math tells you when to stop retesting and escalate
+        to engineering.</p>
+      </div>
+
+      <div class="card">
+        <h3>Setup</h3>
+        <ul style="padding-left:18px; line-height:1.9; color:var(--txt-dim); font-size:0.9em;">
+          <li><strong>n = 10</strong> — number of ICT retest cycles</li>
+          <li><strong>p = 0.5</strong> — probability joint makes contact (detected as fault) on any single cycle</li>
+          <li><strong>k = 4</strong> — number of cycles where fault was detected (joint failed open)</li>
+          <li>Question: What is P(k = 4 detections in 10 retests)? And what is P(joint passes ALL 10 retests)?</li>
+        </ul>
+
+        <div style="background:#0a1a2a; border-left:4px solid var(--accent); padding:14px 18px; margin:14px 0; border-radius:0 4px 4px 0; font-family:monospace; font-size:0.9em; color:#7ec8e3;">
+          <div style="color:var(--txt-dim); font-size:0.82em; margin-bottom:6px;">BINOMIAL PMF — P(X = k) = C(n,k) · p^k · (1-p)^(n-k)</div>
+          P(k=4) = C(10,4) · (0.5)^4 · (0.5)^6<br>
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;= 210 · 0.0625 · 0.015625<br>
+          <span style="color:#ffd700; font-weight:bold;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;= 0.2051 → 20.51% chance of exactly 4 detections</span><br><br>
+          P(k=0) = C(10,0) · (0.5)^0 · (0.5)^10<br>
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;= 1 · 1 · 0.000977<br>
+          <span style="color:#ff4444; font-weight:bold;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;= 0.0010 → 0.10% chance joint passes ALL 10 retests and ships</span>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>What This Means on the Bench</h3>
+        <ul style="padding-left:18px; line-height:1.9; color:var(--txt-dim); font-size:0.9em;">
+          <li>If a board passes ICT 6 out of 10 retests and fails 4 — the joint is intermittent, not random noise</li>
+          <li>P(k=0) = 0.10% means roughly 1 in 1000 of these boards would pass all retests and ship with a bad joint</li>
+          <li>At production volume (500 boards/week), that is 0–1 field failures per week from this joint alone</li>
+          <li><strong>Decision rule:</strong> If a board fails ICT more than twice in retest, stop retesting. Escalate to engineering — the math shows retesting cannot reliably catch this fault class</li>
+        </ul>
+
+        <div style="background:#0d1a10; border-left:4px solid #00ff88; padding:12px 16px; border-radius:0 4px 4px 0; margin-top:12px;">
+          <div style="color:#00ff88; font-size:0.8em; font-weight:bold; margin-bottom:6px; text-transform:uppercase; letter-spacing:1px;">Key Talking Point</div>
+          <p style="font-size:0.88em; line-height:1.7; color:#d0d0e8;">"I modeled an intermittent cold solder joint at ICT using a binomial distribution — p=0.5 contact probability,
+          n=10 retests. The math shows there's a 0.10% chance the board passes every retest and ships anyway.
+          At production volume that's real field risk. The statistical case for escalating instead of retesting
+          is exactly what probability is for in a test engineering role."</p>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>Binomial PMF Table — P(k detections in 10 retests)</h3>
+        <table style="width:100%; border-collapse:collapse; font-size:0.85em; font-family:monospace;">
+          <thead>
+            <tr style="background:#0a1a2a; color:var(--accent);">
+              <th style="padding:8px 12px; text-align:left; border-bottom:1px solid var(--border);">k (detections)</th>
+              <th style="padding:8px 12px; text-align:left; border-bottom:1px solid var(--border);">P(X = k)</th>
+              <th style="padding:8px 12px; text-align:left; border-bottom:1px solid var(--border);">Interpretation</th>
+            </tr>
+          </thead>
+          <tbody style="color:var(--txt-dim);">
+            <tr style="background:#0d1020;">
+              <td style="padding:7px 12px; border-bottom:1px solid #1a1a2e;">0</td>
+              <td style="padding:7px 12px; border-bottom:1px solid #1a1a2e; color:#ff4444; font-weight:bold;">0.0010 (0.10%)</td>
+              <td style="padding:7px 12px; border-bottom:1px solid #1a1a2e;">Joint passes ALL retests → ships → field failure risk</td>
+            </tr>
+            <tr>
+              <td style="padding:7px 12px; border-bottom:1px solid #1a1a2e;">1</td>
+              <td style="padding:7px 12px; border-bottom:1px solid #1a1a2e;">0.0098</td>
+              <td style="padding:7px 12px; border-bottom:1px solid #1a1a2e;">Caught once — easy to miss as a fluke</td>
+            </tr>
+            <tr style="background:#0d1020;">
+              <td style="padding:7px 12px; border-bottom:1px solid #1a1a2e;">2</td>
+              <td style="padding:7px 12px; border-bottom:1px solid #1a1a2e;">0.0439</td>
+              <td style="padding:7px 12px; border-bottom:1px solid #1a1a2e;">Caught twice — escalation threshold</td>
+            </tr>
+            <tr>
+              <td style="padding:7px 12px; border-bottom:1px solid #1a1a2e;">3</td>
+              <td style="padding:7px 12px; border-bottom:1px solid #1a1a2e;">0.1172</td>
+              <td style="padding:7px 12px; border-bottom:1px solid #1a1a2e;">Pattern is clear — escalate to engineering</td>
+            </tr>
+            <tr style="background:#0d1020;">
+              <td style="padding:7px 12px; border-bottom:1px solid #1a1a2e;"><strong>4</strong></td>
+              <td style="padding:7px 12px; border-bottom:1px solid #1a1a2e; color:#ffd700; font-weight:bold;">0.2051 (20.51%)</td>
+              <td style="padding:7px 12px; border-bottom:1px solid #1a1a2e;"><strong>Most likely outcome — intermittent joint confirmed</strong></td>
+            </tr>
+            <tr>
+              <td style="padding:7px 12px; border-bottom:1px solid #1a1a2e;">5</td>
+              <td style="padding:7px 12px; border-bottom:1px solid #1a1a2e;">0.2461</td>
+              <td style="padding:7px 12px; border-bottom:1px solid #1a1a2e;">Symmetric peak — 50/50 joint</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
     <div class="section" id="cad">
       <div class="sec-hdr">
         <h2>CAD Notes</h2>
