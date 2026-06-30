@@ -297,56 +297,85 @@
     </div>
 
 
-    <!-- ── Section 1: Measurement Uncertainty ──────────────────────────── -->
+    <!-- ── Section 1: ICT False Reject vs. Real Defect ─────────────────── -->
     <div class="section" id="s1">
       <div class="sec-hdr">
-        <h2>1 — Measurement Uncertainty</h2>
-        <span class="sec-tag">Probability · Normal Distribution</span>
+        <h2>1 — ICT False Reject vs. Real Defect</h2>
+        <span class="sec-tag">Probability · Normal Distribution · Guard Band Decision</span>
       </div>
 
       <div class="card">
-        <h3>The Concept</h3>
-        <p>A DMM reading is never a single exact value. Every measurement has uncertainty —
-        the true voltage is somewhere within a distribution of possible readings. That
-        distribution follows the normal (Gaussian) curve, described by its mean µ and
-        standard deviation σ.</p>
+        <h3>The Floor Problem</h3>
+        <p>A board fails ICT. R15 on the power management circuit reads <strong>9,893 Ω</strong>.
+        The spec is 10 kΩ ± 1%, so the lower spec limit (LSL) is <strong>9,900 Ω</strong> — the
+        reading is 7 Ω below the line. The board gets flagged for rework.</p>
+
+        <p style="margin-top:10px;">Before the tech touches it: is this a real defect, or did
+        measurement noise cause the fail? The ICT tester's calibration record shows a
+        1σ uncertainty of <strong>18 Ω</strong> at this range. That 7 Ω margin is less than
+        half a sigma — well within the tester's noise floor.</p>
+
+        <p style="margin-top:10px;"><strong>Management pain point:</strong> Unnecessary rework
+        adds 15–20 minutes of tech time per board, introduces handling risk (lifted pads, ESD),
+        and pulls the board back through ICT for another cycle. At 50 boards per shift, bad
+        rework decisions are a throughput and cost problem — not just a quality problem.</p>
+      </div>
+
+      <div class="card">
+        <h3>The Math — Normal Distribution Answers the Question</h3>
+        <p>If R15's true value is exactly at the LSL (9,900 Ω) and the tester has σ = 18 Ω,
+        what is the probability the tester reads ≤ 9,893 Ω just from measurement noise?</p>
 
         <div class="formula-box">
-          PDF(x) = (1/σ√2π) · e^(−½·((x−µ)/σ)²)<br><br>
-          68.3%  of readings fall within  µ ± 1σ<br>
-          95.4%  of readings fall within  µ ± 2σ<br>
-          99.7%  of readings fall within  µ ± 3σ   ← "three-sigma rule"
+          z = (x − µ) / σ  =  (9,893 − 9,900) / 18  =  −0.39<br><br>
+          P(reading ≤ 9,893 | true value = 9,900 Ω)  =  P(z ≤ −0.39)<br>
+          <span style="color:#ffd700; font-weight:bold;">≈ 34.8% — more than 1 in 3 chance this is a false reject</span><br><br>
+          68.3%  of readings fall within  µ ± 1σ  (±18 Ω)<br>
+          95.4%  of readings fall within  µ ± 2σ  (±36 Ω)<br>
+          99.7%  of readings fall within  µ ± 3σ  (±54 Ω)  ← three-sigma rule
         </div>
 
-        <h4>Applied to TP3 (3.3V Rail Measurement)</h4>
-        <p>50 repeated DMM readings of TP3. The rail is actually at 3.285V (slightly low
-        but within the ±5% spec band of 3.135–3.465V). The spread of readings reveals
-        the measurement system's uncertainty — important when setting test limits, because
-        a tight spec combined with high measurement noise creates false rejects.</p>
-
         <img class="plot-img" src="analysis_output/math_01_measurement_uncertainty.png"
-             alt="Measurement Uncertainty — TP3 Normal Distribution"
-             onerror="this.style.display='none';this.nextElementSibling.style.display='block'">
+             alt="ICT False Reject — Normal Distribution Guard Band"
+             onerror="this.style.display:'none';this.nextElementSibling.style.display='block'">
         <div class="alert alert-info" style="display:none;">
           Run <code>python3 simulate_math_applied_01.py</code> to generate this plot.
         </div>
 
         <div class="knums">
-          <div class="kn"><div class="kn-val">3.285 V</div><div class="kn-lbl">True mean µ</div></div>
-          <div class="kn"><div class="kn-val">~12 mV</div><div class="kn-lbl">Std deviation σ</div></div>
-          <div class="kn"><div class="kn-val">3.249 V</div><div class="kn-lbl">3σ lower limit</div></div>
-          <div class="kn"><div class="kn-val">3.321 V</div><div class="kn-lbl">3σ upper limit</div></div>
-          <div class="kn"><div class="kn-val">≈ 0%</div><div class="kn-lbl">False reject risk</div></div>
+          <div class="kn"><div class="kn-val">9,900 Ω</div><div class="kn-lbl">Spec LSL (10 kΩ −1%)</div></div>
+          <div class="kn"><div class="kn-val">18 Ω</div><div class="kn-lbl">Tester 1σ uncertainty</div></div>
+          <div class="kn"><div class="kn-val">9,893 Ω</div><div class="kn-lbl">ICT reading (fail)</div></div>
+          <div class="kn"><div class="kn-val">−0.39</div><div class="kn-lbl">z-score</div></div>
+          <div class="kn"><div class="kn-val">34.8%</div><div class="kn-lbl">False reject probability</div></div>
         </div>
+      </div>
+
+      <div class="card">
+        <h3>The Decision Rule — What the Tech Does on the Floor</h3>
+        <p>A 34.8% false reject probability is too high to rework without verification.
+        The correct action: <strong>take 5 more readings</strong> and compute the sample mean.</p>
+
+        <ul style="padding-left:18px; line-height:2; color:var(--txt-dim); font-size:0.9em; margin-top:8px;">
+          <li>If the sample mean µ̄ &lt; 9,900 Ω with consistent readings → <strong>real defect, rework and escalate</strong></li>
+          <li>If the sample mean µ̄ ≥ 9,900 Ω → <strong>false reject from measurement noise, re-run ICT, skip rework</strong></li>
+          <li>If readings are scattered (high σ) → <strong>suspect fixture probe wear</strong>, check contact resistance at that pin</li>
+        </ul>
+
+        <p style="margin-top:12px; font-size:0.88em; color:var(--txt-dim);">This is also the logic behind <strong>guard banding</strong>: set the ICT test limit to
+        LSL + 2σ = 9,900 + 36 = <strong>9,936 Ω</strong> instead of 9,900 Ω. Any board reading
+        below 9,936 Ω gets flagged for verification — not automatic rework. Boards with true
+        values inside spec but near the edge get a second look; genuine defects still get caught.</p>
 
         <div class="tp">
           <div class="tp-lbl">Key Talking Point</div>
-          "Probability shows up in test engineering every time you set a pass/fail limit. If the
-          measurement has 12 millivolt standard deviation and your spec limit is only 30 millivolts
-          away from the mean, your 3-sigma band overlaps the spec — meaning good boards fail
-          occasionally just from measurement noise. That's a statistical inference problem. You
-          have to widen the guard band or improve the measurement system, and the normal distribution
-          tells you exactly how much."
+          "When a board fails ICT by a few ohms, the first question isn't 'where's the solder iron?' —
+          it's 'is this reading real?' The tester has measurement uncertainty. If the margin between
+          the reading and the spec limit is less than one sigma, statistically you're looking at a
+          coin flip between a real defect and measurement noise. Management cares about both sides:
+          unnecessary rework costs labor and introduces handling damage, and a false accept costs a
+          field failure. The normal distribution gives you a number — a probability — so you make
+          that call with data, not gut feel."
         </div>
       </div>
     </div>
