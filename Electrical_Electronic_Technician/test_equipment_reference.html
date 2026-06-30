@@ -203,7 +203,7 @@
 
 <header>
   <h1>EET Technical Reference — Oscilloscope & Multimeter</h1>
-  <span class="badge">5 Questions + Follow-ups</span>
+  <span class="badge">7 Questions + Follow-ups</span>
 </header>
 <div class="sub">
   <div>Role: <span>Electronic Engineering Technician</span></div>
@@ -215,7 +215,7 @@
 
   <div class="score-row">
     <span class="lbl">Progress</span>
-    <span class="val" id="score-val">0 / 5</span>
+    <span class="val" id="score-val">0 / 7</span>
     <div class="track"><div class="fill" id="prog-fill"></div></div>
     <span class="lbl" id="score-pct">—</span>
   </div>
@@ -225,7 +225,7 @@
   ══════════════════════════════════════════════════════════════ -->
   <div class="q-card">
     <div class="q-head">
-      <span class="q-num">Question 1 of 5</span>
+      <span class="q-num">Question 1 of 7</span>
       <span class="q-topic">Voltage Measurement · Multimeter</span>
     </div>
     <div class="q-body">
@@ -280,7 +280,7 @@
   ══════════════════════════════════════════════════════════════ -->
   <div class="q-card">
     <div class="q-head">
-      <span class="q-num">Question 2 of 5</span>
+      <span class="q-num">Question 2 of 7</span>
       <span class="q-topic">Waveform Interpretation · Oscilloscope</span>
     </div>
     <div class="q-body">
@@ -335,7 +335,7 @@
   ══════════════════════════════════════════════════════════════ -->
   <div class="q-card">
     <div class="q-head">
-      <span class="q-num">Question 3 of 5</span>
+      <span class="q-num">Question 3 of 7</span>
       <span class="q-topic">Component Testing · Resistors · Capacitors · Diodes</span>
     </div>
     <div class="q-body">
@@ -393,7 +393,7 @@
   ══════════════════════════════════════════════════════════════ -->
   <div class="q-card">
     <div class="q-head">
-      <span class="q-num">Question 4 of 5</span>
+      <span class="q-num">Question 4 of 7</span>
       <span class="q-topic">Safety Precautions · Live Circuit Work</span>
     </div>
     <div class="q-body">
@@ -448,7 +448,7 @@
   ══════════════════════════════════════════════════════════════ -->
   <div class="q-card">
     <div class="q-head">
-      <span class="q-num">Question 5 of 5</span>
+      <span class="q-num">Question 5 of 7</span>
       <span class="q-topic">Frequency · Period · Amplitude · Scope Reading</span>
     </div>
     <div class="q-body">
@@ -507,6 +507,125 @@
     </div>
   </div>
 
+  <!-- ══════════════════════════════════════════════════════════════
+       Q6 — ICT as Automated Test Equipment
+  ══════════════════════════════════════════════════════════════ -->
+  <div class="q-card">
+    <div class="q-head">
+      <span class="q-num">Question 6 of 7</span>
+      <span class="q-topic">In-Circuit Test · ATE · Bed-of-Nails · IPC-9252</span>
+    </div>
+    <div class="q-body">
+      <p class="question-text">
+        "Can you explain what In-Circuit Test (ICT) is, how a bed-of-nails fixture works, and what types of faults it's designed to catch? What are its limitations compared to functional test?"
+      </p>
+      <div class="tip-box">
+        <strong>Key points to demonstrate:</strong> ICT is automated test equipment (ATE) — not a handheld instrument but a fixture-based system. Know what it tests (component values, opens, shorts, presence/absence), what it cannot catch (firmware faults, system-level timing), and reference IPC-9252 as the standard that defines electrical test requirements for PCBs.
+      </div>
+      <textarea class="answer-area" placeholder="Type your answer here before revealing the model response..."></textarea>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-reveal" onclick="reveal(6)">Reveal Model Answer</button>
+      <button class="btn btn-followup" onclick="showFollowup(6)">Show Follow-Up Question</button>
+    </div>
+    <div class="model-answer" id="ma-6">
+      <h4>Model Answer — STAR Format</h4>
+      <div class="star-block">
+        <span class="star-label">SITUATION</span>
+        <div class="model-text"><p>"ICT is a form of automated test equipment — it's not something you hold in your hand like a multimeter. It uses a fixture with spring-loaded probe pins, called a bed-of-nails, that make simultaneous contact with dozens or hundreds of test points on a populated PCBA."</p></div>
+      </div>
+      <div class="star-block">
+        <span class="star-label">WHAT IT TESTS</span>
+        <div class="model-text">
+          <p>1. <strong>Component values</strong> — resistor values (Ω), capacitance (µF/nF), inductance (µH). Compares measured value against BOM spec within a defined tolerance.</p>
+          <p>2. <strong>Opens and shorts</strong> — verifies all nets are connected and no unintended shorts exist between adjacent nets.</p>
+          <p>3. <strong>Component presence/absence</strong> — a missing or tombstoned component shows up as an open on the net it should connect.</p>
+          <p>4. <strong>Power-on tests</strong> — some ICT systems apply board power and run basic supply voltage checks at test points.</p>
+          <p>5. IPC-9252 defines the electrical test requirements and test coverage standards for populated board testing.</p>
+        </div>
+      </div>
+      <div class="star-block">
+        <span class="star-label">LIMITATIONS</span>
+        <div class="model-text">
+          <p>"ICT has three main gaps: First, it requires test point access — if a component doesn't have a test point in the layout, ICT can't probe it directly. Second, it can't verify firmware, timing, or system-level behavior — a board can pass ICT and still fail functional test. Third, it struggles with intermittent solder joints that only open under thermal or mechanical stress, not under the static probe force of the fixture."</p>
+        </div>
+      </div>
+      <div class="star-block">
+        <span class="star-label">RESULT</span>
+        <div class="model-text"><p>"ICT is the first gate — it catches assembly defects fast and at low cost. Functional test is the second gate — it catches what ICT misses. Running both in sequence gives the highest confidence in shipped board quality."</p></div>
+      </div>
+    </div>
+    <div class="followup-panel" id="fu-6">
+      <p class="fu-q">Follow-Up: "You mentioned ICT catches assembly defects. If a board fails ICT and is sent to rework, what standard governs how that rework is performed, and why does it matter whether rework is done correctly?"</p>
+      <div class="fu-hint">
+        <strong>Bridge hint:</strong> IPC-7711/7721 governs rework and repair of electronic assemblies — it defines allowable rework methods (hot air, soldering iron, paste dispense) and the number of times a component can be reworked before the board is scrapped. Poorly executed rework can introduce new defects — lifted pads, pad cratering, thermal damage — that ICT won't catch on the next cycle because the test point itself was damaged.
+      </div>
+      <textarea placeholder="Practice your answer here using the STAR method..."></textarea>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════════
+       Q7 — ICT Fault Diagnosis / IPC-A-610 & IPC-7711
+  ══════════════════════════════════════════════════════════════ -->
+  <div class="q-card">
+    <div class="q-head">
+      <span class="q-num">Question 7 of 7</span>
+      <span class="q-topic">ICT Fault Diagnosis · IPC-A-610 · IPC-7711/7721 · Rework Decision</span>
+    </div>
+    <div class="q-body">
+      <p class="question-text">
+        "A board fails ICT at the same test point three times in a row after rework. How do you determine whether the problem is the fixture, the solder joint, or the component? What IPC standards guide your decision on how to handle the failed board?"
+      </p>
+      <div class="tip-box">
+        <strong>Key points to demonstrate:</strong> Ability to isolate fixture failure from board failure (probe pin wear vs. actual solder defect). Know that IPC-A-610 defines the solder joint acceptance criteria that ICT results are measured against, and that IPC-7711/7721 governs how rework is performed and how many rework cycles a board can survive. Repeated failure at the same test point triggers a structured diagnosis — not another rework cycle.
+      </div>
+      <textarea class="answer-area" placeholder="Type your answer here before revealing the model response..."></textarea>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-reveal" onclick="reveal(7)">Reveal Model Answer</button>
+      <button class="btn btn-followup" onclick="showFollowup(7)">Show Follow-Up Question</button>
+    </div>
+    <div class="model-answer" id="ma-7">
+      <h4>Model Answer — Diagnostic Process</h4>
+      <div class="star-block">
+        <span class="star-label">STEP 1 — ISOLATE FIXTURE vs. BOARD</span>
+        <div class="model-text">
+          <p>"Before assuming the board is bad, I'd verify the fixture. Three consecutive failures at the same test point is actually the signature of a worn or bent probe pin — not necessarily a bad solder joint."</p>
+          <p>1. Pull a known-good board and run it. If that board also fails at the same test point → fixture problem. If it passes → the fault is on the board under test.</p>
+          <p>2. Visually inspect the probe pin for the failing test point. Spring-loaded pins wear after thousands of insertions — a worn tip creates intermittent contact that mimics an open solder joint.</p>
+          <p>3. Check fixture alignment: if the fixture is misaligned, the probe may be hitting the solder mask instead of the test point pad.</p>
+        </div>
+      </div>
+      <div class="star-block">
+        <span class="star-label">STEP 2 — INSPECT THE SOLDER JOINT (IPC-A-610)</span>
+        <div class="model-text">
+          <p>"If the fixture checks out and the board is still failing, the next step is visual inspection of the solder joint against IPC-A-610 criteria."</p>
+          <p><strong>IPC-A-610</strong> is the Acceptability of Electronic Assemblies standard. It defines Class 1, 2, and 3 solder joint acceptance criteria — joint geometry, wetting angle, fillet height, and void limits. A joint that looks acceptable by eye may still have an open due to a cold solder condition (insufficient wetting) that IPC-A-610 Class 3 inspection would flag.</p>
+          <p>For a BGAs or components where the joint is not visible: X-ray or cross-section to verify internal solder joint integrity.</p>
+        </div>
+      </div>
+      <div class="star-block">
+        <span class="star-label">STEP 3 — REWORK DECISION (IPC-7711/7721)</span>
+        <div class="model-text">
+          <p>"If the joint is confirmed bad, the rework decision follows IPC-7711/7721 — the Rework, Modification and Repair of Electronic Assemblies standard."</p>
+          <p><strong>IPC-7711/7721</strong> defines: allowable rework methods (hot air reflow, soldering iron, solder paste dispense), temperature profiles, the maximum number of rework cycles before a board must be scrapped, and the inspection criteria after rework.</p>
+          <p>Key constraint: most boards are limited to 2–3 rework cycles at the same location. Thermal cycling degrades the laminate and pad adhesion. A board that has already been reworked twice at the same joint should be escalated for engineering disposition — not reworked a third time.</p>
+        </div>
+      </div>
+      <div class="star-block">
+        <span class="star-label">RESULT</span>
+        <div class="model-text"><p>"Three consecutive failures at the same test point is a process signal, not a random event. The diagnosis chain — fixture check → IPC-A-610 joint inspection → IPC-7711 rework limits — keeps you from reworking a board into scrap and gives engineering the data they need to fix the root cause in the assembly process."</p></div>
+      </div>
+    </div>
+    <div class="followup-panel" id="fu-7">
+      <p class="fu-q">Follow-Up: "You walked through a structured diagnostic process. Can you connect the statistical concept of repeated failure at the same test point to what that tells you about the process versus a random defect?"</p>
+      <div class="fu-hint">
+        <strong>Bridge hint:</strong> Three failures at the same location is not binomially random — random defects distribute across the board. Clustering at one test point suggests an assignable cause: fixture wear, a solder paste deposition problem at that pad, or a component with a bent lead. This is the difference between common cause variation (random, inherent to the process) and special cause variation (assignable, fixable). SPC thinking applied directly to ICT results.
+      </div>
+      <textarea placeholder="Practice your answer here using the STAR method..."></textarea>
+    </div>
+  </div>
+
   <!-- waveform link -->
   <div style="background:#fff;border:1px solid #b2dfdb;border-radius:5px;padding:14px 18px;margin-bottom:20px;font-size:0.87rem;">
     <strong style="color:#004d40;">Practice Companion:</strong>
@@ -515,7 +634,7 @@
 
 </div>
 
-<footer>EET Technical Reference · Oscilloscope & Multimeter · STAR Method · Electronic Engineering Technician Role</footer>
+<footer>EET Technical Reference · Oscilloscope · Multimeter · ICT · IPC-A-610 · IPC-7711/7721 · IPC-9252 · STAR Method</footer>
 
 <script>
   var revealed = 0;
@@ -536,8 +655,8 @@
   }
 
   function updateScore() {
-    document.getElementById('score-val').textContent = revealed + ' / 5';
-    var pct = Math.round(revealed / 5 * 100);
+    document.getElementById('score-val').textContent = revealed + ' / 7';
+    var pct = Math.round(revealed / 7 * 100);
     document.getElementById('score-pct').textContent = pct + '% reviewed';
     document.getElementById('prog-fill').style.width = pct + '%';
   }
